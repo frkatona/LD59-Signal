@@ -81,6 +81,7 @@ var gameplay_started := false
 var pause_menu_visible := false
 var win_screen_visible := false
 var game_won := false
+var audio_playback_unlocked := false
 var debug_overlay_visible := false
 var debug_elapsed := 0.0
 var debug_overlay_timer := 0.0
@@ -138,6 +139,9 @@ func _exit_tree() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.echo:
 		return
+
+	if _is_audio_unlock_event(event):
+		_ensure_audio_playback_unlocked()
 
 	if _is_debug_toggle_event(event):
 		_toggle_debug_overlay()
@@ -733,6 +737,7 @@ func _show_start_menu() -> void:
 
 
 func _start_game() -> void:
+	_ensure_audio_playback_unlocked()
 	gameplay_started = true
 	pause_menu_visible = false
 	win_screen_visible = false
@@ -1040,7 +1045,7 @@ func _sync_music_players() -> void:
 	var target_player := sonar_music_player if sonar_mode_enabled else normal_music_player
 	var source_player := normal_music_player if sonar_mode_enabled else sonar_music_player
 
-	if target_player == null or source_player == null:
+	if not audio_playback_unlocked or target_player == null or source_player == null:
 		return
 
 	if target_player.playing and not source_player.playing:
@@ -1054,6 +1059,24 @@ func _sync_music_players() -> void:
 
 	target_player.play(start_position)
 	source_player.stop()
+
+
+func _ensure_audio_playback_unlocked() -> void:
+	if audio_playback_unlocked:
+		return
+
+	audio_playback_unlocked = true
+	_sync_music_players()
+
+
+func _is_audio_unlock_event(event: InputEvent) -> bool:
+	if event is InputEventKey:
+		return event.pressed and not event.echo
+
+	if event is InputEventMouseButton:
+		return event.pressed
+
+	return false
 
 
 func _get_wrapped_playback_position(player: AudioStreamPlayer, target_stream: AudioStream) -> float:
