@@ -9,6 +9,9 @@ const SFX_BUS_NAME := &"SFX"
 const NORMAL_MUSIC_PATH := "res://assets/audio/music/menu-loop.mp3"
 const SONAR_MUSIC_PATH := "res://assets/audio/music/menu_static-loop.mp3"
 const SONAR_PING_SFX_PATH := "res://assets/audio/sfx/ping_2.mp3"
+const DEBUG_TOGGLE_KEY := KEY_QUOTELEFT
+const DEBUG_SAMPLE_WINDOW := 5.0
+const DEBUG_REFRESH_INTERVAL := 0.2
 const DOOR_OPEN_ANGLE := deg_to_rad(100.0)
 const DOOR_OPEN_DURATION := 0.45
 const DOOR_FACING_THRESHOLD := 0.72
@@ -24,7 +27,7 @@ const WIN_ORB_PROMPT_TEXT := "Press E to touch the sphere"
 
 @onready var player: CharacterBody3D = $Player
 @onready var player_camera: Camera3D = $Player/CameraPivot/Camera3D
-@onready var kill_floor: Area3D = $KillFloor
+@onready var kill_floor: Area3D = $Environment/KillFloor
 @onready var sonar_viewport: SubViewport = $SonarViewport
 @onready var sonar_camera: Camera3D = $SonarViewport/SonarCamera
 @onready var reveal_proxy_root: Node3D = $SonarViewport/RevealProxies
@@ -67,12 +70,20 @@ var gameplay_started := false
 var pause_menu_visible := false
 var win_screen_visible := false
 var game_won := false
+var debug_overlay_visible := false
+var debug_elapsed := 0.0
+var debug_overlay_timer := 0.0
+var frame_sample_total := 0.0
+var frame_samples: Array = []
 var menus_layer: CanvasLayer
 var menus_root: Control
 var menu_backdrop: ColorRect
 var start_menu_panel: PanelContainer
 var pause_menu_panel: PanelContainer
 var win_menu_panel: PanelContainer
+var debug_layer: CanvasLayer
+var debug_panel: PanelContainer
+var debug_label: Label
 var volume_sliders: Dictionary = {}
 var volume_value_labels: Dictionary = {}
 
@@ -87,6 +98,7 @@ func _ready() -> void:
 	_configure_overlay()
 	_configure_interaction_prompt()
 	_build_menu_ui()
+	_build_debug_overlay()
 	_configure_sonar_viewport()
 	_configure_kill_floor()
 	_rebuild_proxy_scene()
@@ -106,6 +118,10 @@ func _exit_tree() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.echo:
+		return
+
+	if _is_debug_toggle_event(event):
+		_toggle_debug_overlay()
 		return
 
 	if event.is_action_pressed("pause_menu"):
@@ -139,6 +155,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
+	_record_frame_sample(delta)
+	_update_debug_overlay(delta)
 	_resize_sonar_viewport()
 
 	if _is_menu_open():
@@ -164,7 +182,7 @@ func _ensure_input_actions() -> void:
 	_ensure_key_action("toggle_sonar_mode", KEY_G)
 	_ensure_key_action("sonar_ping", KEY_F)
 	_ensure_key_action("interact", KEY_E)
-	_ensure_key_action("pause_menu", KEY_ESCAPE)
+	_replace_key_action("pause_menu", KEY_TAB)
 
 
 func _ensure_key_action(action_name: StringName, keycode: Key) -> void:
@@ -174,6 +192,20 @@ func _ensure_key_action(action_name: StringName, keycode: Key) -> void:
 	for event in InputMap.action_get_events(action_name):
 		if event is InputEventKey and event.physical_keycode == keycode:
 			return
+
+	var input_event := InputEventKey.new()
+	input_event.keycode = keycode
+	input_event.physical_keycode = keycode
+	InputMap.action_add_event(action_name, input_event)
+
+
+func _replace_key_action(action_name: StringName, keycode: Key) -> void:
+	if not InputMap.has_action(action_name):
+		InputMap.add_action(action_name)
+
+	for event in InputMap.action_get_events(action_name):
+		if event is InputEventKey:
+			InputMap.action_erase_event(action_name, event)
 
 	var input_event := InputEventKey.new()
 	input_event.keycode = keycode
@@ -354,6 +386,40 @@ func _build_menu_ui() -> void:
 	menus_root.add_child(win_menu_panel)
 
 
+func _build_debug_overlay() -> void:
+	debug_layer = CanvasLayer.new()
+	debug_layer.name = "DebugOverlay"
+	debug_layer.layer = 130
+	add_child(debug_layer)
+
+	debug_panel = PanelContainer.new()
+	debug_panel.name = "DebugPanel"
+	debug_panel.position = Vector2(12.0, 12.0)
+	debug_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	debug_panel.visible = false
+	debug_layer.add_child(debug_panel)
+
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.0, 0.0, 0.0, 0.72)
+	panel_style.border_width_left = 1
+	panel_style.border_width_top = 1
+	panel_style.border_width_right = 1
+	panel_style.border_width_bottom = 1
+	panel_style.border_color = Color(0.3, 0.85, 1.0, 0.7)
+	panel_style.content_margin_left = 10
+	panel_style.content_margin_top = 8
+	panel_style.content_margin_right = 10
+	panel_style.content_margin_bottom = 8
+	debug_panel.add_theme_stylebox_override("panel", panel_style)
+
+	debug_label = Label.new()
+	debug_label.name = "DebugLabel"
+	debug_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	debug_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	debug_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
+	debug_panel.add_child(debug_label)
+
+
 func _create_start_menu_panel() -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.name = "StartMenu"
@@ -378,7 +444,7 @@ func _create_start_menu_panel() -> PanelContainer:
 	content.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "Explore the room. Use G for static vision, F for sonar ping, and Esc for pause."
+	subtitle.text = "Explore the room. Use G for static vision, F for sonar ping, and Tab for pause."
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	content.add_child(subtitle)
@@ -869,3 +935,69 @@ func _get_wrapped_playback_position(player: AudioStreamPlayer, target_stream: Au
 			return fposmod(playback_position, stream_length)
 
 	return playback_position
+
+
+func _record_frame_sample(delta: float) -> void:
+	debug_elapsed += delta
+	frame_samples.append({
+		"time": debug_elapsed,
+		"delta": delta,
+	})
+	frame_sample_total += delta
+
+	while frame_samples.size() > 0 and debug_elapsed - frame_samples[0]["time"] > DEBUG_SAMPLE_WINDOW:
+		frame_sample_total -= frame_samples[0]["delta"]
+		frame_samples.pop_front()
+
+
+func _update_debug_overlay(delta: float) -> void:
+	if not debug_overlay_visible or debug_label == null:
+		return
+
+	debug_overlay_timer += delta
+	if debug_overlay_timer < DEBUG_REFRESH_INTERVAL:
+		return
+
+	debug_overlay_timer = 0.0
+
+	var avg_fps := 0.0
+	var avg_frame_ms := 0.0
+	var sample_count := frame_samples.size()
+	if frame_sample_total > 0.0 and sample_count > 0:
+		avg_fps = sample_count / frame_sample_total
+		avg_frame_ms = (frame_sample_total / sample_count) * 1000.0
+
+	var current_fps := Engine.get_frames_per_second()
+	var current_frame_ms := get_process_delta_time() * 1000.0
+	var total_objects := Performance.get_monitor(Performance.OBJECT_COUNT)
+	var total_nodes := get_tree().get_node_count()
+	var draw_calls := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
+
+	debug_label.text = "Debug\nFPS: %d\nFPS avg (5s): %.1f\nFrame ms: %.2f\nFrame ms avg (5s): %.2f\nNodes: %d\nObjects: %d\nDraw calls: %d" % [
+		current_fps,
+		avg_fps,
+		current_frame_ms,
+		avg_frame_ms,
+		total_nodes,
+		total_objects,
+		draw_calls,
+	]
+
+
+func _toggle_debug_overlay() -> void:
+	debug_overlay_visible = not debug_overlay_visible
+	if debug_panel != null:
+		debug_panel.visible = debug_overlay_visible
+
+	if debug_overlay_visible:
+		debug_overlay_timer = DEBUG_REFRESH_INTERVAL
+		_update_debug_overlay(0.0)
+
+
+func _is_debug_toggle_event(event: InputEvent) -> bool:
+	if not (event is InputEventKey):
+		return false
+
+	return event.pressed and not event.echo and (
+		event.keycode == DEBUG_TOGGLE_KEY or event.physical_keycode == DEBUG_TOGGLE_KEY
+	)

@@ -280,6 +280,22 @@ Right now all reveals are grayscale because the design goal was "sonar shape inf
 - The sonar system currently has no sound, HUD, or gameplay feedback besides the visual effect.
 - The effect is tuned for this small prototype room, not for a larger level.
 
+## Draw Call Cost And Candidate Fixes
+
+One side effect of the current design is that enabling the noise or sonar view can increase draw calls by roughly the number of tagged sonar objects in the scene. That is expected. The overlay is not only a fullscreen shader pass. It also drives a second `SubViewport` with proxy `MeshInstance3D` copies for `sonar_reveal` and `sonar_occluder` content, so the renderer is effectively drawing a second simplified version of the room.
+
+In this prototype, that overhead sometimes shows up as about twenty additional draw calls because the scene currently contains about that many sonar-tagged sources. The exact number varies with visibility and camera position, but the pattern is consistent with the architecture.
+
+The main fixes that were pitched are straightforward:
+
+- Remove duplicate parent and child sonar tags so the same object is not proxied twice.
+- Only build proxies for nodes that actually own visible meshes.
+- Stop updating the sonar `SubViewport` when sonar mode is disabled.
+- Skip reveal proxy rendering when no ping is active, since black output still costs a draw call.
+- If needed later, merge or simplify proxy geometry for larger rooms.
+
+None of those change the overall architecture. They are incremental optimizations on top of the current approach.
+
 ## Why This Architecture Is A Good Fit For The Prototype
 
 This implementation is more structured than a quick material hack, but that was deliberate.
