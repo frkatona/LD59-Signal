@@ -1,0 +1,149 @@
+[gd_scene format=3 uid="uid://g4vgrw5vrhm6"]
+
+[ext_resource type="Script" uid="uid://cktwaird8aawj" path="res://scripts/first_person_controller.gd" id="1_player"]
+[ext_resource type="Script" path="res://scripts/sonar_vision_controller.gd" id="2_sonar"]
+[ext_resource type="PackedScene" uid="uid://mb7hqotwfu75" path="res://assets/models/chair.glb" id="3_chair"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_player"]
+size = Vector3(0.7, 1.8, 0.7)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(12, 0.5, 12)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.160784, 0.176471, 0.211765, 1)
+roughness = 0.95
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+material = SubResource("StandardMaterial3D_floor")
+size = Vector3(12, 0.5, 12)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ceiling"]
+size = Vector3(12, 0.5, 12)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ceiling"]
+albedo_color = Color(0.560784, 0.584314, 0.635294, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ceiling"]
+material = SubResource("StandardMaterial3D_ceiling")
+size = Vector3(12, 0.5, 12)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_wide"]
+size = Vector3(12, 4, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
+albedo_color = Color(0.741176, 0.741176, 0.776471, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_wide"]
+material = SubResource("StandardMaterial3D_wall")
+size = Vector3(12, 4, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_side"]
+size = Vector3(0.5, 4, 12)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_side"]
+material = SubResource("StandardMaterial3D_wall")
+size = Vector3(0.5, 4, 12)
+
+[node name="Main" type="Node3D" unique_id=2031895928]
+script = ExtResource("2_sonar")
+
+[node name="Player" type="CharacterBody3D" parent="." unique_id=1856995630]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+script = ExtResource("1_player")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=1177376146]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("BoxShape3D_player")
+
+[node name="CameraPivot" type="Node3D" parent="Player" unique_id=1228903506]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+
+[node name="Camera3D" type="Camera3D" parent="Player/CameraPivot" unique_id=479594037]
+current = true
+
+[node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=1383541854]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.729662, 0)
+light_energy = 2.5
+shadow_enabled = true
+omni_range = 20.0
+
+[node name="Room" type="Node3D" parent="." unique_id=472349600]
+
+[node name="Floor" type="StaticBody3D" parent="Room" groups=["sonar_occluder"] unique_id=1600432920]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/Floor" unique_id=2033852378]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/Floor" unique_id=284221126]
+mesh = SubResource("BoxMesh_floor")
+
+[node name="Ceiling" type="StaticBody3D" parent="Room" groups=["sonar_occluder"] unique_id=60746050]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.25, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/Ceiling" unique_id=2105344841]
+shape = SubResource("BoxShape3D_ceiling")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/Ceiling" unique_id=1459229483]
+mesh = SubResource("BoxMesh_ceiling")
+
+[node name="NorthWall" type="StaticBody3D" parent="Room" groups=["sonar_occluder"] unique_id=2091474859]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -6.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/NorthWall" unique_id=181063540]
+shape = SubResource("BoxShape3D_wall_wide")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/NorthWall" unique_id=667988605]
+mesh = SubResource("BoxMesh_wall_wide")
+
+[node name="SouthWall" type="StaticBody3D" parent="Room" groups=["sonar_occluder"] unique_id=1142133437]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 6.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/SouthWall" unique_id=742178849]
+shape = SubResource("BoxShape3D_wall_wide")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/SouthWall" unique_id=241680215]
+mesh = SubResource("BoxMesh_wall_wide")
+
+[node name="WestWall" type="StaticBody3D" parent="Room" groups=["sonar_occluder"] unique_id=452767522]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.25, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/WestWall" unique_id=1591144810]
+shape = SubResource("BoxShape3D_wall_side")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/WestWall" unique_id=27448338]
+mesh = SubResource("BoxMesh_wall_side")
+
+[node name="EastWall" type="StaticBody3D" parent="Room" groups=["sonar_occluder"] unique_id=704229481]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.25, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/EastWall" unique_id=1524242803]
+shape = SubResource("BoxShape3D_wall_side")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/EastWall" unique_id=1488997584]
+mesh = SubResource("BoxMesh_wall_side")
+
+[node name="chair2" parent="." groups=["sonar_reveal"] unique_id=1377584579 instance=ExtResource("3_chair")]
+transform = Transform3D(0.7150056, 0, 0, 0, 0.7150056, 0, 0, 0, 0.7150056, 5.3317194, 0.00074707816, -5.3162546)
+
+[node name="SonarViewport" type="SubViewport" parent="."]
+size = Vector2i(1152, 648)
+own_world_3d = true
+
+[node name="SonarCamera" type="Camera3D" parent="SonarViewport"]
+current = true
+
+[node name="RevealProxies" type="Node3D" parent="SonarViewport"]
+
+[node name="OccluderProxies" type="Node3D" parent="SonarViewport"]
+
+[node name="VisionOverlay" type="CanvasLayer" parent="."]
+layer = 100
+
+[node name="OverlayRoot" type="Control" parent="VisionOverlay"]
+
+[node name="StaticRect" type="ColorRect" parent="VisionOverlay/OverlayRoot"]
+color = Color(0, 0, 0, 1)
+
+[node name="SonarRect" type="TextureRect" parent="VisionOverlay/OverlayRoot"]
