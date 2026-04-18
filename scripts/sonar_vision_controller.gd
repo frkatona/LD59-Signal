@@ -12,6 +12,13 @@ const SONAR_PING_SFX_PATH := "res://assets/audio/sfx/ping_2.mp3"
 const DEBUG_TOGGLE_KEY := KEY_QUOTELEFT
 const DEBUG_SAMPLE_WINDOW := 5.0
 const DEBUG_REFRESH_INTERVAL := 0.2
+const PING_SPEED_STEP := 5.0
+const PING_SPEED_MIN_LIMIT := 5.0
+const PING_SPEED_MAX_LIMIT := 50.0
+const PING_SPEED_UI_MIN := 1
+const PING_SPEED_UI_MAX := 10
+const PING_SOUND_MIN_PITCH := 0.85
+const PING_SOUND_MAX_PITCH := 1.35
 const DOOR_OPEN_ANGLE := deg_to_rad(100.0)
 const DOOR_OPEN_DURATION := 0.45
 const DOOR_FACING_THRESHOLD := 0.72
@@ -20,7 +27,11 @@ const DOOR_PROMPT_TEXT := "Press E to open door"
 const WIN_ORB_PROMPT_TEXT := "Press E to touch the sphere"
 
 @export var ping_cooldown_seconds: float = 0.6
-@export var ping_speed: float = 18.0
+@export_range(5.0, 50.0, 5.0) var ping_speed: float = 20.0
+@export_group("Ping Speed Limits")
+@export_range(5.0, 50.0, 5.0) var ping_speed_floor: float = 5.0
+@export_range(5.0, 50.0, 5.0) var ping_speed_ceiling: float = 50.0
+@export_group("")
 @export var ping_max_radius: float = 18.0
 @export var ping_band_width: float = 0.9
 @export var ping_band_fade: float = 0.2
@@ -84,20 +95,28 @@ var win_menu_panel: PanelContainer
 var debug_layer: CanvasLayer
 var debug_panel: PanelContainer
 var debug_label: Label
+var hud_layer: CanvasLayer
+var ping_hud_panel: PanelContainer
+var ping_speed_label: Label
+var ping_cooldown_label: Label
+var ping_cooldown_bar: ProgressBar
 var volume_sliders: Dictionary = {}
 var volume_value_labels: Dictionary = {}
 
 
 func _ready() -> void:
 	_ensure_input_actions()
+	_normalize_ping_speed_settings()
 	_configure_audio_buses()
 	_create_music_players()
 	_create_sfx_players()
+	_update_ping_sound_pitch()
 	_create_materials()
 	_start_fan_animation()
 	_configure_overlay()
 	_configure_interaction_prompt()
 	_build_menu_ui()
+	_build_ping_hud()
 	_build_debug_overlay()
 	_configure_sonar_viewport()
 	_configure_kill_floor()
@@ -137,6 +156,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _is_menu_open():
 		return
 
+	if _is_ping_speed_adjust_event(event):
+		var mouse_button_event := event as InputEventMouseButton
+		_adjust_ping_speed(PING_SPEED_STEP if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_UP else -PING_SPEED_STEP)
+		return
+
 	if event.is_action_pressed("interact"):
 		if _can_trigger_win():
 			_show_win_screen()
@@ -161,6 +185,7 @@ func _process(delta: float) -> void:
 
 	if _is_menu_open():
 		interaction_prompt.visible = false
+		_update_ping_hud()
 		return
 
 	_sync_sonar_camera()
@@ -176,6 +201,7 @@ func _process(delta: float) -> void:
 			ping_active = false
 
 	_update_shader_state()
+	_update_ping_hud()
 
 
 func _ensure_input_actions() -> void:
@@ -211,6 +237,27 @@ func _replace_key_action(action_name: StringName, keycode: Key) -> void:
 	input_event.keycode = keycode
 	input_event.physical_keycode = keycode
 	InputMap.action_add_event(action_name, input_event)
+
+
+func _normalize_ping_speed_settings() -> void:
+	ping_speed_floor = _sanitize_ping_speed_limit(ping_speed_floor)
+	ping_speed_ceiling = _sanitize_ping_speed_limit(ping_speed_ceiling)
+	if ping_speed_floor > ping_speed_ceiling:
+		var previous_floor := ping_speed_floor
+		ping_speed_floor = ping_speed_ceiling
+		ping_speed_ceiling = previous_floor
+
+	ping_speed = _clamp_ping_speed(ping_speed)
+
+
+func _sanitize_ping_speed_limit(value: float) -> float:
+	var snapped_value: float = roundf(value / PING_SPEED_STEP) * PING_SPEED_STEP
+	return clampf(snapped_value, PING_SPEED_MIN_LIMIT, PING_SPEED_MAX_LIMIT)
+
+
+func _clamp_ping_speed(value: float) -> float:
+	var snapped_value: float = roundf(value / PING_SPEED_STEP) * PING_SPEED_STEP
+	return clampf(snapped_value, ping_speed_floor, ping_speed_ceiling)
 
 
 func _configure_audio_buses() -> void:
@@ -420,6 +467,91 @@ func _build_debug_overlay() -> void:
 	debug_panel.add_child(debug_label)
 
 
+func _build_ping_hud() -> void:
+	hud_layer = CanvasLayer.new()
+	hud_layer.name = "PingHUD"
+	hud_layer.layer = 110
+	add_child(hud_layer)
+
+	ping_hud_panel = PanelContainer.new()
+	ping_hud_panel.name = "PingHUDPanel"
+	ping_hud_panel.anchor_left = 0.0
+	ping_hud_panel.anchor_right = 0.0
+	ping_hud_panel.anchor_top = 1.0
+	ping_hud_panel.anchor_bottom = 1.0
+	ping_hud_panel.offset_left = 16.0
+	ping_hud_panel.offset_top = -142.0
+	ping_hud_panel.offset_right = 252.0
+	ping_hud_panel.offset_bottom = -16.0
+	ping_hud_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud_layer.add_child(ping_hud_panel)
+
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.0, 0.02, 0.05, 0.72)
+	panel_style.border_width_left = 1
+	panel_style.border_width_top = 1
+	panel_style.border_width_right = 1
+	panel_style.border_width_bottom = 1
+	panel_style.border_color = Color(0.3, 0.85, 1.0, 0.7)
+	panel_style.corner_radius_top_left = 4
+	panel_style.corner_radius_top_right = 4
+	panel_style.corner_radius_bottom_right = 4
+	panel_style.corner_radius_bottom_left = 4
+	panel_style.content_margin_left = 12
+	panel_style.content_margin_top = 10
+	panel_style.content_margin_right = 12
+	panel_style.content_margin_bottom = 10
+	ping_hud_panel.add_theme_stylebox_override("panel", panel_style)
+
+	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation", 8)
+	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ping_hud_panel.add_child(content)
+
+	ping_speed_label = Label.new()
+	ping_speed_label.name = "PingSpeedLabel"
+	ping_speed_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ping_speed_label.add_theme_font_size_override("font_size", 22)
+	content.add_child(ping_speed_label)
+
+	ping_cooldown_label = Label.new()
+	ping_cooldown_label.name = "PingCooldownLabel"
+	ping_cooldown_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ping_cooldown_label.add_theme_font_size_override("font_size", 13)
+	content.add_child(ping_cooldown_label)
+
+	ping_cooldown_bar = ProgressBar.new()
+	ping_cooldown_bar.name = "PingCooldownBar"
+	ping_cooldown_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ping_cooldown_bar.show_percentage = false
+	ping_cooldown_bar.custom_minimum_size = Vector2(0.0, 20.0)
+	ping_cooldown_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	content.add_child(ping_cooldown_bar)
+
+	var bar_background := StyleBoxFlat.new()
+	bar_background.bg_color = Color(0.08, 0.12, 0.16, 0.95)
+	bar_background.border_width_left = 1
+	bar_background.border_width_top = 1
+	bar_background.border_width_right = 1
+	bar_background.border_width_bottom = 1
+	bar_background.border_color = Color(0.18, 0.42, 0.52, 0.95)
+	bar_background.corner_radius_top_left = 3
+	bar_background.corner_radius_top_right = 3
+	bar_background.corner_radius_bottom_right = 3
+	bar_background.corner_radius_bottom_left = 3
+	ping_cooldown_bar.add_theme_stylebox_override("background", bar_background)
+
+	var bar_fill := StyleBoxFlat.new()
+	bar_fill.bg_color = Color(0.2, 0.92, 1.0, 0.95)
+	bar_fill.corner_radius_top_left = 3
+	bar_fill.corner_radius_top_right = 3
+	bar_fill.corner_radius_bottom_right = 3
+	bar_fill.corner_radius_bottom_left = 3
+	ping_cooldown_bar.add_theme_stylebox_override("fill", bar_fill)
+
+	_update_ping_hud()
+
+
 func _create_start_menu_panel() -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.name = "StartMenu"
@@ -444,7 +576,7 @@ func _create_start_menu_panel() -> PanelContainer:
 	content.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "Explore the room. Use G for static vision, F for sonar ping, and Tab for pause."
+	subtitle.text = "Explore the room. Use G for static vision, F for sonar ping, mouse wheel for ping speed (1-10), and Tab for pause."
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	content.add_child(subtitle)
@@ -825,6 +957,7 @@ func _start_ping() -> void:
 	ping_origin_ws = player_camera.global_position
 	ping_cooldown_remaining = ping_cooldown_seconds
 	if sonar_ping_player != null:
+		_update_ping_sound_pitch()
 		sonar_ping_player.play()
 	_update_shader_state()
 
@@ -935,6 +1068,51 @@ func _get_wrapped_playback_position(player: AudioStreamPlayer, target_stream: Au
 			return fposmod(playback_position, stream_length)
 
 	return playback_position
+
+
+func _update_ping_hud() -> void:
+	if ping_hud_panel == null or ping_speed_label == null or ping_cooldown_label == null or ping_cooldown_bar == null:
+		return
+
+	ping_hud_panel.visible = gameplay_started and not pause_menu_visible and not win_screen_visible
+	ping_hud_panel.self_modulate = Color(1.0, 1.0, 1.0, 1.0 if sonar_mode_enabled else 0.7)
+
+	ping_speed_label.text = "Ping Speed: %d/%d" % [_get_ping_speed_ui_value(), PING_SPEED_UI_MAX]
+	ping_cooldown_label.text = "Ping Cooldown"
+
+	var cooldown_max: float = maxf(ping_cooldown_seconds, 0.001)
+	ping_cooldown_bar.max_value = cooldown_max
+	ping_cooldown_bar.value = minf(ping_cooldown_remaining, cooldown_max)
+
+
+func _is_ping_speed_adjust_event(event: InputEvent) -> bool:
+	return event is InputEventMouseButton and event.pressed and (
+		event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN
+	)
+
+
+func _adjust_ping_speed(delta_amount: float) -> void:
+	var next_speed: float = _clamp_ping_speed(ping_speed + delta_amount)
+	if is_equal_approx(next_speed, ping_speed):
+		return
+
+	ping_speed = next_speed
+	_update_ping_sound_pitch()
+	_update_ping_hud()
+
+
+func _get_ping_speed_ui_value() -> int:
+	var clamped_speed: float = clampf(ping_speed, PING_SPEED_MIN_LIMIT, PING_SPEED_MAX_LIMIT)
+	return int(roundi(clamped_speed / PING_SPEED_STEP))
+
+
+func _update_ping_sound_pitch() -> void:
+	if sonar_ping_player == null:
+		return
+
+	var clamped_speed: float = clampf(ping_speed, PING_SPEED_MIN_LIMIT, PING_SPEED_MAX_LIMIT)
+	var speed_alpha: float = (clamped_speed - PING_SPEED_MIN_LIMIT) / (PING_SPEED_MAX_LIMIT - PING_SPEED_MIN_LIMIT)
+	sonar_ping_player.pitch_scale = lerpf(PING_SOUND_MIN_PITCH, PING_SOUND_MAX_PITCH, speed_alpha)
 
 
 func _record_frame_sample(delta: float) -> void:

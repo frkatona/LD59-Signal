@@ -7,23 +7,30 @@ butler push LD59.zip akatona/geordi-la-forge:web
 ## fixes
 - fan blade animation stutters like I repeat the first frame at the end
 
-## to-do
-- [ ] environment
-  - [ ] build models
+## first day to-do
+- [ ] basic placeholder environment
+  - [x] build models
   - [ ] world
-    - [ ] rooms/doors/props
-    - [ ] lighting (switches, lamps, fires, etc.)
+    - [x] rooms/doors/props
+    - [x] lighting (switches, lamps, fires, etc.)
     - [ ] particles (dust, etc.)
 - [ ] HUD
-  - [ ] refine noise overlay
+  - [x] refine noise overlay
+  - [x] cooldowns/controls
 - sound
-  - [ ] placeholder music 
-  - [ ] placeholder sound fx
-    - [ ] ping
-    - [ ] footsteps
+  - [x] placeholder music 
+  - [x] placeholder sound fx
+    - [x] ping
+    - [ ] movement (footsteps, jumps, etc.)
+      - [x] export as wavs to mitigate latency
+
+josh ideas:
+- make placeholder capsule enemy which hurts player on contact
+- make combat system with placeholder stick to swat at enemies, knocking them back (maybe kill them eventually, maybe not, idk)
+- ramp up volume on a noise channel when an enemy is near
 
 Questions:
-- what are you doing when "Validation: headless Godot 4.6.1 startup passed cleanly. A manual playtest is still needed to confirm the reset timing feels right in-game."
+- how to manually run the headless startup in "Validation: headless Godot 4.6.1 startup passed cleanly"
 
 ### exporter
 ```

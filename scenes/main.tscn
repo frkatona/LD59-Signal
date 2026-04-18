@@ -4,7 +4,9 @@
 [ext_resource type="Script" uid="uid://b3ebx2i83ld2t" path="res://scripts/sonar_vision_controller.gd" id="2_sonar"]
 [ext_resource type="PackedScene" uid="uid://mb7hqotwfu75" path="res://assets/models/chair.glb" id="3_chair"]
 [ext_resource type="PackedScene" uid="uid://d13xnsm7t448a" path="res://assets/models/fan.glb" id="3_jyhfs"]
+[ext_resource type="PackedScene" uid="uid://bwkh10wgul3et" path="res://assets/models/dalek.glb" id="3_tefeu"]
 [ext_resource type="PackedScene" uid="uid://m3lxy2w7yit0" path="res://assets/models/stepping-stone.glb" id="5_tbgi4"]
+[ext_resource type="PackedScene" uid="uid://dl0p5kuohdqja" path="res://assets/models/lab-bench.glb" id="6_o6xl0"]
 
 [sub_resource type="Environment" id="Environment_tbgi4"]
 background_energy_multiplier = 0.0
@@ -177,7 +179,7 @@ points = PackedVector3Array(-0.00023770332, -0.07741142, -1, -0.00023770332, 0.0
 
 [node name="Main" type="Node3D" unique_id=2031895928]
 script = ExtResource("2_sonar")
-ping_cooldown_seconds = 0.01
+ping_cooldown_seconds = 2.0
 ping_speed = 10.0
 ping_max_radius = 20.0
 ping_band_width = 1.0
@@ -265,6 +267,9 @@ shape = SubResource("BoxShape3D_floor")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Room/Floor" unique_id=284221126]
 mesh = SubResource("BoxMesh_floor")
+
+[node name="dalek2" parent="Room/Floor" unique_id=1435492741 groups=["sonar_reveal"] instance=ExtResource("3_tefeu")]
+transform = Transform3D(0.38935253, 0, 0.27857435, 0, 0.47874743, 0, -0.27857435, 0, 0.38935253, -4.2593403, 0.36179507, -3.8599977)
 
 [node name="Ceiling" type="StaticBody3D" parent="Room" unique_id=60746050 groups=["sonar_occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.25, 0)
@@ -397,6 +402,8 @@ transform = Transform3D(0.7150056, 0, 0, 0, 0.7150056, 0, 0, 0, 0.7150056, 5.331
 [node name="fan" parent="Props" unique_id=594698607 groups=["sonar_reveal"] instance=ExtResource("3_jyhfs")]
 transform = Transform3D(0.6276457, 0, 0, 0, 0.6276457, 0, 0, 0, 0.6276457, 0.66948557, 3.4538434, 0.6211808)
 
+[node name="fan" parent="Props/fan" index="0" unique_id=1932814783 groups=["sonar_occluder"]]
+
 [node name="WinOrb" type="Node3D" parent="Props" unique_id=815696688 groups=["sonar_reveal"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.854008, 0.14999962, 17.537352)
 
@@ -420,6 +427,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Props/WinOrb/InteractionArea" unique_id=390475869]
 shape = SubResource("SphereShape3D_win_orb_interaction")
+
+[node name="lab-bench" parent="Props" unique_id=2129328667 groups=["sonar_occluder"] instance=ExtResource("6_o6xl0")]
+transform = Transform3D(-3.3236365e-08, 0, 0.7603594, 0, 0.7603594, 0, -0.7603594, 0, -3.3236365e-08, -5.3361416, 0.09189254, -1.9738336)
+
+[node name="lab-bench2" parent="Props" unique_id=416406535 groups=["sonar_occluder"] instance=ExtResource("6_o6xl0")]
+transform = Transform3D(-0.76035935, 0, -6.647272e-08, 0, 0.76035935, 0, 6.647272e-08, 0, -0.76035935, -2.9891753, 0.09189254, 5.3862796)
 
 [node name="SteppingStones" type="Node3D" parent="." unique_id=81523368]
 
