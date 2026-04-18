@@ -1,5 +1,12 @@
 # LD59 Signal Game
 
+```bash
+butler push LD59.zip akatona/geordi-la-forge:web
+```
+
+## fixes
+- fan blade animation stutters like I repeat the first frame at the end
+
 ## to-do
 - [ ] environment
   - [ ] build models
@@ -15,11 +22,8 @@
     - [ ] ping
     - [ ] footsteps
 
-
 Questions:
 - what are you doing when "Validation: headless Godot 4.6.1 startup passed cleanly. A manual playtest is still needed to confirm the reset timing feels right in-game."
-
-
 
 ### exporter
 ```
