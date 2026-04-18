@@ -3,6 +3,9 @@ extends Node3D
 const STATIC_SHADER := preload("res://shaders/sonar_static_overlay.gdshader")
 const COMPOSITE_SHADER := preload("res://shaders/sonar_composite.gdshader")
 const REVEAL_SHADER := preload("res://shaders/sonar_reveal.gdshader")
+const NORMAL_MUSIC_PATH := "res://assets/audio/music/menu-loop.mp3"
+const SONAR_MUSIC_PATH := "res://assets/audio/music/menu_static-loop.mp3"
+const SONAR_PING_SFX_PATH := "res://assets/audio/sfx/ping_2.mp3"
 
 @export var ping_cooldown_seconds: float = 0.6
 @export var ping_speed: float = 18.0
@@ -33,10 +36,15 @@ var static_material: ShaderMaterial
 var composite_material: ShaderMaterial
 var reveal_material: ShaderMaterial
 var occluder_material: StandardMaterial3D
+var normal_music_player: AudioStreamPlayer
+var sonar_music_player: AudioStreamPlayer
+var sonar_ping_player: AudioStreamPlayer
 
 
 func _ready() -> void:
 	_ensure_input_actions()
+	_create_music_players()
+	_create_sfx_players()
 	_create_materials()
 	_configure_overlay()
 	_configure_sonar_viewport()
@@ -45,6 +53,11 @@ func _ready() -> void:
 	_sync_proxy_transforms()
 	_set_sonar_mode(false)
 	_update_shader_state()
+
+
+func _exit_tree() -> void:
+	_release_music_players()
+	_release_sfx_players()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -108,6 +121,48 @@ func _create_materials() -> void:
 	occluder_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	occluder_material.albedo_color = Color.BLACK
 	occluder_material.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
+
+
+func _create_music_players() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+
+	normal_music_player = AudioStreamPlayer.new()
+	normal_music_player.name = "NormalMusicPlayer"
+	normal_music_player.stream = load(NORMAL_MUSIC_PATH)
+	add_child(normal_music_player)
+
+	sonar_music_player = AudioStreamPlayer.new()
+	sonar_music_player.name = "SonarMusicPlayer"
+	sonar_music_player.stream = load(SONAR_MUSIC_PATH)
+	add_child(sonar_music_player)
+
+
+func _release_music_players() -> void:
+	for player in [normal_music_player, sonar_music_player]:
+		if player == null:
+			continue
+
+		player.stop()
+		player.stream = null
+
+
+func _create_sfx_players() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+
+	sonar_ping_player = AudioStreamPlayer.new()
+	sonar_ping_player.name = "SonarPingPlayer"
+	sonar_ping_player.stream = load(SONAR_PING_SFX_PATH)
+	add_child(sonar_ping_player)
+
+
+func _release_sfx_players() -> void:
+	if sonar_ping_player == null:
+		return
+
+	sonar_ping_player.stop()
+	sonar_ping_player.stream = null
 
 
 func _configure_overlay() -> void:
@@ -230,6 +285,7 @@ func _set_sonar_mode(enabled: bool) -> void:
 		ping_active = false
 		ping_radius = 0.0
 
+	_sync_music_players()
 	_update_shader_state()
 
 
@@ -238,6 +294,8 @@ func _start_ping() -> void:
 	ping_radius = 0.0
 	ping_origin_ws = player_camera.global_position
 	ping_cooldown_remaining = ping_cooldown_seconds
+	if sonar_ping_player != null:
+		sonar_ping_player.play()
 	_update_shader_state()
 
 
@@ -247,3 +305,37 @@ func _update_shader_state() -> void:
 	reveal_material.set_shader_parameter("ping_band_width", ping_band_width)
 	reveal_material.set_shader_parameter("ping_band_fade", ping_band_fade)
 	reveal_material.set_shader_parameter("pulse_active", sonar_mode_enabled and ping_active)
+
+
+func _sync_music_players() -> void:
+	var target_player := sonar_music_player if sonar_mode_enabled else normal_music_player
+	var source_player := normal_music_player if sonar_mode_enabled else sonar_music_player
+
+	if target_player == null or source_player == null:
+		return
+
+	if target_player.playing and not source_player.playing:
+		return
+
+	var start_position := 0.0
+	if source_player.playing:
+		start_position = _get_wrapped_playback_position(source_player, target_player.stream)
+	elif target_player.playing:
+		start_position = _get_wrapped_playback_position(target_player, target_player.stream)
+
+	target_player.play(start_position)
+	source_player.stop()
+
+
+func _get_wrapped_playback_position(player: AudioStreamPlayer, target_stream: AudioStream) -> float:
+	var playback_position := player.get_playback_position()
+	playback_position += AudioServer.get_time_since_last_mix()
+	playback_position -= AudioServer.get_output_latency()
+	playback_position = max(playback_position, 0.0)
+
+	if target_stream != null:
+		var stream_length := target_stream.get_length()
+		if stream_length > 0.0:
+			return fposmod(playback_position, stream_length)
+
+	return playback_position
