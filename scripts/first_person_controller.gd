@@ -10,13 +10,36 @@ extends CharacterBody3D
 
 var gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 var pitch: float = 0.0
+var respawn_pitch: float = 0.0
+var controls_enabled := true
 
 
 func _ready() -> void:
+	respawn_pitch = camera_pivot.rotation.x
+	set_controls_enabled(true)
+
+
+func set_controls_enabled(enabled: bool) -> void:
+	controls_enabled = enabled
+	if not enabled:
+		velocity = Vector3.ZERO
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		return
+
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 
+func respawn_at(target_transform: Transform3D) -> void:
+	global_transform = target_transform
+	velocity = Vector3.ZERO
+	pitch = respawn_pitch
+	camera_pivot.rotation.x = respawn_pitch
+
+
 func _unhandled_input(event: InputEvent) -> void:
+	if not controls_enabled:
+		return
+
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * mouse_sensitivity)
 		pitch = clamp(pitch - event.relative.y * mouse_sensitivity, deg_to_rad(-85.0), deg_to_rad(85.0))
@@ -25,13 +48,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-		return
-
-	if event is InputEventKey and event.pressed and event.keycode == KEY_ESCAPE:
-		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 
 
 func _physics_process(delta: float) -> void:
+	if not controls_enabled:
+		return
+
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 	elif Input.is_physical_key_pressed(KEY_SPACE):
