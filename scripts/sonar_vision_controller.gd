@@ -23,6 +23,7 @@ const PING_SOUND_MAX_PITCH := 1.35
 const DOOR_OPEN_ANGLE := deg_to_rad(100.0)
 const DOOR_OPEN_DURATION := 0.45
 const DOOR_FACING_THRESHOLD := 0.72
+const SLIDING_DOOR_GROUP := &"sliding_door"
 const LIGHT_SWITCH_ANIMATION_NAME := &"switch-down"
 const LIGHT_SWITCH_TOGGLE_DEBOUNCE_SECONDS := 0.25
 const ROOM_LIGHT_START_ENABLED := false
@@ -251,6 +252,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 		if _can_toggle_room_light():
 			_toggle_room_light()
+			return
+
+		var sliding_door := _get_interactable_sliding_door()
+		if sliding_door != null:
+			sliding_door.interact()
+			interaction_prompt.visible = false
 			return
 
 		if _can_open_door():
@@ -1411,10 +1418,26 @@ func _get_interaction_prompt_text() -> String:
 	if _can_toggle_room_light():
 		return LIGHT_SWITCH_ON_PROMPT_TEXT if not room_light_enabled else LIGHT_SWITCH_OFF_PROMPT_TEXT
 
+	var sliding_door := _get_interactable_sliding_door()
+	if sliding_door != null:
+		return sliding_door.get_prompt_text()
+
 	if _can_open_door():
 		return DOOR_PROMPT_TEXT
 
 	return ""
+
+
+func _get_interactable_sliding_door() -> SlidingHaloDoor:
+	for node in get_tree().get_nodes_in_group(SLIDING_DOOR_GROUP):
+		var sliding_door := node as SlidingHaloDoor
+		if sliding_door == null:
+			continue
+
+		if sliding_door.can_player_interact(player, player_camera):
+			return sliding_door
+
+	return null
 
 
 func _can_open_door() -> bool:

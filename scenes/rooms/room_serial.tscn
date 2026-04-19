@@ -1,11 +1,10 @@
 [gd_scene format=3 uid="uid://bhvo2p6dl8m8w"]
 
-[ext_resource type="PackedScene" uid="uid://bwkh10wgul3et" path="res://assets/models/dalek.glb" id="1_6m4pu"]
+[ext_resource type="PackedScene" uid="uid://b2clkddfgsfl4" path="res://halo-door.tscn" id="1_2kggb"]
 [ext_resource type="PackedScene" uid="uid://mb7hqotwfu75" path="res://assets/models/chair.glb" id="2_kax5n"]
 [ext_resource type="PackedScene" uid="uid://d13xnsm7t448a" path="res://assets/models/fan.glb" id="3_urbhd"]
 [ext_resource type="PackedScene" uid="uid://dl0p5kuohdqja" path="res://assets/models/lab-bench.glb" id="4_a2sae"]
 [ext_resource type="PackedScene" uid="uid://c5l62di7vxio2" path="res://assets/models/light-switch.glb" id="5_jsoye"]
-[ext_resource type="PackedScene" uid="uid://cfaa6d3t863va" path="res://scenes/enemy.tscn" id="6_rqxcv"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6xppq"]
 size = Vector3(12, 0.5, 12)
@@ -76,9 +75,6 @@ geometry_source_group_name = &"NAVMESH"
 [node name="Node3D" type="Node3D" unique_id=1561931392]
 
 [node name="Room1" type="Node3D" parent="." unique_id=760375280 groups=["NAVMESH"]]
-
-[node name="dalek2" parent="Room1" unique_id=1435492741 groups=["sonar_reveal"] instance=ExtResource("1_6m4pu")]
-transform = Transform3D(0.38935253, 0, 0.27857435, 0, 0.47874743, 0, -0.27857435, 0, 0.38935253, -4.2593403, 0.11179507, -3.8599977)
 
 [node name="Floor" type="StaticBody3D" parent="Room1" unique_id=2088358244 groups=["sonar_occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
@@ -161,7 +157,7 @@ transform = Transform3D(0.183333, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("BoxShape3D_1grhh")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/SouthWallHeader" unique_id=16939214]
-transform = Transform3D(0.183333, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(0.183333, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, -5.069936, 0)
 mesh = SubResource("BoxMesh_2uwn8")
 
 [node name="ExteriorLanding" type="StaticBody3D" parent="Room1" unique_id=17308227 groups=["sonar_occluder"]]
@@ -186,42 +182,8 @@ shape = SubResource("BoxShape3D_6xppq")
 transform = Transform3D(0.208333, 0, 0, 0, 1, 0, 0, 0, 0.25, 0, 0, 0)
 mesh = SubResource("BoxMesh_g8d8l")
 
-[node name="Doorway" type="Node3D" parent="Room1" unique_id=1299595078]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6.19)
-
-[node name="DoorFrame" type="Node3D" parent="Room1/Doorway" unique_id=91686973]
-
-[node name="LeftPost" type="MeshInstance3D" parent="Room1/Doorway/DoorFrame" unique_id=2131737579 groups=["sonar_occluder"]]
-transform = Transform3D(0.20157968, 0, 0, 0, 3.2, 0, 0, 0, 0.16, -1, 1.6, 0)
-mesh = SubResource("BoxMesh_nsf7e")
-
-[node name="RightPost" type="MeshInstance3D" parent="Room1/Doorway/DoorFrame" unique_id=1568709745 groups=["sonar_occluder"]]
-transform = Transform3D(0.1853994, 0, 0, 0, 3.2, 0, 0, 0, 0.16, 1, 1.6, 0)
-mesh = SubResource("BoxMesh_nsf7e")
-
-[node name="TopBeam" type="MeshInstance3D" parent="Room1/Doorway/DoorFrame" unique_id=2122672878]
-transform = Transform3D(2.32, 0, 0, 0, 0.16, 0, 0, 0, 0.16, 0, 3.28, 0)
-mesh = SubResource("BoxMesh_nsf7e")
-
-[node name="DoorPivot" type="Node3D" parent="Room1/Doorway" unique_id=1221912362]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0, 0)
-
-[node name="Door" type="StaticBody3D" parent="Room1/Doorway/DoorPivot" unique_id=964038891 groups=["sonar_occluder"]]
-transform = Transform3D(1.6, 0, 0, 0, 3.2, 0, 0, 0, 0.12, 0.8, 1.6, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/Doorway/DoorPivot/Door" unique_id=1446113601]
-shape = SubResource("BoxShape3D_fvfsy")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/Doorway/DoorPivot/Door" unique_id=176464865 groups=["sonar_occluder"]]
-transform = Transform3D(1.1679566, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
-mesh = SubResource("BoxMesh_erwiy")
-
-[node name="InteractionArea" type="Area3D" parent="Room1/Doorway" unique_id=1925667269]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -1.2)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/Doorway/InteractionArea" unique_id=1966227229]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.59194326)
-shape = SubResource("BoxShape3D_p83gs")
+[node name="door2" parent="Room1" unique_id=251979430 instance=ExtResource("1_2kggb")]
+transform = Transform3D(1.6758232, 0, 0, 0, 1.6758232, 0, 0, 0, 1.6758233, 0.026432991, -0.022327885, 6.2363124)
 
 [node name="WestWall" type="StaticBody3D" parent="Room1" unique_id=1969074543 groups=["sonar_occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.25, 2, 0)
@@ -274,11 +236,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 2.3)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/Props/light-switch/InteractionArea" unique_id=2078761003]
 transform = Transform3D(1, 0, 1.4210855e-14, 0, 1, 0, -1.4210855e-14, 0, 1, 0.10915756, -0.019591808, 0.4271145)
 shape = SubResource("BoxShape3D_lwnyg")
-
-[node name="Enemy" parent="Room1" unique_id=1286619820 node_paths=PackedStringArray("nav_mesh") groups=["sonar_reveal"] instance=ExtResource("6_rqxcv")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1053405, -3.5762787e-07, -3.8320973)
-move_speed = 1.0
-nav_mesh = NodePath("../NavigationRegion3D")
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="Room1" unique_id=1920495575]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00041365623, 0, 0.002642393)
