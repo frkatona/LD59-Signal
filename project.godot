@@ -49,6 +49,7 @@ pause_menu={
 [layer_names]
 
 3d_physics/layer_9="Enemy Rigid Body"
+3d_physics/layer_13="Player"
 
 [physics]
 

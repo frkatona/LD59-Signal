@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://cfaa6d3t863va"]
 
 [ext_resource type="Script" uid="uid://djsr7hotk8htv" path="res://scripts/enemy.gd" id="1_4a83h"]
+[ext_resource type="Script" uid="uid://c4j8wryx81wo6" path="res://scripts/enemy_ai.gd" id="2_5uy6h"]
 [ext_resource type="PackedScene" uid="uid://bwkh10wgul3et" path="res://assets/models/dalek.glb" id="2_md0e3"]
 [ext_resource type="AudioStream" uid="uid://dgcqwmpla7o11" path="res://assets/audio/sfx/gross-noise.wav" id="3_4ra3w"]
 
@@ -17,8 +18,21 @@ radius = 0.4
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_85g3d"]
 radius = 0.4
 
-[node name="Enemy" type="CharacterBody3D" unique_id=1286619820]
+[node name="Enemy" type="CharacterBody3D" unique_id=1286619820 node_paths=PackedStringArray("ai")]
 script = ExtResource("1_4a83h")
+ai = NodePath("EnemyAI")
+
+[node name="EnemyAI" type="Node3D" parent="." unique_id=1879352509 node_paths=PackedStringArray("enemy", "ray")]
+script = ExtResource("2_5uy6h")
+enemy = NodePath("..")
+ray = NodePath("LineOfSight")
+
+[node name="LineOfSight" type="RayCast3D" parent="EnemyAI" unique_id=150481500]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+target_position = Vector3(0, -10, 0)
+collision_mask = 4097
+debug_shape_custom_color = Color(0.88235295, 0.88235295, 0.88235295, 0.2)
+debug_shape_thickness = 3
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=2066241855]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
