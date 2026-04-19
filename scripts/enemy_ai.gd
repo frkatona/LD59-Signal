@@ -1,6 +1,8 @@
 class_name EnemyAI
 extends Node
 
+signal state_changed(new_state: State)
+
 enum State {
 	IDLE,
 	PATROLLING,
@@ -35,10 +37,14 @@ func _think():
 	if ray.is_colliding() and ray.get_collider() == enemy.player:
 		print("Enemy sees the player! Moving towards the player.")
 		current_state = State.CHASING
+		enemy.player_position = enemy.player.global_position
+		enemy.player_visible = true
 	else:
 		print("Enemy does not see the player. Patrolling.")
 		current_state = State.CHASING_LAST_KNOWN_POSITION
+		enemy.player_visible = false
 
+	state_changed.emit(current_state)
 	think_timer.start(1.0)
 
 func _process(_delta):

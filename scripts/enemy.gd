@@ -24,6 +24,9 @@ var gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravi
 var is_being_pushed: bool = false
 var enemy_material: StandardMaterial3D
 
+var player_position: Vector3 = Vector3.ZERO
+var player_visible: bool = false
+
 func _ready() -> void:
 	add_to_group(SIGNAL_ENEMY_GROUP)
 	assert(player, "Player node not found in the scene tree.")
@@ -46,8 +49,7 @@ func _ready() -> void:
 
 	_update_color()
 
-	# Wait for the navigation map to initialize
-	await get_tree().physics_frame
+	ai.state_changed.connect(_on_enemy_ai_state_changed)
 
 func _physics_process(_delta: float) -> void:
 	_update_color()
@@ -112,3 +114,20 @@ func do_push(direction: Vector3) -> void:
 	is_being_pushed = true
 	enemy_rigid_body.linear_velocity = direction
 	print("Push velocity applied to enemy: ", direction)
+
+
+func _on_enemy_ai_state_changed(new_state: EnemyAI.State) -> void:
+	print("Enemy state changed to: ", new_state)
+	match new_state:
+		EnemyAI.State.IDLE:
+			$Label3D.text = "Idle"
+		EnemyAI.State.PATROLLING:
+			$Label3D.text = "Patrolling"
+		EnemyAI.State.CHASING:
+			$Label3D.text = "Chasing"
+		EnemyAI.State.CHASING_LAST_KNOWN_POSITION:
+			$Label3D.text = "Chasing Last Known Position"
+		EnemyAI.State.STUNNED:
+			$Label3D.text = "Stunned"
+		_:
+			$Label3D.text = "Unknown State"
