@@ -1,6 +1,7 @@
 extends CharacterBody3D
 
 const SIGNAL_ENEMY_GROUP := &"signal_enemy"
+const MAIN_PLAYER_GROUP := &"main_player"
 const NAV_MESH_OFFSET := Vector3(0, 0.5, 0)
 const INDICATOR_PUSH_DURATION_SECONDS := 2.0
 
@@ -28,7 +29,8 @@ var indicator_push_remaining: float = 0.0
 
 func _ready() -> void:
 	add_to_group(SIGNAL_ENEMY_GROUP)
-	assert(player, "Player node not found in the scene tree.")
+	_resolve_player()
+	assert(player, "Player node could not be resolved. Expected an explicit assignment or a node in group 'main_player'.")
 	assert(nav_mesh, "NavigationRegion3D not assigned.")
 	assert(navigation_agent_3d, "NavigationAgent3D node not found in the scene tree.")
 	assert(enemy_mesh, "MeshInstance3D node not found in the scene tree.")
@@ -52,6 +54,13 @@ func _ready() -> void:
 
 	# Wait for the navigation map to initialize
 	await get_tree().physics_frame
+
+
+func _resolve_player() -> void:
+	if player != null:
+		return
+
+	player = get_tree().get_first_node_in_group(MAIN_PLAYER_GROUP) as CharacterBody3D
 
 func _physics_process(_delta: float) -> void:
 	_update_color()

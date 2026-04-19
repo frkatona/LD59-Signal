@@ -275,11 +275,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 2.3)
 transform = Transform3D(1, 0, 1.4210855e-14, 0, 1, 0, -1.4210855e-14, 0, 1, 0.10915756, -0.019591808, 0.4271145)
 shape = SubResource("BoxShape3D_lwnyg")
 
-[node name="Enemy" parent="Room1" unique_id=1286619820 node_paths=PackedStringArray("nav_mesh", "player") groups=["sonar_reveal"] instance=ExtResource("6_rqxcv")]
+[node name="Enemy" parent="Room1" unique_id=1286619820 node_paths=PackedStringArray("nav_mesh") groups=["sonar_reveal"] instance=ExtResource("6_rqxcv")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1053405, -3.5762787e-07, -3.8320973)
 move_speed = 1.0
 nav_mesh = NodePath("../NavigationRegion3D")
-player = NodePath("../../../Player")
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="Room1" unique_id=1920495575]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00041365623, 0, 0.002642393)

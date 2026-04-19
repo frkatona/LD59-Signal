@@ -20,7 +20,7 @@ radius = 0.4
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4ra3w"]
 albedo_color = Color(0, 0, 0, 1)
 emission_enabled = true
-emission = Color(0.6089677, 0.1788316, 0.18341184, 1)
+emission = Color(0.4195452, 0.107978664, 0.1148885, 1)
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_4ra3w"]
 material = SubResource("StandardMaterial3D_4ra3w")

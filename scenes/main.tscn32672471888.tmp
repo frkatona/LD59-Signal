@@ -311,12 +311,7 @@ mesh = SubResource("BoxMesh_floor")
 
 [node name="Room1" type="Node3D" parent="." unique_id=472349600 groups=["NAVMESH"]]
 
-[node name="Enemy" parent="Room1" unique_id=196884257 node_paths=PackedStringArray("nav_mesh") groups=["sonar_reveal"] instance=ExtResource("8_tipki")]
-transform = Transform3D(0.47065774, 0, -0.8823159, 0, 1, 0, 0.8823159, 0, 0.47065774, -4.2075486, -3.5762787e-07, 3.714383)
-move_speed = 1.0
-nav_mesh = NodePath("../NavigationRegion3D")
-
-[node name="enemy_broken" parent="Room1" unique_id=1435492741 groups=["sonar_reveal"] instance=ExtResource("3_tefeu")]
+[node name="dalek2" parent="Room1" unique_id=1435492741 groups=["sonar_reveal"] instance=ExtResource("3_tefeu")]
 transform = Transform3D(0.38935253, 0, 0.27857435, 0, 0.47874743, 0, -0.27857435, 0, 0.38935253, -4.2593403, 0.11179507, -3.8599977)
 
 [node name="Floor" type="StaticBody3D" parent="Room1" unique_id=1600432920 groups=["sonar_occluder"]]
@@ -514,12 +509,17 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 2.3)
 transform = Transform3D(1, 0, 1.4210855e-14, 0, 1, 0, -1.4210855e-14, 0, 1, 0.10915756, -0.019591808, 0.4271145)
 shape = SubResource("BoxShape3D_light_switch_interaction")
 
+[node name="Enemy" parent="Room1" unique_id=196884257 node_paths=PackedStringArray("nav_mesh") groups=["sonar_reveal"] instance=ExtResource("8_tipki")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1053405, -3.5762787e-07, -3.8320973)
+move_speed = 1.0
+nav_mesh = NodePath("../NavigationRegion3D")
+
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="Room1" unique_id=239465632]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00041365623, 0, 0.002642393)
 navigation_mesh = SubResource("NavigationMesh_tipki")
 
 [node name="Room2" parent="." unique_id=1770556226 instance=ExtResource("12_room2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00027388334, -5.9604645e-08, -14.998346)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -15)
 
 [node name="Room3" parent="." unique_id=857258731 instance=ExtResource("12_room2")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -30)
@@ -676,6 +676,6 @@ shape = SubResource("ConvexPolygonShape3D_tbgi4")
 
 [editable path="Player"]
 [editable path="Player/CameraPivot/Camera3D/crowbar"]
-[editable path="Room1/enemy_broken"]
+[editable path="Room1/dalek2"]
 [editable path="Room1/Props/fan"]
 [editable path="EndGame/SteppingStones/stepping-stone"]

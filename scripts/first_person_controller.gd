@@ -8,6 +8,7 @@ const PUSH_HIT_STREAM := preload("res://assets/audio/sfx/whack-hit.wav")
 const PUSH_MISS_STREAM := preload("res://assets/audio/sfx/whack.wav")
 const SIGNAL_SCOPE_SHADER := preload("res://shaders/oscilloscope_signal.gdshader")
 const DEFAULT_FOOTSTEP_BUS := &"SFX"
+const MAIN_PLAYER_GROUP := &"main_player"
 const SIGNAL_ENEMY_GROUP := &"signal_enemy"
 const SIGNAL_SCOPE_RESPONSE_SPEED := 2.8
 const CROWBAR_SMACK_ANIMATION := &"smack"
@@ -60,6 +61,7 @@ var push_cooldown_remaining: float = 0.0
 
 
 func _ready() -> void:
+	add_to_group(MAIN_PLAYER_GROUP)
 	respawn_pitch = camera_pivot.rotation.x
 	_create_footstep_players()
 	crowbar_animation_player = _find_animation_player(crowbar_root)
