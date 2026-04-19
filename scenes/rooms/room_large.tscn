@@ -1,0 +1,195 @@
+[gd_scene format=3 uid="uid://c3hwb06r5v2st"]
+
+[ext_resource type="PackedScene" uid="uid://mb7hqotwfu75" path="res://assets/models/chair.glb" id="1_chair"]
+[ext_resource type="PackedScene" uid="uid://d13xnsm7t448a" path="res://assets/models/fan.glb" id="2_fan"]
+[ext_resource type="PackedScene" uid="uid://dl0p5kuohdqja" path="res://assets/models/lab-bench.glb" id="3_bench"]
+[ext_resource type="PackedScene" uid="uid://c5l62di7vxio2" path="res://assets/models/light-switch.glb" id="4_switch"]
+[ext_resource type="PackedScene" uid="uid://cfaa6d3t863va" path="res://scenes/enemy.tscn" id="5_enemy"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
+size = Vector3(26, 0.5, 28)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_floor"]
+albedo_color = Color(0.160784, 0.176471, 0.211765, 1)
+roughness = 0.95
+
+[sub_resource type="BoxMesh" id="BoxMesh_floor"]
+material = SubResource("StandardMaterial3D_floor")
+size = Vector3(26, 0.5, 28)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_wall"]
+albedo_color = Color(0.741176, 0.741176, 0.776471, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ns"]
+size = Vector3(26, 5, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_ns"]
+material = SubResource("StandardMaterial3D_wall")
+size = Vector3(26, 5, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wall_ew"]
+size = Vector3(0.5, 5, 28)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall_ew"]
+material = SubResource("StandardMaterial3D_wall")
+size = Vector3(0.5, 5, 28)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_landing"]
+albedo_color = Color(0.184314, 0.219608, 0.266667, 1)
+roughness = 0.92
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_landing"]
+size = Vector3(8, 0.5, 3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_landing"]
+material = SubResource("StandardMaterial3D_landing")
+size = Vector3(8, 0.5, 3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_light_switch_interaction"]
+size = Vector3(5.9825044, 7.521753, 5.748584)
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_large"]
+vertices = PackedVector3Array(-12.5, 0.5, 13.5, 12.5, 0.5, 13.5, 12.5, 0.5, -13.5, -12.5, 0.5, -13.5)
+polygons = [PackedInt32Array(0, 1, 2), PackedInt32Array(0, 2, 3)]
+
+[node name="RoomLargeRoot" type="Node3D" unique_id=1786201147]
+
+[node name="RoomLarge" type="Node3D" parent="." unique_id=1047625955 groups=["NAVMESH"]]
+
+[node name="Floor" type="StaticBody3D" parent="RoomLarge" unique_id=940205600 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RoomLarge/Floor" unique_id=444196377]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RoomLarge/Floor" unique_id=616143062 groups=["sonar_reveal"]]
+mesh = SubResource("BoxMesh_floor")
+
+[node name="SouthWall" type="StaticBody3D" parent="RoomLarge" unique_id=1997734172 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 14.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RoomLarge/SouthWall" unique_id=1590317512]
+shape = SubResource("BoxShape3D_wall_ns")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RoomLarge/SouthWall" unique_id=252796733 groups=["sonar_reveal"]]
+mesh = SubResource("BoxMesh_wall_ns")
+
+[node name="NorthWallLeft" type="StaticBody3D" parent="RoomLarge" unique_id=1597446565 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.5, 2.5, -14.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RoomLarge/NorthWallLeft" unique_id=2036191564]
+transform = Transform3D(0.423077, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("BoxShape3D_wall_ns")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RoomLarge/NorthWallLeft" unique_id=209734113 groups=["sonar_reveal"]]
+transform = Transform3D(0.423077, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("BoxMesh_wall_ns")
+
+[node name="NorthWallRight" type="StaticBody3D" parent="RoomLarge" unique_id=1726204867 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7.5, 2.5, -14.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RoomLarge/NorthWallRight" unique_id=2003309224]
+transform = Transform3D(0.423077, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("BoxShape3D_wall_ns")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RoomLarge/NorthWallRight" unique_id=1630098136 groups=["sonar_reveal"]]
+transform = Transform3D(0.423077, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("BoxMesh_wall_ns")
+
+[node name="NorthWallHeader" type="StaticBody3D" parent="RoomLarge" unique_id=630346334 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.5, -14.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RoomLarge/NorthWallHeader" unique_id=175586714]
+transform = Transform3D(0.153846, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("BoxShape3D_wall_ns")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RoomLarge/NorthWallHeader" unique_id=1498600903 groups=["sonar_reveal"]]
+transform = Transform3D(0.153846, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("BoxMesh_wall_ns")
+
+[node name="WestWall" type="StaticBody3D" parent="RoomLarge" unique_id=1639173134 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13.25, 2.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RoomLarge/WestWall" unique_id=1042151074]
+shape = SubResource("BoxShape3D_wall_ew")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RoomLarge/WestWall" unique_id=938278188 groups=["sonar_reveal"]]
+mesh = SubResource("BoxMesh_wall_ew")
+
+[node name="EastWall" type="StaticBody3D" parent="RoomLarge" unique_id=1232398212 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 13.25, 2.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RoomLarge/EastWall" unique_id=693389693]
+shape = SubResource("BoxShape3D_wall_ew")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RoomLarge/EastWall" unique_id=1565147062 groups=["sonar_reveal"]]
+mesh = SubResource("BoxMesh_wall_ew")
+
+[node name="NorthLanding" type="StaticBody3D" parent="RoomLarge" unique_id=97669678 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, -15.5)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RoomLarge/NorthLanding" unique_id=1439215434]
+shape = SubResource("BoxShape3D_landing")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RoomLarge/NorthLanding" unique_id=1727346775 groups=["sonar_reveal"]]
+mesh = SubResource("BoxMesh_landing")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="RoomLarge" unique_id=97481722]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.6, -1.4)
+light_energy = 1.8
+shadow_enabled = true
+omni_range = 18.0
+omni_attenuation = 1.25
+
+[node name="Props" type="Node3D" parent="RoomLarge" unique_id=712731792 groups=["NAVMESH"]]
+
+[node name="chair1" parent="RoomLarge/Props" unique_id=1519836020 groups=["sonar_reveal"] instance=ExtResource("1_chair")]
+transform = Transform3D(0.50558525, 0, -0.50558525, 0, 0.7150055, 0, 0.50558525, 0, 0.50558525, 9.214, 0.00074707816, 8.642)
+
+[node name="chair2" parent="RoomLarge/Props" unique_id=1213508013 groups=["sonar_reveal"] instance=ExtResource("1_chair")]
+transform = Transform3D(-0.50558525, 0, -0.50558525, 0, 0.7150055, 0, 0.50558525, 0, -0.50558525, -8.931, 0.00074707816, 6.844)
+
+[node name="fan" parent="RoomLarge/Props" unique_id=27126892 groups=["sonar_reveal"] instance=ExtResource("2_fan")]
+transform = Transform3D(0.6276457, 0, 0, 0, 0.6276457, 0, 0, 0, 0.6276457, 0.118, 4.184, -0.281)
+
+[node name="fan" parent="RoomLarge/Props/fan" index="0" unique_id=1255231637]
+cast_shadow = 0
+
+[node name="fanblades" parent="RoomLarge/Props/fan/fan" index="1" unique_id=1526421861]
+cast_shadow = 0
+
+[node name="lab-bench" parent="RoomLarge/Props" unique_id=1498430563 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("3_bench")]
+transform = Transform3D(-3.3236365e-08, 0, 0.7603594, 0, 0.7603594, 0, -0.7603594, 0, -3.3236365e-08, -10.14, 0.09189254, -2.731)
+
+[node name="lab-bench2" parent="RoomLarge/Props" unique_id=197921285 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("3_bench")]
+transform = Transform3D(-0.76035935, 0, -6.647272e-08, 0, 0.76035935, 0, 6.647272e-08, 0, -0.76035935, 7.601, 0.09189254, -10.677)
+
+[node name="lab-bench3" parent="RoomLarge/Props" unique_id=1063839432 groups=["sonar_occluder"] instance=ExtResource("3_bench")]
+transform = Transform3D(0.7603593, 0, -7.1054274e-15, 0, 0.7603593, 0, 7.1054274e-15, 0, 0.7603593, 1.214, 0.0918923, 9.88)
+
+[node name="light-switch" parent="RoomLarge/Props" unique_id=1631709526 groups=["sonar_reveal"] instance=ExtResource("4_switch")]
+transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -12.946, 1.3073962, -5.264)
+
+[node name="InteractionArea" type="Area3D" parent="RoomLarge/Props/light-switch" unique_id=1670601265]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 2.3)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RoomLarge/Props/light-switch/InteractionArea" unique_id=1233791604]
+transform = Transform3D(1, 0, 1.4210855e-14, 0, 1, 0, -1.4210855e-14, 0, 1, 0.10915756, -0.019591808, 0.4271145)
+shape = SubResource("BoxShape3D_light_switch_interaction")
+
+[node name="EnemyA" parent="RoomLarge" unique_id=2003294534 node_paths=PackedStringArray("nav_mesh", "player") groups=["sonar_reveal"] instance=ExtResource("5_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.245, 0, -3.844)
+move_speed = 1.3
+nav_mesh = NodePath("../NavigationRegion3D")
+player = NodePath("../../../Player")
+
+[node name="EnemyB" parent="RoomLarge" unique_id=1509456700 node_paths=PackedStringArray("nav_mesh", "player") groups=["sonar_reveal"] instance=ExtResource("5_enemy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.733, 0, 8.241)
+move_speed = 1.5
+nav_mesh = NodePath("../NavigationRegion3D")
+player = NodePath("../../../Player")
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="RoomLarge" unique_id=1802218465]
+navigation_mesh = SubResource("NavigationMesh_large")
+
+[editable path="RoomLarge/Props/fan"]

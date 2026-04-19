@@ -11,6 +11,9 @@
 [ext_resource type="PackedScene" uid="uid://cfaa6d3t863va" path="res://scenes/enemy.tscn" id="8_tipki"]
 [ext_resource type="PackedScene" uid="uid://c5l62di7vxio2" path="res://assets/models/light-switch.glb" id="9_85g3d"]
 [ext_resource type="PackedScene" uid="uid://bv0hnms6140rh" path="res://assets/models/crowbar.glb" id="11_ya4ey"]
+[ext_resource type="PackedScene" uid="uid://bhvo2p6dl8m8w" path="res://scenes/rooms/room_serial.tscn" id="12_room2"]
+[ext_resource type="PackedScene" uid="uid://ddj3m4m8j8qaq" path="res://scenes/rooms/room_drop.tscn" id="13_room4"]
+[ext_resource type="PackedScene" uid="uid://c3hwb06r5v2st" path="res://scenes/rooms/room_large.tscn" id="14_room5"]
 
 [sub_resource type="Environment" id="Environment_tbgi4"]
 background_energy_multiplier = 0.0
@@ -75,6 +78,41 @@ size = Vector3(0.5, 4, 12)
 [sub_resource type="BoxMesh" id="BoxMesh_wall_side"]
 material = SubResource("StandardMaterial3D_wall")
 size = Vector3(0.5, 4, 12)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_final_floor"]
+size = Vector3(16, 0.5, 30)
+
+[sub_resource type="BoxMesh" id="BoxMesh_final_floor"]
+material = SubResource("StandardMaterial3D_floor")
+size = Vector3(16, 0.5, 30)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_final_ceiling"]
+size = Vector3(16, 0.5, 30)
+
+[sub_resource type="BoxMesh" id="BoxMesh_final_ceiling"]
+material = SubResource("StandardMaterial3D_ceiling")
+size = Vector3(16, 0.5, 30)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_final_wall_wide"]
+size = Vector3(16, 4, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_final_wall_wide"]
+material = SubResource("StandardMaterial3D_wall")
+size = Vector3(16, 4, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_final_wall_side"]
+size = Vector3(0.5, 4, 30)
+
+[sub_resource type="BoxMesh" id="BoxMesh_final_wall_side"]
+material = SubResource("StandardMaterial3D_wall")
+size = Vector3(0.5, 4, 30)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_final_landing"]
+size = Vector3(8, 0.5, 3)
+
+[sub_resource type="BoxMesh" id="BoxMesh_final_landing"]
+material = SubResource("StandardMaterial3D_floor")
+size = Vector3(8, 0.5, 3)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_light_switch_interaction"]
 size = Vector3(5.9825044, 7.521753, 5.748584)
@@ -294,13 +332,37 @@ shape = SubResource("BoxShape3D_ceiling")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/Ceiling" unique_id=1459229483 groups=["sonar_reveal"]]
 mesh = SubResource("BoxMesh_ceiling")
 
-[node name="NorthWall" type="StaticBody3D" parent="Room1" unique_id=2091474859 groups=["sonar_occluder"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -6.25)
+[node name="NorthWallLeft" type="StaticBody3D" parent="Room1" unique_id=2091474859 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.55, 2, -6.25)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/NorthWall" unique_id=181063540]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/NorthWallLeft" unique_id=181063540]
+transform = Transform3D(0.408333, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("BoxShape3D_wall_wide")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/NorthWall" unique_id=667988605 groups=["sonar_reveal"]]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/NorthWallLeft" unique_id=667988605 groups=["sonar_reveal"]]
+transform = Transform3D(0.408333, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("BoxMesh_wall_wide")
+
+[node name="NorthWallRight" type="StaticBody3D" parent="Room1" unique_id=469985829 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.55, 2, -6.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/NorthWallRight" unique_id=169433740]
+transform = Transform3D(0.408333, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("BoxShape3D_wall_wide")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/NorthWallRight" unique_id=644452175 groups=["sonar_reveal"]]
+transform = Transform3D(0.408333, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("BoxMesh_wall_wide")
+
+[node name="NorthWallHeader" type="StaticBody3D" parent="Room1" unique_id=127440593 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.6, -6.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/NorthWallHeader" unique_id=1049243440]
+transform = Transform3D(0.183333, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("BoxShape3D_wall_wide")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/NorthWallHeader" unique_id=1886226769 groups=["sonar_reveal"]]
+transform = Transform3D(0.183333, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, 0, 0)
 mesh = SubResource("BoxMesh_wall_wide")
 
 [node name="SouthWallLeft" type="StaticBody3D" parent="Room1" unique_id=1262331745 groups=["sonar_occluder"]]
@@ -344,6 +406,17 @@ transform = Transform3D(0.208333, 0, 0, 0, 1, 0, 0, 0, 0.25, 0, 0, 0)
 shape = SubResource("BoxShape3D_floor")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/ExteriorLanding" unique_id=1136952765]
+transform = Transform3D(0.208333, 0, 0, 0, 1, 0, 0, 0, 0.25, 0, 0, 0)
+mesh = SubResource("BoxMesh_floor")
+
+[node name="InteriorLanding" type="StaticBody3D" parent="Room1" unique_id=391988957 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, -7.5)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/InteriorLanding" unique_id=1811679136]
+transform = Transform3D(0.208333, 0, 0, 0, 1, 0, 0, 0, 0.25, 0, 0, 0)
+shape = SubResource("BoxShape3D_floor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/InteriorLanding" unique_id=1124322956 groups=["sonar_reveal"]]
 transform = Transform3D(0.208333, 0, 0, 0, 1, 0, 0, 0, 0.25, 0, 0, 0)
 mesh = SubResource("BoxMesh_floor")
 
@@ -446,10 +519,110 @@ player = NodePath("../../Player")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00041365623, 0, 0.002642393)
 navigation_mesh = SubResource("NavigationMesh_tipki")
 
+[node name="Room2" parent="." unique_id=1770556226 instance=ExtResource("12_room2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -15)
+
+[node name="Room3" parent="." unique_id=857258731 instance=ExtResource("12_room2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -30)
+
+[node name="Room4" parent="." unique_id=1074277457 instance=ExtResource("13_room4")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, -45)
+
+[node name="Room5" parent="." unique_id=416776096 instance=ExtResource("14_room5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7, -45)
+
 [node name="EndGame" type="Node3D" parent="." unique_id=1109924021]
-transform = Transform3D(1.3113416e-07, 0, 1, 0, 1, 0, -1, 0, 1.3113416e-07, 8.174656, 0.14999962, 63.143974)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -7, -77)
+
+[node name="Floor" type="StaticBody3D" parent="EndGame" unique_id=187854638 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EndGame/Floor" unique_id=1627236826]
+shape = SubResource("BoxShape3D_final_floor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="EndGame/Floor" unique_id=644925603 groups=["sonar_reveal"]]
+mesh = SubResource("BoxMesh_final_floor")
+
+[node name="Ceiling" type="StaticBody3D" parent="EndGame" unique_id=951196552 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.25, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EndGame/Ceiling" unique_id=948228177]
+shape = SubResource("BoxShape3D_final_ceiling")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="EndGame/Ceiling" unique_id=1927747661 groups=["sonar_reveal"]]
+mesh = SubResource("BoxMesh_final_ceiling")
+
+[node name="NorthWall" type="StaticBody3D" parent="EndGame" unique_id=1566776088 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -15.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EndGame/NorthWall" unique_id=355917372]
+shape = SubResource("BoxShape3D_final_wall_wide")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="EndGame/NorthWall" unique_id=1861533592 groups=["sonar_reveal"]]
+mesh = SubResource("BoxMesh_final_wall_wide")
+
+[node name="SouthWallLeft" type="StaticBody3D" parent="EndGame" unique_id=452236853 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.55, 2, 15.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EndGame/SouthWallLeft" unique_id=195819161]
+transform = Transform3D(0.56875, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("BoxShape3D_final_wall_wide")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="EndGame/SouthWallLeft" unique_id=211115425 groups=["sonar_reveal"]]
+transform = Transform3D(0.56875, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("BoxMesh_final_wall_wide")
+
+[node name="SouthWallRight" type="StaticBody3D" parent="EndGame" unique_id=146917891 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.55, 2, 15.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EndGame/SouthWallRight" unique_id=656630870]
+transform = Transform3D(0.56875, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("BoxShape3D_final_wall_wide")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="EndGame/SouthWallRight" unique_id=483081700 groups=["sonar_reveal"]]
+transform = Transform3D(0.56875, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("BoxMesh_final_wall_wide")
+
+[node name="SouthWallHeader" type="StaticBody3D" parent="EndGame" unique_id=540554311 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.6, 15.25)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EndGame/SouthWallHeader" unique_id=34295718]
+transform = Transform3D(0.18125, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("BoxShape3D_final_wall_wide")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="EndGame/SouthWallHeader" unique_id=242952740 groups=["sonar_reveal"]]
+transform = Transform3D(0.18125, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, 0, 0)
+mesh = SubResource("BoxMesh_final_wall_wide")
+
+[node name="SouthLanding" type="StaticBody3D" parent="EndGame" unique_id=264663878 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 16.5)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EndGame/SouthLanding" unique_id=622320559]
+shape = SubResource("BoxShape3D_final_landing")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="EndGame/SouthLanding" unique_id=2114230581 groups=["sonar_reveal"]]
+mesh = SubResource("BoxMesh_final_landing")
+
+[node name="WestWall" type="StaticBody3D" parent="EndGame" unique_id=205210855 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -8.25, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EndGame/WestWall" unique_id=1224017294]
+shape = SubResource("BoxShape3D_final_wall_side")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="EndGame/WestWall" unique_id=1899562740 groups=["sonar_reveal"]]
+mesh = SubResource("BoxMesh_final_wall_side")
+
+[node name="EastWall" type="StaticBody3D" parent="EndGame" unique_id=1585407850 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.25, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="EndGame/EastWall" unique_id=596891446]
+shape = SubResource("BoxShape3D_final_wall_side")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="EndGame/EastWall" unique_id=1812035815 groups=["sonar_reveal"]]
+mesh = SubResource("BoxMesh_final_wall_side")
 
 [node name="WinOrb" type="Node3D" parent="EndGame" unique_id=815696688 groups=["sonar_reveal"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -9)
 
 [node name="OrbBody" type="StaticBody3D" parent="EndGame/WinOrb" unique_id=862829769]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
@@ -473,7 +646,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
 shape = SubResource("SphereShape3D_win_orb_interaction")
 
 [node name="SteppingStones" type="Node3D" parent="EndGame" unique_id=81523368]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.854008, -0.14999962, -17.537352)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.14999962, 0)
 
 [node name="stepping-stone" parent="EndGame/SteppingStones" unique_id=1158499491 instance=ExtResource("5_tbgi4")]
 transform = Transform3D(-0.39261004, 0, -0.91970503, 0, 1, 0, 0.91970503, 0, -0.39261004, -1.8814359, -0.5801451, 11.389015)
