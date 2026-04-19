@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cfaa6d3t863va"]
 
-[ext_resource type="Script" uid="uid://djsr7hotk8htv" path="res://scenes/enemy/enemy.gd" id="1_4a83h"]
+[ext_resource type="Script" uid="uid://djsr7hotk8htv" path="res://scripts/enemy.gd" id="1_4a83h"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o6xl0"]
 metallic = 0.2

@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://bme1uywuhta4a"]
+
+[ext_resource type="Script" uid="uid://cktwaird8aawj" path="res://scripts/first_person_controller.gd" id="1_8afob"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_player"]
+size = Vector3(0.7, 1.8, 0.7)
+
+[node name="Player" type="CharacterBody3D" unique_id=22887971]
+script = ExtResource("1_8afob")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1988471710]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("BoxShape3D_player")
+
+[node name="CameraPivot" type="Node3D" parent="." unique_id=173732664]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot" unique_id=1194919771]
+current = true
