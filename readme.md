@@ -46,16 +46,23 @@ butler push LD59.zip akatona/geordi-la-forge:web
 - [x] extend the hitbox for a push by at least 2x
 - [ ] implement enemy collision = death screen (try to make it clear to the player what happened...maybe pull back the camera and make a short-range omnilight at the player position to show the enemy for a moment before the 'retry' screen?)
 - [x] working web audio
-  - [ ] make sure web audio either has a good starting volume or it's overwhelmingly clear to the player immediately at the start screen how to get to the volume control...maybe just start volume at 0.5
+  - [x] make sure web audio either has a good starting volume or it's overwhelmingly clear to the player immediately at the start screen how to get to the volume control...maybe just start volume at 0.5
 - [ ] why is it so laggy in full screen?  what can I do to keep it lightweight?
 
-josh test results:
-- start volume at ~5-10%
-- HUD scaling (the sliders get small on big screen)
+josh test play results:
+- [x] start volume at ~5-10%
+- [x] HUD scaling (the sliders get small on big screen)
 - his resolution is do-able, but his mouse is crazy
-  - add a mouse sensitivity slider
+  - [x] add a mouse sensitivity slider
 - even he struggles to get the rhythm for the geordi-vision and ping tool
-  - add the hotkeys to the sliders and controls hints in the pause menu
+  - [x]add the hotkeys to the sliders and controls hints in the pause menu
+  - design the rooms with gradual concept introductions:
+    - [ ] room 1: basic movement
+      - [ ] remake the door into a fancy gate or sliding door to make it more clear that it will require a button to open (halo doors?  car door swoosh?)
+        - [ ] (make a window between the first rooms or from the first room to the goal to foreshadow?)
+    - [ ] room 2: introduce the ping tool and the noise overlay
+    - [ ] room 3: introduce a disabled, static enemy (light color to indicate disabled? also implement a short stun to the hit enemies in general which will trigger this light color); pick up the crowbar
+    - [ ] room 4: introduce the stick and combat
 - stetch:
   - variations in wave generation
   - mcguffins
