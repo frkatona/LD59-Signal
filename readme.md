@@ -26,15 +26,17 @@ butler push LD59.zip akatona/geordi-la-forge:web
 
 - keep player better oriented
   - [x] pause the pulse on hit targets
-  - [ ] make some floor/ceiling tiles pulse reactive
-- better way to be "signal" theme
-- audio still not working in web
+  - [x] make some floor/ceiling tiles pulse reactive
+- [ ] better way to be "signal" theme
+  - 180d out-of-phase sine waves on oscilloscope screen begin to emerge from noise with proximity to enemy
+- [ ] audio still not working in web
 - blender
-  - model a light switch for the room to make the sonar useful
-  - model a handheld oscilloscope
+  - [x] model a light switch for the room to make the sonar useful
+  - [x] model a handheld oscilloscope
 - actually pause the game during pause menu and start screen
 
 ### cool clever little ideas
+- finding the lightswitch is the first part of the puzzle
 - using enemy's radar occlusion state to still see them by keeping a static pulse illuminating an object behind them 
 - encourage the player to pace out the room with their footsteps to navigate while blind
 

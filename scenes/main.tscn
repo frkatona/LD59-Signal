@@ -13,6 +13,7 @@
 
 [sub_resource type="Environment" id="Environment_tbgi4"]
 background_energy_multiplier = 0.0
+tonemap_mode = 2
 glow_enabled = true
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_kill_floor"]
@@ -228,7 +229,7 @@ layout_mode = 0
 text = "Press E to open door"
 
 [node name="Player" parent="." unique_id=22887971 instance=ExtResource("2_tipki")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 2.8153815)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 15.081289, 0.05, -1.0699883)
 
 [node name="oscilloscope" parent="Player" unique_id=1917917503 instance=ExtResource("3_choun")]
 transform = Transform3D(0.16816652, 0, 0, 0, 0.16203153, 0.04500842, 0, -0.04500842, 0.16203153, 0.709725, 1.1606226, -0.9821894)
@@ -260,17 +261,26 @@ current = true
 
 [node name="Room" type="Node3D" parent="." unique_id=472349600 groups=["NAVMESH"]]
 
+[node name="dalek2" parent="Room" unique_id=1435492741 groups=["sonar_reveal"] instance=ExtResource("3_tefeu")]
+transform = Transform3D(0.38935253, 0, 0.27857435, 0, 0.47874743, 0, -0.27857435, 0, 0.38935253, -4.2593403, 0.11179507, -3.8599977)
+
 [node name="Floor" type="StaticBody3D" parent="Room" unique_id=1600432920 groups=["sonar_occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Room/Floor" unique_id=2033852378]
 shape = SubResource("BoxShape3D_floor")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/Floor" unique_id=284221126]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/Floor" unique_id=284221126 groups=["sonar_reveal"]]
 mesh = SubResource("BoxMesh_floor")
 
-[node name="dalek2" parent="Room/Floor" unique_id=1435492741 groups=["sonar_reveal"] instance=ExtResource("3_tefeu")]
-transform = Transform3D(0.38935253, 0, 0.27857435, 0, 0.47874743, 0, -0.27857435, 0, 0.38935253, -4.2593403, 0.36179507, -3.8599977)
+[node name="Floor2" type="StaticBody3D" parent="Room" unique_id=1040397370 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12.010821, -0.25, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/Floor2" unique_id=2066239066]
+shape = SubResource("BoxShape3D_floor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/Floor2" unique_id=103922614]
+mesh = SubResource("BoxMesh_floor")
 
 [node name="Ceiling" type="StaticBody3D" parent="Room" unique_id=60746050 groups=["sonar_occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.25, 0)
@@ -278,7 +288,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.25, 0)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Room/Ceiling" unique_id=2105344841]
 shape = SubResource("BoxShape3D_ceiling")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/Ceiling" unique_id=1459229483]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/Ceiling" unique_id=1459229483 groups=["sonar_reveal"]]
 mesh = SubResource("BoxMesh_ceiling")
 
 [node name="NorthWall" type="StaticBody3D" parent="Room" unique_id=2091474859 groups=["sonar_occluder"]]
@@ -287,7 +297,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, -6.25)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Room/NorthWall" unique_id=181063540]
 shape = SubResource("BoxShape3D_wall_wide")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/NorthWall" unique_id=667988605]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/NorthWall" unique_id=667988605 groups=["sonar_reveal"]]
 mesh = SubResource("BoxMesh_wall_wide")
 
 [node name="SouthWallLeft" type="StaticBody3D" parent="Room" unique_id=1262331745 groups=["sonar_occluder"]]
@@ -308,7 +318,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.55, 2, 6.25)
 transform = Transform3D(0.408333, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("BoxShape3D_wall_wide")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/SouthWallRight" unique_id=1950400851]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/SouthWallRight" unique_id=1950400851 groups=["sonar_reveal"]]
 transform = Transform3D(0.408333, 0, 0, 0, 1, 0, 0, 0, 1, -0.0005354881, 0, 0.0032510757)
 mesh = SubResource("BoxMesh_wall_wide")
 
@@ -383,14 +393,8 @@ mesh = SubResource("BoxMesh_wall_side")
 [node name="EastWall" type="StaticBody3D" parent="Room" unique_id=704229481 groups=["sonar_occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.25, 2, 0)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Room/EastWall" unique_id=1524242803]
-shape = SubResource("BoxShape3D_wall_side")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Room/EastWall" unique_id=1488997584]
-mesh = SubResource("BoxMesh_wall_side")
-
 [node name="OmniLight3D" type="OmniLight3D" parent="Room" unique_id=1383541854]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6940484, 3.2523572, 0.6161754)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6940484, 2.84119, 0.6161754)
 light_energy = 1.5
 shadow_enabled = true
 omni_range = 10.0
@@ -405,6 +409,10 @@ transform = Transform3D(0.50558525, 0, -0.50558525, 0, 0.7150055, 0, 0.50558525,
 transform = Transform3D(0.6276457, 0, 0, 0, 0.6276457, 0, 0, 0, 0.6276457, 0.66948557, 3.4538434, 0.6211808)
 
 [node name="fan" parent="Props/fan" index="0" unique_id=1932814783 groups=["sonar_occluder"]]
+cast_shadow = 0
+
+[node name="fanblades" parent="Props/fan/fan" index="1" unique_id=1602824703]
+cast_shadow = 0
 
 [node name="WinOrb" type="Node3D" parent="Props" unique_id=815696688 groups=["sonar_reveal"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.854008, 0.14999962, 17.537352)
@@ -440,7 +448,7 @@ transform = Transform3D(-0.76035935, 0, -6.647272e-08, 0, 0.76035935, 0, 6.64727
 transform = Transform3D(0.7603593, 0, -7.1054274e-15, 0, 0.7603593, 0, 7.1054274e-15, 0, 0.7603593, 1.0842574, 0.0918923, -5.3680596)
 
 [node name="light-switch" parent="Props" unique_id=914163819 groups=["sonar_reveal"] instance=ExtResource("9_85g3d")]
-transform = Transform3D(-0.18130338, 0, -1.5850045e-08, 0, 0.18130338, 0, 1.5850045e-08, 0, -0.18130338, 2.5497, 1.3073962, 5.9604416)
+transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -5.9441714, 1.3073962, 2.6469533)
 
 [node name="InteractionArea" type="Area3D" parent="Props/light-switch" unique_id=1090664854]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 2.3)

@@ -25,6 +25,7 @@ const DOOR_OPEN_DURATION := 0.45
 const DOOR_FACING_THRESHOLD := 0.72
 const LIGHT_SWITCH_ANIMATION_NAME := &"switch-down"
 const LIGHT_SWITCH_TOGGLE_DEBOUNCE_SECONDS := 0.25
+const ROOM_LIGHT_START_ENABLED := false
 const MIN_VOLUME_DB := -80.0
 const DOOR_PROMPT_TEXT := "Press E to open door"
 const LIGHT_SWITCH_ON_PROMPT_TEXT := "Press E to turn lights on"
@@ -139,7 +140,9 @@ func _ready() -> void:
 	_sync_proxy_transforms()
 	door_closed_rotation_y = door_pivot.rotation.y
 	light_switch_animation_player = _find_animation_player(light_switch_root)
-	room_light_enabled = room_omni_light != null and room_omni_light.visible
+	room_light_enabled = ROOM_LIGHT_START_ENABLED
+	_sync_room_light_state()
+	_sync_light_switch_visual_state()
 	player_spawn_transform = player.global_transform
 	_set_sonar_mode(false)
 	_update_shader_state()
@@ -151,12 +154,20 @@ func _exit_tree() -> void:
 	_release_sfx_players()
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.echo:
 		return
 
 	if _is_audio_unlock_event(event):
 		_ensure_audio_playback_unlocked()
+
+	if _can_start_game_from_event(event):
+		_start_game_from_input_event()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.echo:
+		return
 
 	if _is_debug_toggle_event(event):
 		_toggle_debug_overlay()
@@ -167,7 +178,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			return
 
 		if pause_menu_visible:
-			_resume_game()
+			_resume_game_from_input_event()
 		else:
 			_pause_game()
 		return
@@ -608,7 +619,7 @@ func _create_start_menu_panel() -> PanelContainer:
 	content.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "Explore the room. Use G for static vision, F for sonar ping, mouse wheel for ping speed (1-10), and Tab for pause."
+	subtitle.text = "Click, tap, or press any key to begin. Use G for static vision, F for sonar ping, mouse wheel for ping speed (1-10), and Tab for pause."
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	content.add_child(subtitle)
@@ -765,7 +776,22 @@ func _show_start_menu() -> void:
 
 
 func _start_game() -> void:
+	if gameplay_started:
+		return
+
+	_start_game_internal(false)
+
+
+func _start_game_from_input_event() -> void:
+	if gameplay_started:
+		return
+
 	_ensure_audio_playback_unlocked()
+	_start_game_internal(true)
+	get_viewport().set_input_as_handled()
+
+
+func _start_game_internal(capture_mouse: bool) -> void:
 	gameplay_started = true
 	pause_menu_visible = false
 	win_screen_visible = false
@@ -773,7 +799,7 @@ func _start_game() -> void:
 	start_menu_panel.visible = false
 	pause_menu_panel.visible = false
 	win_menu_panel.visible = false
-	_set_player_controls_enabled(true)
+	_set_player_controls_enabled(true, capture_mouse)
 
 
 func _pause_game() -> void:
@@ -788,10 +814,18 @@ func _pause_game() -> void:
 
 
 func _resume_game() -> void:
+	_resume_game_internal(false)
+
+
+func _resume_game_from_input_event() -> void:
+	_resume_game_internal(true)
+
+
+func _resume_game_internal(capture_mouse: bool) -> void:
 	pause_menu_visible = false
 	menus_root.visible = false
 	pause_menu_panel.visible = false
-	_set_player_controls_enabled(true)
+	_set_player_controls_enabled(true, capture_mouse)
 
 
 func _return_to_main_menu() -> void:
@@ -816,11 +850,15 @@ func _show_win_screen() -> void:
 	win_menu_panel.visible = true
 
 
-func _set_player_controls_enabled(enabled: bool) -> void:
+func _set_player_controls_enabled(enabled: bool, capture_mouse: bool = true) -> void:
 	if player == null:
 		return
 
-	player.call("set_controls_enabled", enabled)
+	player.call("set_controls_enabled", enabled, capture_mouse)
+
+
+func _can_start_game_from_event(event: InputEvent) -> bool:
+	return not gameplay_started and not win_screen_visible and start_menu_panel != null and start_menu_panel.visible and _is_audio_unlock_event(event)
 
 
 func _is_menu_open() -> bool:
@@ -1114,6 +1152,19 @@ func _play_light_switch_animation(play_forward: bool) -> void:
 		light_switch_animation_player.play(LIGHT_SWITCH_ANIMATION_NAME)
 	else:
 		light_switch_animation_player.play(LIGHT_SWITCH_ANIMATION_NAME, -1.0, -1.0, true)
+
+
+func _sync_light_switch_visual_state() -> void:
+	if light_switch_animation_player == null:
+		return
+
+	var switch_animation := light_switch_animation_player.get_animation(LIGHT_SWITCH_ANIMATION_NAME)
+	if switch_animation == null:
+		return
+
+	light_switch_animation_player.play(LIGHT_SWITCH_ANIMATION_NAME)
+	light_switch_animation_player.seek(switch_animation.length if not room_light_enabled else 0.0, true)
+	light_switch_animation_player.pause()
 
 
 func _play_light_switch_sound() -> void:

@@ -1,5 +1,7 @@
 extends CharacterBody3D
 
+const SIGNAL_ENEMY_GROUP := &"signal_enemy"
+
 @export var move_speed: float = 3.0
 @export var nav_mesh: NavigationRegion3D
 @export var player: CharacterBody3D
@@ -7,6 +9,7 @@ extends CharacterBody3D
 @onready var navigation_agent_3d: NavigationAgent3D = $NavigationAgent3D
 
 func _ready() -> void:
+	add_to_group(SIGNAL_ENEMY_GROUP)
 	assert(player, "Player node not found in the scene tree.")
 	assert(nav_mesh, "NavigationRegion3D not assigned.")
 	assert(navigation_agent_3d, "NavigationAgent3D node not found in the scene tree.")
