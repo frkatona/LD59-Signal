@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://dl0p5kuohdqja" path="res://assets/models/lab-bench.glb" id="6_o6xl0"]
 [ext_resource type="PackedScene" uid="uid://cfaa6d3t863va" path="res://scenes/enemy.tscn" id="8_tipki"]
 [ext_resource type="PackedScene" uid="uid://c5l62di7vxio2" path="res://assets/models/light-switch.glb" id="9_85g3d"]
+[ext_resource type="PackedScene" uid="uid://bv0hnms6140rh" path="res://assets/models/crowbar.glb" id="11_ya4ey"]
 
 [sub_resource type="Environment" id="Environment_tbgi4"]
 background_energy_multiplier = 0.0
@@ -232,16 +233,25 @@ layout_mode = 0
 text = "Press E to open door"
 
 [node name="Player" parent="." unique_id=22887971 instance=ExtResource("2_tipki")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 15.081289, 0.05, -1.0699883)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 15.081289, 0.34377092, -1.0699883)
 signal_scope_min_distance = 0.5
-signal_scope_max_distance = 15.0
-signal_scope_local_position = Vector3(0.345, -0.304, -0.675)
-signal_scope_local_rotation_degrees = Vector3(-10.59, 1.405, -0.365)
-signal_scope_size = Vector2(0.345, 0.225)
+signal_scope_max_distance = 10.0
+signal_scope_local_position = Vector3(-0.625, -0.11, -0.6)
+signal_scope_local_rotation_degrees = Vector3(0, 0, 0)
+signal_scope_size = Vector2(0.295, 0.145)
+signal_scope_corner_radius = 0.035
+signal_scope_corner_softness = 0.001
 signal_scope_overlay_padding = Vector2(0, 0)
 
-[node name="oscilloscope" parent="Player/CameraPivot/Camera3D" parent_id_path=PackedInt32Array(22887971, 1194919771) index="0" unique_id=1917917503 instance=ExtResource("3_choun")]
-transform = Transform3D(0.16816652, 0, 0, 0, 0.16203153, 0.04500842, 0, -0.04500842, 0.16203153, 0.50675714, -0.43937743, -0.9821892)
+[node name="Camera3D" parent="Player/CameraPivot" parent_id_path=PackedInt32Array(22887971, 173732664) index="0" unique_id=1194919771]
+transform = Transform3D(0.9999963, 0.0026513834, -0.0006258848, -0.002652597, 0.9999946, -0.0019505381, 0.00062072073, 0.0019521877, 0.9999979, 0, 0, -0.45794106)
+
+[node name="oscilloscope" parent="Player/CameraPivot/Camera3D" index="0" unique_id=1917917503 instance=ExtResource("3_choun")]
+transform = Transform3D(0.13243191, 0, 0, 0, 0.12760058, 0.035444338, 0, -0.035444338, 0.12760058, -0.6940754, -0.3978274, -0.8326082)
+visible = false
+
+[node name="crowbar" parent="Player/CameraPivot/Camera3D" index="1" unique_id=184608769 instance=ExtResource("11_ya4ey")]
+transform = Transform3D(-0.2774241, 0.13258758, -0.117723964, 0.16689633, 0.26907805, -0.09025054, 0.059866708, -0.13572057, -0.29393607, 0.74605536, -0.65209377, -0.7659073)
 
 [node name="VisionOverlay" type="CanvasLayer" parent="." unique_id=267744132]
 layer = 100

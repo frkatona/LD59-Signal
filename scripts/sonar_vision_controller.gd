@@ -26,6 +26,8 @@ const DOOR_FACING_THRESHOLD := 0.72
 const LIGHT_SWITCH_ANIMATION_NAME := &"switch-down"
 const LIGHT_SWITCH_TOGGLE_DEBOUNCE_SECONDS := 0.25
 const ROOM_LIGHT_START_ENABLED := false
+const WORLD_ENERGY_DISABLED_MULTIPLIER := 0.0
+const WORLD_ENERGY_ENABLED_MULTIPLIER := 1.0
 const MIN_VOLUME_DB := -80.0
 const DOOR_PROMPT_TEXT := "Press E to open door"
 const LIGHT_SWITCH_ON_PROMPT_TEXT := "Press E to turn lights on"
@@ -52,6 +54,7 @@ const WIN_ORB_PROMPT_TEXT := "Press E to touch the sphere"
 @onready var overlay_root: Control = $VisionOverlay/OverlayRoot
 @onready var static_rect: ColorRect = $VisionOverlay/OverlayRoot/StaticRect
 @onready var sonar_rect: TextureRect = $VisionOverlay/OverlayRoot/SonarRect
+@onready var world_environment: WorldEnvironment = $Environment/WorldEnvironment
 @onready var door_pivot: Node3D = $Room/Doorway/DoorPivot
 @onready var door_body: StaticBody3D = $Room/Doorway/DoorPivot/Door
 @onready var door_interaction_area: Area3D = $Room/Doorway/InteractionArea
@@ -90,6 +93,7 @@ var door_is_animating := false
 var door_open_tween: Tween
 var light_switch_animation_player: AnimationPlayer
 var room_light_enabled := true
+var world_energy_enabled := false
 var light_switch_toggle_cooldown_remaining := 0.0
 var player_spawn_transform := Transform3D.IDENTITY
 var gameplay_started := false
@@ -145,6 +149,7 @@ func _ready() -> void:
 	light_switch_animation_player = _find_animation_player(light_switch_root)
 	room_light_enabled = ROOM_LIGHT_START_ENABLED
 	_sync_room_light_state()
+	_sync_world_environment_energy_state()
 	_sync_light_switch_visual_state()
 	player_spawn_transform = player.global_transform
 	_set_sonar_mode(false)
@@ -174,6 +179,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if _is_debug_toggle_event(event):
 		_toggle_debug_overlay()
+		return
+
+	if event.is_action_pressed("toggle_world_energy"):
+		_toggle_world_environment_energy()
 		return
 
 	if event.is_action_pressed("pause_menu"):
@@ -251,6 +260,7 @@ func _ensure_input_actions() -> void:
 	_ensure_key_action("toggle_sonar_mode", KEY_G)
 	_ensure_key_action("sonar_ping", KEY_F)
 	_ensure_key_action("interact", KEY_E)
+	_ensure_key_action("toggle_world_energy", KEY_BACKSPACE)
 	_replace_key_action("pause_menu", KEY_TAB)
 
 
@@ -1212,6 +1222,20 @@ func _sync_room_light_state() -> void:
 		room_omni_light.visible = room_light_enabled
 
 
+func _toggle_world_environment_energy() -> void:
+	world_energy_enabled = not world_energy_enabled
+	_sync_world_environment_energy_state()
+
+
+func _sync_world_environment_energy_state() -> void:
+	if world_environment == null or world_environment.environment == null:
+		return
+
+	world_environment.environment.background_energy_multiplier = (
+		WORLD_ENERGY_ENABLED_MULTIPLIER if world_energy_enabled else WORLD_ENERGY_DISABLED_MULTIPLIER
+	)
+
+
 func _play_light_switch_animation(play_forward: bool) -> void:
 	if light_switch_animation_player == null:
 		return
@@ -1325,7 +1349,7 @@ func _update_ping_hud() -> void:
 	ping_cooldown_bar.max_value = cooldown_max
 	ping_cooldown_bar.value = minf(ping_cooldown_remaining, cooldown_max)
 
-	push_cooldown_label.text = "Push Cooldown"
+	push_cooldown_label.text = "Swing Cooldown"
 	var push_cooldown_duration: float = 5.0
 	var push_cooldown_remaining_value: float = 0.0
 	if player != null and player.has_method("get_push_cooldown_state"):

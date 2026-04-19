@@ -4,13 +4,14 @@ const LEFT_FOOTSTEP_STREAM := preload("res://assets/audio/sfx/fist_2.wav")
 const RIGHT_FOOTSTEP_STREAM := preload("res://assets/audio/sfx/fist_3.wav")
 const JUMP_STREAM := preload("res://assets/audio/sfx/fist_5.wav")
 const LANDING_STREAM := preload("res://assets/audio/sfx/fist_4.wav")
-const PUSH_STREAM := preload("res://assets/audio/sfx/fist_1.wav")
+const PUSH_HIT_STREAM := preload("res://assets/audio/sfx/whack-hit.wav")
+const PUSH_MISS_STREAM := preload("res://assets/audio/sfx/whack.wav")
 const SIGNAL_SCOPE_SHADER := preload("res://shaders/oscilloscope_signal.gdshader")
 const DEFAULT_FOOTSTEP_BUS := &"SFX"
 const SIGNAL_ENEMY_GROUP := &"signal_enemy"
 const SIGNAL_SCOPE_RESPONSE_SPEED := 2.8
-const PUSH_HIT_PITCH := 1.0
-const PUSH_MISS_PITCH := 1.3
+const CROWBAR_SMACK_ANIMATION := &"smack"
+const PUSH_DEFAULT_PITCH := 1.0
 
 @export var move_speed: float = 5.0
 @export var jump_velocity: float = 4.5
@@ -19,6 +20,7 @@ const PUSH_MISS_PITCH := 1.3
 @export var air_acceleration: float = 8.0
 @export var push_velocity: float = 6
 @export var push_cooldown_seconds: float = 5.0
+@export_range(-40.0, 12.0, 0.5) var push_hit_volume_db: float = 0.0
 @export var footstep_interval_seconds: float = 0.45
 @export var footstep_speed_threshold: float = 0.15
 @export var signal_scope_min_distance: float = 1.25
@@ -36,6 +38,7 @@ const PUSH_MISS_PITCH := 1.3
 @onready var player_camera: Camera3D = $CameraPivot/Camera3D
 @onready var push_area: Area3D = %PushArea
 @onready var oscilloscope_model: Node3D = get_node_or_null("oscilloscope")
+@onready var crowbar_root: Node = get_node_or_null("CameraPivot/Camera3D/crowbar")
 
 var gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 var pitch: float = 0.0
@@ -48,6 +51,7 @@ var right_footstep_player: AudioStreamPlayer
 var jump_player: AudioStreamPlayer
 var landing_player: AudioStreamPlayer
 var push_player: AudioStreamPlayer
+var crowbar_animation_player: AnimationPlayer
 var signal_scope_display: MeshInstance3D
 var signal_scope_material: ShaderMaterial
 var signal_scope_strength: float = 0.0
@@ -57,6 +61,7 @@ var push_cooldown_remaining: float = 0.0
 func _ready() -> void:
 	respawn_pitch = camera_pivot.rotation.x
 	_create_footstep_players()
+	crowbar_animation_player = _find_animation_player(crowbar_root)
 	_attach_oscilloscope_model_to_camera()
 	_create_signal_scope_display()
 	set_controls_enabled(false, false)
@@ -174,7 +179,7 @@ func _create_footstep_players() -> void:
 
 	push_player = AudioStreamPlayer.new()
 	push_player.name = "PushPlayer"
-	push_player.stream = PUSH_STREAM
+	push_player.stream = PUSH_HIT_STREAM
 	push_player.bus = _resolve_footstep_bus()
 	add_child(push_player)
 
@@ -229,6 +234,21 @@ func _sync_signal_scope_display_configuration() -> void:
 
 func _resolve_footstep_bus() -> StringName:
 	return DEFAULT_FOOTSTEP_BUS if AudioServer.get_bus_index(DEFAULT_FOOTSTEP_BUS) != -1 else &"Master"
+
+
+func _find_animation_player(root: Node) -> AnimationPlayer:
+	if root == null:
+		return null
+
+	if root is AnimationPlayer:
+		return root
+
+	for child in root.get_children():
+		var animation_player := _find_animation_player(child)
+		if animation_player != null:
+			return animation_player
+
+	return null
 
 
 func _update_signal_scope(delta: float) -> void:
@@ -437,8 +457,21 @@ func _play_push_sound(hit_enemy: bool) -> void:
 		return
 
 	push_player.bus = _resolve_footstep_bus()
-	push_player.pitch_scale = PUSH_HIT_PITCH if hit_enemy else PUSH_MISS_PITCH
+	push_player.stream = PUSH_HIT_STREAM if hit_enemy else PUSH_MISS_STREAM
+	push_player.pitch_scale = PUSH_DEFAULT_PITCH
+	push_player.volume_db = push_hit_volume_db if hit_enemy else 0.0
 	push_player.play()
+
+
+func _play_crowbar_smack_animation() -> void:
+	if crowbar_animation_player == null:
+		return
+
+	if not crowbar_animation_player.has_animation(CROWBAR_SMACK_ANIMATION):
+		return
+
+	crowbar_animation_player.stop()
+	crowbar_animation_player.play(CROWBAR_SMACK_ANIMATION)
 
 
 func _reset_footstep_cycle() -> void:
@@ -469,6 +502,7 @@ func do_push() -> void:
 		return
 
 	push_cooldown_remaining = maxf(push_cooldown_seconds, 0.0)
+	_play_crowbar_smack_animation()
 	print("Attacking!")
 	# Get all bodies overlapping with the push area
 	var overlapping_bodies = push_area.get_overlapping_bodies()

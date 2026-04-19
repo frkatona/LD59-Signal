@@ -8,13 +8,13 @@ butler push LD59.zip akatona/geordi-la-forge:web
 - fan blade animation stutters like I repeat the first frame at the end
 
 ## first day to-do
-- [ ] basic placeholder environment
+- basic placeholder environment
   - [x] build models
-  - [ ] world
+- world
     - [x] rooms/doors/props
     - [x] lighting (switches, lamps, fires, etc.)
     - [ ] particles (dust, etc.)
-- [ ] HUD
+- HUD
   - [x] refine noise overlay
   - [x] cooldowns/controls
 - sound
@@ -36,10 +36,15 @@ butler push LD59.zip akatona/geordi-la-forge:web
 - [x] swap in the dalek model
 - [ ] actually pause the game during pause menu and start screen
 - [x] sfx for for enemy movement and/or oscilloscopes sinewaves
-- [ ] take on stick animation and static sound for enemy proximity
 - [x] make enemy turn towards player
 - [x] make sure the ping cooldown is longer than the pulse duration
-
+- [x] stick (crowbar? bat? wrench?)
+  - [x] model
+  - [x] swing animation
+  - [x] tune sound for a hit vs missed swing (currently needs louder)
+- [x] fix the awkward noise overlay punchout for the oscilloscope
+- [ ] extend the hitbox for a push by at least 2x
+- [ ] implement enemy collision = death screen (try to make it clear to the player what happened...maybe pull back the camera and make a short-range omnilight at the player position to show the enemy for a moment before the 'retry' screen?)
 
 - next josh ideas?
   - let's expand to a bigger space --> give the enemies a patrol with a leash
