@@ -5,6 +5,10 @@
 [sub_resource type="BoxShape3D" id="BoxShape3D_player"]
 size = Vector3(0.7, 1.8, 0.7)
 
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_3vyb7"]
+radius = 0.7
+height = 1.5
+
 [node name="Player" type="CharacterBody3D" unique_id=22887971]
 script = ExtResource("1_8afob")
 
@@ -17,3 +21,16 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot" unique_id=1194919771]
 current = true
+
+[node name="PushArea" type="Area3D" parent="." unique_id=1916487078]
+unique_name_in_owner = true
+visible = false
+collision_layer = 0
+collision_mask = 256
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="PushArea" unique_id=126007424]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 1, -0.90649414)
+visible = false
+shape = SubResource("CapsuleShape3D_3vyb7")
+debug_color = Color(0, 0.6, 0.69803923, 0)
