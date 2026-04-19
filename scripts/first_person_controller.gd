@@ -5,8 +5,10 @@ extends CharacterBody3D
 @export var mouse_sensitivity: float = 0.0025
 @export var ground_acceleration: float = 20.0
 @export var air_acceleration: float = 8.0
+@export var push_velocity: float = 6
 
 @onready var camera_pivot: Node3D = $CameraPivot
+@onready var push_area: Area3D = %PushArea
 
 var gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 var pitch: float = 0.0
@@ -48,6 +50,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+	
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_RIGHT:
+		do_push()
 
 
 func _physics_process(delta: float) -> void:
@@ -79,3 +84,35 @@ func _physics_process(delta: float) -> void:
 	velocity.z = move_toward(velocity.z, target_velocity.z, acceleration * delta)
 
 	move_and_slide()
+
+func do_push() -> void:
+	print("Attacking!")
+	# Get all bodies overlapping with the push area
+	var overlapping_bodies = push_area.get_overlapping_bodies()
+	print("Overlapping bodies: ", overlapping_bodies.size())
+
+	var direction: Vector3 = -global_transform.basis.z
+	direction.y = 0.0
+	direction = direction.normalized()
+	print("Push direction: ", direction, "with cardinal direction: ", get_cardinal_direction(direction))
+
+	for body in overlapping_bodies:
+		if body is RigidBody3D:
+			body.get_parent().do_push(direction * push_velocity)
+			print ("Pushing body: ", body.name)
+
+func get_cardinal_direction(direction: Vector3) -> String:
+	var angle = atan2(direction.x, direction.z)
+	if angle < 0:
+		angle += 2 * PI
+
+	if angle >= 0 and angle < PI / 4:
+		return "North"
+	elif angle >= PI / 4 and angle < 3 * PI / 4:
+		return "East"
+	elif angle >= 3 * PI / 4 and angle < 5 * PI / 4:
+		return "South"
+	elif angle >= 5 * PI / 4 and angle < 7 * PI / 4:
+		return "West"
+	else:
+		return "North"
