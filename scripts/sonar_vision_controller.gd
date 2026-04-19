@@ -57,6 +57,7 @@ const WIN_ORB_PROMPT_TEXT := "Press E to touch the sphere"
 
 var sonar_mode_enabled := false
 var ping_active := false
+var ping_frozen := false
 var ping_radius := 0.0
 var ping_origin_ws := Vector3.ZERO
 var ping_cooldown_remaining := 0.0
@@ -178,8 +179,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		_set_sonar_mode(not sonar_mode_enabled)
 		return
 
-	if event.is_action_pressed("sonar_ping") and sonar_mode_enabled and ping_cooldown_remaining <= 0.0:
-		_start_ping()
+	if event.is_action_pressed("sonar_ping") and sonar_mode_enabled:
+		_handle_sonar_ping_input()
+		return
 
 
 func _process(delta: float) -> void:
@@ -196,13 +198,13 @@ func _process(delta: float) -> void:
 	_sync_proxy_transforms()
 	_update_interaction_prompt()
 
-	if ping_cooldown_remaining > 0.0:
+	if ping_cooldown_remaining > 0.0 and not ping_frozen:
 		ping_cooldown_remaining = max(ping_cooldown_remaining - delta, 0.0)
 
-	if ping_active:
+	if ping_active and not ping_frozen:
 		ping_radius += ping_speed * delta
 		if ping_radius > ping_max_radius:
-			ping_active = false
+			_clear_ping()
 
 	_update_shader_state()
 	_update_ping_hud()
@@ -949,15 +951,28 @@ func _set_sonar_mode(enabled: bool) -> void:
 	overlay_root.visible = enabled
 
 	if not enabled:
-		ping_active = false
-		ping_radius = 0.0
+		_clear_ping()
 
 	_sync_music_players()
 	_update_shader_state()
 
 
+func _handle_sonar_ping_input() -> void:
+	if ping_active:
+		if ping_frozen:
+			_clear_ping()
+		else:
+			ping_frozen = true
+			_update_ping_hud()
+		return
+
+	if ping_cooldown_remaining <= 0.0:
+		_start_ping()
+
+
 func _start_ping() -> void:
 	ping_active = true
+	ping_frozen = false
 	ping_radius = 0.0
 	ping_origin_ws = player_camera.global_position
 	ping_cooldown_remaining = ping_cooldown_seconds
@@ -965,6 +980,12 @@ func _start_ping() -> void:
 		_update_ping_sound_pitch()
 		sonar_ping_player.play()
 	_update_shader_state()
+
+
+func _clear_ping() -> void:
+	ping_active = false
+	ping_frozen = false
+	ping_radius = 0.0
 
 
 func _update_shader_state() -> void:
@@ -1101,7 +1122,7 @@ func _update_ping_hud() -> void:
 	ping_hud_panel.self_modulate = Color(1.0, 1.0, 1.0, 1.0 if sonar_mode_enabled else 0.7)
 
 	ping_speed_label.text = "Ping Speed: %d/%d" % [_get_ping_speed_ui_value(), PING_SPEED_UI_MAX]
-	ping_cooldown_label.text = "Ping Cooldown"
+	ping_cooldown_label.text = "Ping Cooldown (Paused)" if ping_frozen else "Ping Cooldown"
 
 	var cooldown_max: float = maxf(ping_cooldown_seconds, 0.001)
 	ping_cooldown_bar.max_value = cooldown_max

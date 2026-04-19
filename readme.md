@@ -46,7 +46,7 @@ How it works:
 
 First run prompts once for the itch target in username/game:web form and saves it to itch-deploy.local.json.
 It auto-detects a Godot executable that has matching export templates installed.
-It exports to build\web\index.html, creates build\arana-grande-web.zip, then runs butler push build\web username/game:web.
+It exports to web-export\index.html, creates build\LD59.zip, then runs butler push web-export username/game:web.
 Useful flags:
 -Configure to change the saved itch target
 -SkipPush to export and zip only
@@ -57,7 +57,7 @@ What I validated:
 Ran powershell -File .\scripts\deploy-web.ps1 -SkipPush
 Godot export succeeded with 4.6.stable
 Zip creation succeeded
-butler validate build\web succeeded and detected index.html as an HTML5 app
+butler validate web-export succeeded and detected index.html as an HTML5 app
 I did not run a real push because no itch target was configured yet
 Use it:
 

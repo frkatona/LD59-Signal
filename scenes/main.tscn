@@ -397,7 +397,7 @@ omni_attenuation = 1.5
 [node name="Props" type="Node3D" parent="." unique_id=693231226]
 
 [node name="chair2" parent="Props" unique_id=1377584579 groups=["sonar_reveal"] instance=ExtResource("3_chair")]
-transform = Transform3D(0.7150056, 0, 0, 0, 0.7150056, 0, 0, 0, 0.7150056, 5.3317194, 0.00074707816, -5.3162546)
+transform = Transform3D(0.50558525, 0, -0.50558525, 0, 0.7150055, 0, 0.50558525, 0, 0.50558525, 5.0347924, 0.00074707816, -5.185207)
 
 [node name="fan" parent="Props" unique_id=594698607 groups=["sonar_reveal"] instance=ExtResource("3_jyhfs")]
 transform = Transform3D(0.6276457, 0, 0, 0, 0.6276457, 0, 0, 0, 0.6276457, 0.66948557, 3.4538434, 0.6211808)
@@ -428,10 +428,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Props/WinOrb/InteractionArea" unique_id=390475869]
 shape = SubResource("SphereShape3D_win_orb_interaction")
 
-[node name="lab-bench" parent="Props" unique_id=2129328667 groups=["sonar_occluder"] instance=ExtResource("6_o6xl0")]
+[node name="lab-bench" parent="Props" unique_id=2129328667 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("6_o6xl0")]
 transform = Transform3D(-3.3236365e-08, 0, 0.7603594, 0, 0.7603594, 0, -0.7603594, 0, -3.3236365e-08, -5.3361416, 0.09189254, -1.9738336)
 
-[node name="lab-bench2" parent="Props" unique_id=416406535 groups=["sonar_occluder"] instance=ExtResource("6_o6xl0")]
+[node name="lab-bench2" parent="Props" unique_id=416406535 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("6_o6xl0")]
 transform = Transform3D(-0.76035935, 0, -6.647272e-08, 0, 0.76035935, 0, 6.647272e-08, 0, -0.76035935, -2.9891753, 0.09189254, 5.3862796)
 
 [node name="SteppingStones" type="Node3D" parent="." unique_id=81523368]
