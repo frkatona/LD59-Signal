@@ -395,7 +395,7 @@ transform = Transform3D(0.50558525, 0, -0.50558525, 0, 0.7150055, 0, 0.50558525,
 [node name="fan" parent="Props" unique_id=594698607 groups=["sonar_reveal"] instance=ExtResource("3_jyhfs")]
 transform = Transform3D(0.6276457, 0, 0, 0, 0.6276457, 0, 0, 0, 0.6276457, 0.66948557, 3.4538434, 0.6211808)
 
-[node name="fan" parent="Props/fan" index="0" unique_id=749048863 groups=["sonar_occluder"]]
+[node name="fan" parent="Props/fan" index="0" unique_id=1932814783 groups=["sonar_occluder"]]
 
 [node name="WinOrb" type="Node3D" parent="Props" unique_id=815696688 groups=["sonar_reveal"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.854008, 0.14999962, 17.537352)
@@ -435,7 +435,7 @@ transform = Transform3D(-0.76035935, 0, -6.647272e-08, 0, 0.76035935, 0, 6.64727
 [node name="stepping-stone" parent="SteppingStones" unique_id=1158499491 instance=ExtResource("5_tbgi4")]
 transform = Transform3D(-0.39261004, 0, -0.91970503, 0, 1, 0, 0.91970503, 0, -0.39261004, -1.8814359, -0.5801451, 11.389015)
 
-[node name="Cylinder" parent="SteppingStones/stepping-stone" index="0" unique_id=755835401 groups=["sonar_reveal"]]
+[node name="Cylinder" parent="SteppingStones/stepping-stone" index="0" unique_id=1442778864 groups=["sonar_reveal"]]
 
 [node name="Cylinder2" type="MeshInstance3D" parent="SteppingStones/stepping-stone" unique_id=605880380 groups=["sonar_reveal"]]
 transform = Transform3D(1.3231832, 0, 2.9802322e-08, 0, 1, 0, 0, 0, 1.2966664, 5.1419945, 0.8881767, -2.6012752)
