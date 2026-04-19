@@ -17,6 +17,16 @@ radius = 0.4
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_85g3d"]
 radius = 0.4
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4ra3w"]
+albedo_color = Color(0, 0, 0, 1)
+emission_enabled = true
+emission = Color(0.6089677, 0.1788316, 0.18341184, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_4ra3w"]
+material = SubResource("StandardMaterial3D_4ra3w")
+radial_segments = 32
+rings = 2
+
 [node name="Enemy" type="CharacterBody3D" unique_id=1286619820]
 script = ExtResource("1_4a83h")
 
@@ -48,6 +58,13 @@ shape = SubResource("CapsuleShape3D_85g3d")
 [node name="dalek2" parent="." unique_id=1435492741 instance=ExtResource("2_md0e3")]
 transform = Transform3D(-0.5158722, 0, 4.509898e-08, 0, 0.5158722, 0, -4.509898e-08, 0, -0.5158722, -0.010447651, 0, -0.03338802)
 
+[node name="Cylinder_003" parent="dalek2/dalek" parent_id_path=PackedInt32Array(1435492741, 1108945464) index="2" unique_id=1520643615]
+transform = Transform3D(0.07918163, 0.062358916, 0, -0.08151791, 0.060571726, 0, 0, 0, 0.097777896, 0.5058447, 3.215167, -0.054660063)
+
+[node name="IndicatorLight" type="MeshInstance3D" parent="dalek2" unique_id=1946696396]
+transform = Transform3D(-0.27357304, 0, -2.3916515e-08, 0, 0.11565754, 0, 2.3916515e-08, 0, -0.27357304, -0.02025242, 3.5808704, -0.18382505)
+mesh = SubResource("CylinderMesh_4ra3w")
+
 [node name="robot-static-noise" type="AudioStreamPlayer3D" parent="." unique_id=1346748014]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.03003934, 0.9088471, -0.13517618)
 stream = ExtResource("3_4ra3w")
@@ -59,3 +76,5 @@ max_distance = 5.0
 bus = &"SFX"
 attenuation_filter_cutoff_hz = 20500.0
 attenuation_filter_db = 0.0
+
+[editable path="dalek2"]

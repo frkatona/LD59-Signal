@@ -11,6 +11,7 @@ const DEFAULT_FOOTSTEP_BUS := &"SFX"
 const SIGNAL_ENEMY_GROUP := &"signal_enemy"
 const SIGNAL_SCOPE_RESPONSE_SPEED := 2.8
 const CROWBAR_SMACK_ANIMATION := &"smack"
+const CROWBAR_SMACK_SPEED_SCALE := 3.0
 const PUSH_DEFAULT_PITCH := 1.0
 
 @export var move_speed: float = 5.0
@@ -471,7 +472,7 @@ func _play_crowbar_smack_animation() -> void:
 		return
 
 	crowbar_animation_player.stop()
-	crowbar_animation_player.play(CROWBAR_SMACK_ANIMATION)
+	crowbar_animation_player.play(CROWBAR_SMACK_ANIMATION, -1.0, CROWBAR_SMACK_SPEED_SCALE)
 
 
 func _reset_footstep_cycle() -> void:

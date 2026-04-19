@@ -21,7 +21,7 @@ butler push LD59.zip akatona/geordi-la-forge:web
   - [x] placeholder music 
   - [x] placeholder sound fx
     - [x] ping
-    - [ ] movement (footsteps, jumps, etc.)
+    - [x] movement (footsteps, jumps, etc.)
       - [x] export as wavs to mitigate latency
 
 - keep player better oriented
@@ -43,8 +43,23 @@ butler push LD59.zip akatona/geordi-la-forge:web
   - [x] swing animation
   - [x] tune sound for a hit vs missed swing (currently needs louder)
 - [x] fix the awkward noise overlay punchout for the oscilloscope
-- [ ] extend the hitbox for a push by at least 2x
+- [x] extend the hitbox for a push by at least 2x
 - [ ] implement enemy collision = death screen (try to make it clear to the player what happened...maybe pull back the camera and make a short-range omnilight at the player position to show the enemy for a moment before the 'retry' screen?)
+- [x] working web audio
+  - [ ] make sure web audio either has a good starting volume or it's overwhelmingly clear to the player immediately at the start screen how to get to the volume control...maybe just start volume at 0.5
+- [ ] why is it so laggy in full screen?  what can I do to keep it lightweight?
+
+josh test results:
+- start volume at ~5-10%
+- HUD scaling (the sliders get small on big screen)
+- his resolution is do-able, but his mouse is crazy
+  - add a mouse sensitivity slider
+- even he struggles to get the rhythm for the geordi-vision and ping tool
+  - add the hotkeys to the sliders and controls hints in the pause menu
+- stetch:
+  - variations in wave generation
+  - mcguffins
+- polish: sine waves scroll speed
 
 - next josh ideas?
   - let's expand to a bigger space --> give the enemies a patrol with a leash

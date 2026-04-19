@@ -2,6 +2,7 @@ extends CharacterBody3D
 
 const SIGNAL_ENEMY_GROUP := &"signal_enemy"
 const NAV_MESH_OFFSET := Vector3(0, 0.5, 0)
+const INDICATOR_PUSH_DURATION_SECONDS := 2.0
 
 @export var move_speed: float = 3.0
 @export var turn_speed: float = 8.0
@@ -10,15 +11,20 @@ const NAV_MESH_OFFSET := Vector3(0, 0.5, 0)
 @export var player: CharacterBody3D
 @export var normal_color: Color = Color(0.20241532, 0.17677477, 0.4619112, 1.0)
 @export var pushed_color: Color = Color(1.0, 0.25, 0.25, 1.0)
+@export var indicator_default_color: Color = Color(0.6089677, 0.1788316, 0.18341184, 1.0)
+@export var indicator_pushed_color: Color = Color(1.0, 0.92, 0.2, 1.0)
 
 @onready var navigation_agent_3d: NavigationAgent3D = $NavigationAgent3D
 @onready var enemy_rigid_body: RigidBody3D = %EnemyRigidBody
 @onready var enemy_mesh: MeshInstance3D = $MeshInstance3D
+@onready var indicator_light: MeshInstance3D = $dalek2/IndicatorLight
 
 var gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 
 var is_being_pushed: bool = false
 var enemy_material: StandardMaterial3D
+var indicator_light_material: StandardMaterial3D
+var indicator_push_remaining: float = 0.0
 
 func _ready() -> void:
 	add_to_group(SIGNAL_ENEMY_GROUP)
@@ -26,6 +32,7 @@ func _ready() -> void:
 	assert(nav_mesh, "NavigationRegion3D not assigned.")
 	assert(navigation_agent_3d, "NavigationAgent3D node not found in the scene tree.")
 	assert(enemy_mesh, "MeshInstance3D node not found in the scene tree.")
+	assert(indicator_light, "IndicatorLight node not found in the scene tree.")
 
 	enemy_rigid_body.top_level = true
 	enemy_rigid_body.global_position = global_position
@@ -39,13 +46,17 @@ func _ready() -> void:
 		enemy_material = StandardMaterial3D.new()
 		enemy_mesh.material_override = enemy_material
 
+	indicator_light_material = _duplicate_standard_material(indicator_light)
 	_update_color()
+	_update_indicator_light()
 
 	# Wait for the navigation map to initialize
 	await get_tree().physics_frame
 
 func _physics_process(_delta: float) -> void:
 	_update_color()
+	_update_indicator_push_timer(_delta)
+	_update_indicator_light()
 
 	if is_being_pushed:
 		global_position = enemy_rigid_body.global_position
@@ -88,6 +99,41 @@ func _update_color() -> void:
 	enemy_material.emission = target_color
 
 
+func _duplicate_standard_material(mesh_instance: MeshInstance3D) -> StandardMaterial3D:
+	if mesh_instance == null:
+		return null
+
+	var source_material := mesh_instance.material_override as StandardMaterial3D
+	if source_material == null:
+		source_material = mesh_instance.get_active_material(0) as StandardMaterial3D
+
+	if source_material != null:
+		var duplicated_material := source_material.duplicate()
+		mesh_instance.material_override = duplicated_material
+		return duplicated_material
+
+	var fallback_material := StandardMaterial3D.new()
+	mesh_instance.material_override = fallback_material
+	return fallback_material
+
+
+func _update_indicator_push_timer(delta: float) -> void:
+	if indicator_push_remaining <= 0.0:
+		return
+
+	indicator_push_remaining = maxf(indicator_push_remaining - delta, 0.0)
+
+
+func _update_indicator_light() -> void:
+	if indicator_light_material == null:
+		return
+
+	var target_color: Color = indicator_pushed_color if indicator_push_remaining > 0.0 else indicator_default_color
+	indicator_light_material.albedo_color = target_color
+	indicator_light_material.emission_enabled = true
+	indicator_light_material.emission = target_color
+
+
 func _face_player(delta: float) -> void:
 	if player == null:
 		return
@@ -103,5 +149,6 @@ func _face_player(delta: float) -> void:
 func do_push(direction: Vector3) -> void:
 	print("Enemy is being pushed!")
 	is_being_pushed = true
+	indicator_push_remaining = INDICATOR_PUSH_DURATION_SECONDS
 	enemy_rigid_body.linear_velocity = direction
 	print("Push velocity applied to enemy: ", direction)

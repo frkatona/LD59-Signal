@@ -28,11 +28,30 @@ const LIGHT_SWITCH_TOGGLE_DEBOUNCE_SECONDS := 0.25
 const ROOM_LIGHT_START_ENABLED := false
 const WORLD_ENERGY_DISABLED_MULTIPLIER := 0.0
 const WORLD_ENERGY_ENABLED_MULTIPLIER := 1.0
+const DEFAULT_MASTER_VOLUME_LINEAR := 0.1
+const AUTO_PERFORMANCE_PIXEL_THRESHOLD := 5_000_000
+const HIGH_MAIN_3D_SCALE := 1.0
+const PERFORMANCE_MAIN_3D_SCALE := 0.67
+const HIGH_SONAR_VIEWPORT_SCALE := 1.0
+const PERFORMANCE_SONAR_VIEWPORT_SCALE := 0.5
+const DEFAULT_MOUSE_SENSITIVITY := 0.0025
+const MOUSE_SENSITIVITY_MIN := 0.0005
+const MOUSE_SENSITIVITY_MAX := 0.01
+const MOUSE_SENSITIVITY_STEP := 0.0001
+const UI_REFERENCE_SIZE := Vector2(1280.0, 720.0)
+const UI_MIN_SCALE := 1.0
+const DEBUG_PANEL_BASE_POSITION := Vector2(12.0, 12.0)
 const MIN_VOLUME_DB := -80.0
 const DOOR_PROMPT_TEXT := "Press E to open door"
 const LIGHT_SWITCH_ON_PROMPT_TEXT := "Press E to turn lights on"
 const LIGHT_SWITCH_OFF_PROMPT_TEXT := "Press E to turn lights off"
 const WIN_ORB_PROMPT_TEXT := "Press E to touch the sphere"
+
+enum GraphicsQualityMode {
+	AUTO,
+	HIGH,
+	PERFORMANCE,
+}
 
 @export var ping_cooldown_seconds: float = 0.6
 @export_range(5.0, 50.0, 5.0) var ping_speed: float = 20.0
@@ -60,6 +79,7 @@ const WIN_ORB_PROMPT_TEXT := "Press E to touch the sphere"
 @onready var door_interaction_area: Area3D = $Room/Doorway/InteractionArea
 @onready var room_omni_light: OmniLight3D = $Room/OmniLight3D
 @onready var win_orb_body: StaticBody3D = $Props/WinOrb/OrbBody
+@onready var win_orb_omni_light: OmniLight3D = $Props/WinOrb/OrbBody/OmniLight3D
 @onready var win_orb_interaction_area: Area3D = $Props/WinOrb/InteractionArea
 @onready var light_switch_root: Node3D = $"Props/light-switch"
 @onready var light_switch_interaction_area: Area3D = $"Props/light-switch/InteractionArea"
@@ -74,7 +94,13 @@ var ping_radius := 0.0
 var ping_origin_ws := Vector3.ZERO
 var ping_cooldown_remaining := 0.0
 var ping_cooldown_duration := 0.0
-var last_viewport_size := Vector2i.ZERO
+var last_sonar_viewport_size := Vector2i.ZERO
+var last_ui_viewport_size := Vector2i.ZERO
+var last_quality_viewport_size := Vector2i.ZERO
+var current_ui_scale := 0.0
+var selected_graphics_quality_mode := GraphicsQualityMode.AUTO
+var effective_graphics_quality_mode := GraphicsQualityMode.HIGH
+var graphics_quality_dirty := true
 
 var reveal_proxy_pairs: Array = []
 var occluder_proxy_pairs: Array = []
@@ -111,6 +137,7 @@ var menus_root: Control
 var menu_backdrop: ColorRect
 var start_menu_panel: PanelContainer
 var pause_menu_panel: PanelContainer
+var pause_menu_tabs: TabContainer
 var win_menu_panel: PanelContainer
 var debug_layer: CanvasLayer
 var debug_panel: PanelContainer
@@ -122,8 +149,14 @@ var ping_cooldown_label: Label
 var ping_cooldown_bar: ProgressBar
 var push_cooldown_label: Label
 var push_cooldown_bar: ProgressBar
+var mouse_sensitivity_slider: HSlider
+var mouse_sensitivity_value_label: Label
+var quality_mode_selector: OptionButton
 var volume_sliders: Dictionary = {}
 var volume_value_labels: Dictionary = {}
+var authored_glow_enabled := false
+var authored_room_light_shadow_enabled := false
+var authored_win_orb_light_shadow_enabled := false
 
 
 func _ready() -> void:
@@ -140,6 +173,7 @@ func _ready() -> void:
 	_build_menu_ui()
 	_build_ping_hud()
 	_build_debug_overlay()
+	_cache_graphics_quality_baseline()
 	_configure_sonar_viewport()
 	_configure_kill_floor()
 	_rebuild_proxy_scene()
@@ -154,6 +188,8 @@ func _ready() -> void:
 	player_spawn_transform = player.global_transform
 	_set_sonar_mode(false)
 	_update_shader_state()
+	_refresh_graphics_quality_profile(true)
+	_update_ui_scale()
 	_show_start_menu()
 
 
@@ -164,6 +200,11 @@ func _exit_tree() -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.echo:
+		return
+
+	if _should_resume_pause_menu_from_event(event):
+		_resume_game_from_input_event()
+		get_viewport().set_input_as_handled()
 		return
 
 	if _is_audio_unlock_event(event):
@@ -226,9 +267,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
+	_refresh_graphics_quality_profile()
 	_record_frame_sample(delta)
 	_update_debug_overlay(delta)
-	_resize_sonar_viewport()
+	_update_ui_scale()
 	_sync_signal_scope_overlay_cutout()
 
 	if _is_menu_open():
@@ -332,6 +374,15 @@ func _get_ping_remaining_travel_duration() -> float:
 func _configure_audio_buses() -> void:
 	_ensure_audio_bus(MUSIC_BUS_NAME, MASTER_BUS_NAME)
 	_ensure_audio_bus(SFX_BUS_NAME, MASTER_BUS_NAME)
+	_set_initial_master_volume()
+
+
+func _set_initial_master_volume() -> void:
+	var master_bus_index := AudioServer.get_bus_index(MASTER_BUS_NAME)
+	if master_bus_index == -1:
+		return
+
+	AudioServer.set_bus_volume_db(master_bus_index, linear_to_db(DEFAULT_MASTER_VOLUME_LINEAR))
 
 
 func _ensure_audio_bus(bus_name: StringName, send_bus_name: StringName) -> void:
@@ -506,6 +557,53 @@ func _configure_interaction_prompt() -> void:
 	label_settings.outline_size = 4
 	label_settings.outline_color = Color(0.0, 0.0, 0.0, 0.9)
 	interaction_prompt.label_settings = label_settings
+
+
+func _update_ui_scale() -> void:
+	var visible_size: Vector2 = get_viewport().get_visible_rect().size
+	var viewport_size := Vector2i(int(visible_size.x), int(visible_size.y))
+	if viewport_size.x <= 0 or viewport_size.y <= 0:
+		return
+
+	var ui_scale: float = maxf(
+		minf(visible_size.x / UI_REFERENCE_SIZE.x, visible_size.y / UI_REFERENCE_SIZE.y),
+		UI_MIN_SCALE
+	)
+	if viewport_size == last_ui_viewport_size and is_equal_approx(ui_scale, current_ui_scale):
+		return
+
+	last_ui_viewport_size = viewport_size
+	current_ui_scale = ui_scale
+
+	_apply_centered_ui_scale(menus_root, ui_scale, visible_size * 0.5)
+	_apply_centered_ui_scale(prompt_root, ui_scale, visible_size * 0.5)
+	_apply_bottom_left_ui_scale(ping_hud_panel, ui_scale)
+	_apply_top_left_ui_scale(debug_panel, ui_scale, DEBUG_PANEL_BASE_POSITION * ui_scale)
+
+
+func _apply_centered_ui_scale(control: Control, scale_factor: float, pivot: Vector2) -> void:
+	if control == null:
+		return
+
+	control.pivot_offset = pivot
+	control.scale = Vector2.ONE * scale_factor
+
+
+func _apply_bottom_left_ui_scale(control: Control, scale_factor: float) -> void:
+	if control == null:
+		return
+
+	control.pivot_offset = Vector2(0.0, control.size.y)
+	control.scale = Vector2.ONE * scale_factor
+
+
+func _apply_top_left_ui_scale(control: Control, scale_factor: float, target_position: Vector2) -> void:
+	if control == null:
+		return
+
+	control.pivot_offset = Vector2.ZERO
+	control.position = target_position
+	control.scale = Vector2.ONE * scale_factor
 
 
 func _build_menu_ui() -> void:
@@ -713,7 +811,7 @@ func _create_start_menu_panel() -> PanelContainer:
 func _create_pause_menu_panel() -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.name = "PauseMenu"
-	_set_centered_panel_rect(panel, Vector2(460.0, 360.0))
+	_set_centered_panel_rect(panel, Vector2(500.0, 560.0))
 
 	var margin := MarginContainer.new()
 	margin.add_theme_constant_override("margin_left", 24)
@@ -732,28 +830,68 @@ func _create_pause_menu_panel() -> PanelContainer:
 	title.add_theme_font_size_override("font_size", 30)
 	content.add_child(title)
 
+	pause_menu_tabs = TabContainer.new()
+	pause_menu_tabs.name = "PauseMenuTabs"
+	pause_menu_tabs.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	pause_menu_tabs.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	content.add_child(pause_menu_tabs)
+
+	var pause_tab := VBoxContainer.new()
+	pause_tab.name = "Pause"
+	pause_tab.add_theme_constant_override("separation", 14)
+	pause_menu_tabs.add_child(pause_tab)
+
 	var resume_button := Button.new()
 	resume_button.text = "Resume"
 	resume_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	resume_button.pressed.connect(_resume_game)
-	content.add_child(resume_button)
+	pause_tab.add_child(resume_button)
 
 	var return_button := Button.new()
 	return_button.text = "Return to Main Menu"
 	return_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	return_button.pressed.connect(_return_to_main_menu)
-	content.add_child(return_button)
+	pause_tab.add_child(return_button)
 
-	content.add_child(HSeparator.new())
+	pause_tab.add_child(HSeparator.new())
+
+	var goal_title := Label.new()
+	goal_title.text = "Goal"
+	goal_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pause_tab.add_child(goal_title)
+
+	var goal_label := Label.new()
+	goal_label.text = "Escape the building."
+	goal_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	pause_tab.add_child(goal_label)
+
+	var controls_title := Label.new()
+	controls_title.text = "Controls"
+	controls_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	pause_tab.add_child(controls_title)
+
+	var controls_label := Label.new()
+	controls_label.text = "Move: WASD\nLook: Mouse\nJump: Space\nSwing: Left Click\nInteract: E\nStatic Vision: G\nSonar Ping: F\nPing Speed: Mouse Wheel\nPause: Tab\nWorld Light: Backspace\nDebug: `"
+	controls_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	controls_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	pause_tab.add_child(controls_label)
+
+	var settings_tab := VBoxContainer.new()
+	settings_tab.name = "Settings"
+	settings_tab.add_theme_constant_override("separation", 14)
+	pause_menu_tabs.add_child(settings_tab)
 
 	var volume_title := Label.new()
 	volume_title.text = "Volume"
 	volume_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	content.add_child(volume_title)
+	settings_tab.add_child(volume_title)
 
-	_add_volume_slider(content, "Master", MASTER_BUS_NAME)
-	_add_volume_slider(content, "Music", MUSIC_BUS_NAME)
-	_add_volume_slider(content, "SFX", SFX_BUS_NAME)
+	_add_volume_slider(settings_tab, "Master", MASTER_BUS_NAME)
+	_add_volume_slider(settings_tab, "Music", MUSIC_BUS_NAME)
+	_add_volume_slider(settings_tab, "SFX", SFX_BUS_NAME)
+	_add_mouse_sensitivity_slider(settings_tab)
+	_add_graphics_quality_selector(settings_tab)
 
 	return panel
 
@@ -838,6 +976,55 @@ func _add_volume_slider(parent: VBoxContainer, label_text: String, bus_name: Str
 	_update_volume_label(bus_name, slider.value)
 
 
+func _add_graphics_quality_selector(parent: VBoxContainer) -> void:
+	var row := VBoxContainer.new()
+	row.add_theme_constant_override("separation", 4)
+	parent.add_child(row)
+
+	var label := Label.new()
+	label.text = "Graphics Quality"
+	row.add_child(label)
+
+	quality_mode_selector = OptionButton.new()
+	quality_mode_selector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	quality_mode_selector.add_item("Auto", GraphicsQualityMode.AUTO)
+	quality_mode_selector.add_item("High", GraphicsQualityMode.HIGH)
+	quality_mode_selector.add_item("Performance", GraphicsQualityMode.PERFORMANCE)
+	quality_mode_selector.item_selected.connect(_on_graphics_quality_selected)
+	row.add_child(quality_mode_selector)
+
+	_sync_graphics_quality_control()
+
+
+func _add_mouse_sensitivity_slider(parent: VBoxContainer) -> void:
+	var row := VBoxContainer.new()
+	row.add_theme_constant_override("separation", 4)
+	parent.add_child(row)
+
+	var label := Label.new()
+	label.text = "Mouse Sensitivity"
+	row.add_child(label)
+
+	var slider_row := HBoxContainer.new()
+	slider_row.add_theme_constant_override("separation", 12)
+	row.add_child(slider_row)
+
+	mouse_sensitivity_slider = HSlider.new()
+	mouse_sensitivity_slider.min_value = MOUSE_SENSITIVITY_MIN
+	mouse_sensitivity_slider.max_value = MOUSE_SENSITIVITY_MAX
+	mouse_sensitivity_slider.step = MOUSE_SENSITIVITY_STEP
+	mouse_sensitivity_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	mouse_sensitivity_slider.value_changed.connect(_on_mouse_sensitivity_changed)
+	slider_row.add_child(mouse_sensitivity_slider)
+
+	mouse_sensitivity_value_label = Label.new()
+	mouse_sensitivity_value_label.custom_minimum_size = Vector2(56.0, 0.0)
+	mouse_sensitivity_value_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	slider_row.add_child(mouse_sensitivity_value_label)
+
+	_sync_mouse_sensitivity_control()
+
+
 func _show_start_menu() -> void:
 	gameplay_started = false
 	pause_menu_visible = false
@@ -850,6 +1037,8 @@ func _show_start_menu() -> void:
 	pause_menu_panel.visible = false
 	win_menu_panel.visible = false
 	_sync_volume_controls()
+	_sync_mouse_sensitivity_control()
+	_sync_graphics_quality_control()
 
 
 func _start_game() -> void:
@@ -888,6 +1077,9 @@ func _pause_game() -> void:
 	pause_menu_panel.visible = true
 	win_menu_panel.visible = false
 	_sync_volume_controls()
+	_sync_mouse_sensitivity_control()
+	_sync_graphics_quality_control()
+	_reset_pause_menu_tab()
 
 
 func _resume_game() -> void:
@@ -942,6 +1134,17 @@ func _is_menu_open() -> bool:
 	return not gameplay_started or pause_menu_visible or win_screen_visible
 
 
+func _should_resume_pause_menu_from_event(event: InputEvent) -> bool:
+	return pause_menu_visible and gameplay_started and not win_screen_visible and event.is_action_pressed("pause_menu")
+
+
+func _reset_pause_menu_tab() -> void:
+	if pause_menu_tabs == null:
+		return
+
+	pause_menu_tabs.current_tab = 0
+
+
 func _on_volume_slider_changed(value: float, bus_name: StringName) -> void:
 	var bus_index := AudioServer.get_bus_index(bus_name)
 	if bus_index == -1:
@@ -961,6 +1164,58 @@ func _sync_volume_controls() -> void:
 		var value := _get_bus_slider_value(bus_name)
 		slider.set_value_no_signal(value)
 		_update_volume_label(bus_name, value)
+
+
+func _sync_graphics_quality_control() -> void:
+	if quality_mode_selector == null:
+		return
+
+	quality_mode_selector.select(selected_graphics_quality_mode)
+
+
+func _sync_mouse_sensitivity_control() -> void:
+	if mouse_sensitivity_slider == null:
+		return
+
+	var value: float = _get_player_mouse_sensitivity()
+	mouse_sensitivity_slider.set_value_no_signal(value)
+	_update_mouse_sensitivity_label(value)
+
+
+func _on_mouse_sensitivity_changed(value: float) -> void:
+	var clamped_value: float = clampf(value, MOUSE_SENSITIVITY_MIN, MOUSE_SENSITIVITY_MAX)
+	_set_player_mouse_sensitivity(clamped_value)
+	_update_mouse_sensitivity_label(clamped_value)
+
+
+func _get_player_mouse_sensitivity() -> float:
+	if player == null:
+		return DEFAULT_MOUSE_SENSITIVITY
+
+	return clampf(float(player.get("mouse_sensitivity")), MOUSE_SENSITIVITY_MIN, MOUSE_SENSITIVITY_MAX)
+
+
+func _set_player_mouse_sensitivity(value: float) -> void:
+	if player == null:
+		return
+
+	player.set("mouse_sensitivity", clampf(value, MOUSE_SENSITIVITY_MIN, MOUSE_SENSITIVITY_MAX))
+
+
+func _update_mouse_sensitivity_label(value: float) -> void:
+	if mouse_sensitivity_value_label == null:
+		return
+
+	mouse_sensitivity_value_label.text = "%.4f" % value
+
+
+func _on_graphics_quality_selected(index: int) -> void:
+	if selected_graphics_quality_mode == index:
+		return
+
+	selected_graphics_quality_mode = index
+	graphics_quality_dirty = true
+	_refresh_graphics_quality_profile(true)
 
 
 func _get_bus_slider_value(bus_name: StringName) -> float:
@@ -986,6 +1241,7 @@ func _update_volume_label(bus_name: StringName, value: float) -> void:
 func _configure_sonar_viewport() -> void:
 	sonar_viewport.own_world_3d = true
 	sonar_viewport.transparent_bg = false
+	sonar_viewport.render_target_update_mode = SubViewport.UPDATE_DISABLED
 	_resize_sonar_viewport()
 	sonar_camera.current = true
 
@@ -999,13 +1255,16 @@ func _configure_kill_floor() -> void:
 
 
 func _resize_sonar_viewport() -> void:
-	var visible_size := get_viewport().get_visible_rect().size
-	var viewport_size := Vector2i(int(visible_size.x), int(visible_size.y))
-	if viewport_size == last_viewport_size or viewport_size.x <= 0 or viewport_size.y <= 0:
+	var viewport_size := _get_visible_viewport_size()
+	if viewport_size.x <= 0 or viewport_size.y <= 0:
 		return
 
-	last_viewport_size = viewport_size
-	sonar_viewport.size = viewport_size
+	var target_size := _get_scaled_sonar_viewport_size(viewport_size)
+	if target_size == last_sonar_viewport_size:
+		return
+
+	last_sonar_viewport_size = target_size
+	sonar_viewport.size = target_size
 
 
 func _sync_sonar_camera() -> void:
@@ -1094,6 +1353,7 @@ func _set_sonar_mode(enabled: bool) -> void:
 	if not enabled:
 		_clear_ping()
 
+	_sync_sonar_viewport_update_mode()
 	_sync_music_players()
 	_update_shader_state()
 
@@ -1429,8 +1689,10 @@ func _update_debug_overlay(delta: float) -> void:
 	var total_objects := Performance.get_monitor(Performance.OBJECT_COUNT)
 	var total_nodes := get_tree().get_node_count()
 	var draw_calls := Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
+	var root_viewport := get_viewport()
+	var sonar_viewport_size := sonar_viewport.size if sonar_viewport != null else Vector2i.ZERO
 
-	debug_label.text = "Debug\nFPS: %d\nFPS avg (5s): %.1f\nFrame ms: %.2f\nFrame ms avg (5s): %.2f\nNodes: %d\nObjects: %d\nDraw calls: %d" % [
+	debug_label.text = "Debug\nFPS: %d\nFPS avg (5s): %.1f\nFrame ms: %.2f\nFrame ms avg (5s): %.2f\nNodes: %d\nObjects: %d\nDraw calls: %d\nGraphics: %s -> %s | 3D: %.2f | Sonar: %dx%d" % [
 		current_fps,
 		avg_fps,
 		current_frame_ms,
@@ -1438,6 +1700,11 @@ func _update_debug_overlay(delta: float) -> void:
 		total_nodes,
 		total_objects,
 		draw_calls,
+		_get_graphics_quality_mode_label(selected_graphics_quality_mode),
+		_get_graphics_quality_mode_label(effective_graphics_quality_mode),
+		root_viewport.scaling_3d_scale,
+		sonar_viewport_size.x,
+		sonar_viewport_size.y,
 	]
 
 
@@ -1458,3 +1725,102 @@ func _is_debug_toggle_event(event: InputEvent) -> bool:
 	return event.pressed and not event.echo and (
 		event.keycode == DEBUG_TOGGLE_KEY or event.physical_keycode == DEBUG_TOGGLE_KEY
 	)
+
+
+func _cache_graphics_quality_baseline() -> void:
+	if world_environment != null and world_environment.environment != null:
+		authored_glow_enabled = world_environment.environment.glow_enabled
+
+	if room_omni_light != null:
+		authored_room_light_shadow_enabled = room_omni_light.shadow_enabled
+
+	if win_orb_omni_light != null:
+		authored_win_orb_light_shadow_enabled = win_orb_omni_light.shadow_enabled
+
+
+func _refresh_graphics_quality_profile(force: bool = false) -> void:
+	var viewport_size := _get_visible_viewport_size()
+	if viewport_size.x <= 0 or viewport_size.y <= 0:
+		return
+
+	var next_effective_mode := _get_effective_graphics_quality_mode(viewport_size)
+	if not force \
+	and not graphics_quality_dirty \
+	and viewport_size == last_quality_viewport_size \
+	and next_effective_mode == effective_graphics_quality_mode:
+		return
+
+	last_quality_viewport_size = viewport_size
+	effective_graphics_quality_mode = next_effective_mode
+	graphics_quality_dirty = false
+
+	var root_viewport := get_viewport()
+	root_viewport.scaling_3d_scale = _get_main_3d_scale_for_quality(effective_graphics_quality_mode)
+
+	_apply_graphics_quality_effect_overrides()
+	_resize_sonar_viewport()
+	_sync_sonar_viewport_update_mode()
+	_sync_graphics_quality_control()
+
+
+func _get_visible_viewport_size() -> Vector2i:
+	var visible_size := get_viewport().get_visible_rect().size
+	return Vector2i(int(visible_size.x), int(visible_size.y))
+
+
+func _get_effective_graphics_quality_mode(viewport_size: Vector2i) -> int:
+	if selected_graphics_quality_mode != GraphicsQualityMode.AUTO:
+		return selected_graphics_quality_mode
+
+	var pixel_count := viewport_size.x * viewport_size.y
+	return GraphicsQualityMode.PERFORMANCE if pixel_count >= AUTO_PERFORMANCE_PIXEL_THRESHOLD else GraphicsQualityMode.HIGH
+
+
+func _get_main_3d_scale_for_quality(mode: int) -> float:
+	return PERFORMANCE_MAIN_3D_SCALE if mode == GraphicsQualityMode.PERFORMANCE else HIGH_MAIN_3D_SCALE
+
+
+func _get_sonar_viewport_scale_for_quality(mode: int) -> float:
+	return PERFORMANCE_SONAR_VIEWPORT_SCALE if mode == GraphicsQualityMode.PERFORMANCE else HIGH_SONAR_VIEWPORT_SCALE
+
+
+func _get_scaled_sonar_viewport_size(viewport_size: Vector2i) -> Vector2i:
+	var scale := _get_sonar_viewport_scale_for_quality(effective_graphics_quality_mode)
+	return Vector2i(
+		maxi(2, int(roundf(viewport_size.x * scale))),
+		maxi(2, int(roundf(viewport_size.y * scale)))
+	)
+
+
+func _apply_graphics_quality_effect_overrides() -> void:
+	var use_performance_profile := effective_graphics_quality_mode == GraphicsQualityMode.PERFORMANCE
+
+	if world_environment != null and world_environment.environment != null:
+		world_environment.environment.glow_enabled = authored_glow_enabled and not use_performance_profile
+
+	if room_omni_light != null:
+		room_omni_light.shadow_enabled = authored_room_light_shadow_enabled and not use_performance_profile
+
+	if win_orb_omni_light != null:
+		win_orb_omni_light.shadow_enabled = authored_win_orb_light_shadow_enabled and not use_performance_profile
+
+
+func _sync_sonar_viewport_update_mode() -> void:
+	if sonar_viewport == null:
+		return
+
+	sonar_viewport.render_target_update_mode = (
+		SubViewport.UPDATE_ALWAYS if sonar_mode_enabled else SubViewport.UPDATE_DISABLED
+	)
+
+
+func _get_graphics_quality_mode_label(mode: int) -> String:
+	match mode:
+		GraphicsQualityMode.AUTO:
+			return "Auto"
+		GraphicsQualityMode.HIGH:
+			return "High"
+		GraphicsQualityMode.PERFORMANCE:
+			return "Performance"
+		_:
+			return "Unknown"
