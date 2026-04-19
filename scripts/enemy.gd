@@ -1,3 +1,4 @@
+class_name Enemy
 extends CharacterBody3D
 
 const SIGNAL_ENEMY_GROUP := &"signal_enemy"
@@ -5,11 +6,14 @@ const MAIN_PLAYER_GROUP := &"main_player"
 const NAV_MESH_OFFSET := Vector3(0, 0.5, 0)
 const INDICATOR_PUSH_DURATION_SECONDS := 2.0
 
+@export var nav_mesh: NavigationRegion3D
+@export var player: CharacterBody3D
+
+@export_group("Settings")
+@export var ai : EnemyAI
 @export var move_speed: float = 3.0
 @export var turn_speed: float = 8.0
 @export_range(-180.0, 180.0, 0.1) var facing_yaw_offset_degrees: float = 0.0
-@export var nav_mesh: NavigationRegion3D
-@export var player: CharacterBody3D
 @export var normal_color: Color = Color(0.20241532, 0.17677477, 0.4619112, 1.0)
 @export var pushed_color: Color = Color(1.0, 0.25, 0.25, 1.0)
 @export var indicator_default_color: Color = Color(0.6089677, 0.1788316, 0.18341184, 1.0)
@@ -27,6 +31,9 @@ var enemy_material: StandardMaterial3D
 var indicator_light_material: StandardMaterial3D
 var indicator_push_remaining: float = 0.0
 
+var player_position: Vector3 = Vector3.ZERO
+var player_visible: bool = false
+
 func _ready() -> void:
 	add_to_group(SIGNAL_ENEMY_GROUP)
 	_resolve_player()
@@ -35,6 +42,7 @@ func _ready() -> void:
 	assert(navigation_agent_3d, "NavigationAgent3D node not found in the scene tree.")
 	assert(enemy_mesh, "MeshInstance3D node not found in the scene tree.")
 	assert(indicator_light, "IndicatorLight node not found in the scene tree.")
+	assert(ai, "EnemyAI node not assigned.")
 
 	enemy_rigid_body.top_level = true
 	enemy_rigid_body.global_position = global_position
@@ -52,8 +60,7 @@ func _ready() -> void:
 	_update_color()
 	_update_indicator_light()
 
-	# Wait for the navigation map to initialize
-	await get_tree().physics_frame
+	ai.state_changed.connect(_on_enemy_ai_state_changed)
 
 
 func _resolve_player() -> void:
@@ -78,6 +85,8 @@ func _physics_process(_delta: float) -> void:
 		enemy_rigid_body.linear_velocity = Vector3.ZERO
 		enemy_rigid_body.global_position = global_position
 
+	if ai.current_state != EnemyAI.State.CHASING:
+		return
 
 	if not nav_mesh:
 		return
@@ -161,3 +170,20 @@ func do_push(direction: Vector3) -> void:
 	indicator_push_remaining = INDICATOR_PUSH_DURATION_SECONDS
 	enemy_rigid_body.linear_velocity = direction
 	print("Push velocity applied to enemy: ", direction)
+
+
+func _on_enemy_ai_state_changed(new_state: EnemyAI.State) -> void:
+	print("Enemy state changed to: ", new_state)
+	match new_state:
+		EnemyAI.State.IDLE:
+			$Label3D.text = "Idle"
+		EnemyAI.State.PATROLLING:
+			$Label3D.text = "Patrolling"
+		EnemyAI.State.CHASING:
+			$Label3D.text = "Chasing"
+		EnemyAI.State.CHASING_LAST_KNOWN_POSITION:
+			$Label3D.text = "Chasing Last Known Position"
+		EnemyAI.State.STUNNED:
+			$Label3D.text = "Stunned"
+		_:
+			$Label3D.text = "Unknown State"

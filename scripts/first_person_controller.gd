@@ -1,3 +1,4 @@
+class_name Player
 extends CharacterBody3D
 
 const LEFT_FOOTSTEP_STREAM := preload("res://assets/audio/sfx/fist_2.wav")
