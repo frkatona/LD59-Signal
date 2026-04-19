@@ -17,8 +17,9 @@ float rounded_box_sdf(vec2 point, vec2 half_size, float radius) {
 
 
 float get_scope_cutout_mask(vec2 uv) {
-	if not scope_cutout_enabled:
+	if (!scope_cutout_enabled) {
 		return 0.0;
+	}
 
 	float sdf = rounded_box_sdf(uv - scope_cutout_center, scope_cutout_half_size, scope_cutout_corner_radius);
 	return 1.0 - smoothstep(0.0, scope_cutout_softness, sdf);

@@ -4,6 +4,8 @@ const SIGNAL_ENEMY_GROUP := &"signal_enemy"
 const NAV_MESH_OFFSET := Vector3(0, 0.5, 0)
 
 @export var move_speed: float = 3.0
+@export var turn_speed: float = 8.0
+@export_range(-180.0, 180.0, 0.1) var facing_yaw_offset_degrees: float = 0.0
 @export var nav_mesh: NavigationRegion3D
 @export var player: CharacterBody3D
 @export var normal_color: Color = Color(0.20241532, 0.17677477, 0.4619112, 1.0)
@@ -63,6 +65,7 @@ func _physics_process(_delta: float) -> void:
 		navigation_agent_3d.set_navigation_map(nav_mesh)
 
 	navigation_agent_3d.target_position = player.global_transform.origin
+	_face_player(_delta)
 
 	if navigation_agent_3d.is_navigation_finished():
 		return
@@ -83,6 +86,19 @@ func _update_color() -> void:
 	enemy_material.albedo_color = target_color
 	enemy_material.emission_enabled = true
 	enemy_material.emission = target_color
+
+
+func _face_player(delta: float) -> void:
+	if player == null:
+		return
+
+	var to_player: Vector3 = player.global_position - global_position
+	to_player.y = 0.0
+	if to_player.length_squared() <= 0.0001:
+		return
+
+	var target_yaw: float = atan2(to_player.x, to_player.z) + PI + deg_to_rad(facing_yaw_offset_degrees)
+	rotation.y = lerp_angle(rotation.y, target_yaw, clampf(turn_speed * delta, 0.0, 1.0))
 		
 func do_push(direction: Vector3) -> void:
 	print("Enemy is being pushed!")

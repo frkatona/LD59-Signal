@@ -189,11 +189,14 @@ geometry_source_group_name = &"NAVMESH"
 
 [node name="Main" type="Node3D" unique_id=2031895928]
 script = ExtResource("2_sonar")
-ping_cooldown_seconds = 2.0
+ping_cooldown_seconds = 1.0
 ping_speed = 10.0
-ping_max_radius = 20.0
-ping_band_width = 2.0
-ping_band_fade = 5.0
+ping_max_radius = 30.0
+ping_band_width = 0.5
+ping_band_fade = 10.0
+
+[node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=1215722117]
+transform = Transform3D(-4.371139e-08, -0.267642, 0.96351844, 0, 0.96351844, 0.26764196, -1, 1.16990035e-08, -4.2116728e-08, 12.565479, 1.2106223, -1.5767454)
 
 [node name="Environment" type="Node3D" parent="." unique_id=2031291799]
 
@@ -230,9 +233,15 @@ text = "Press E to open door"
 
 [node name="Player" parent="." unique_id=22887971 instance=ExtResource("2_tipki")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 15.081289, 0.05, -1.0699883)
+signal_scope_min_distance = 0.5
+signal_scope_max_distance = 15.0
+signal_scope_local_position = Vector3(0.345, -0.304, -0.675)
+signal_scope_local_rotation_degrees = Vector3(-10.59, 1.405, -0.365)
+signal_scope_size = Vector2(0.345, 0.225)
+signal_scope_overlay_padding = Vector2(0, 0)
 
-[node name="oscilloscope" parent="Player" unique_id=1917917503 instance=ExtResource("3_choun")]
-transform = Transform3D(0.16816652, 0, 0, 0, 0.16203153, 0.04500842, 0, -0.04500842, 0.16203153, 0.709725, 1.1606226, -0.9821894)
+[node name="oscilloscope" parent="Player/CameraPivot/Camera3D" parent_id_path=PackedInt32Array(22887971, 1194919771) index="0" unique_id=1917917503 instance=ExtResource("3_choun")]
+transform = Transform3D(0.16816652, 0, 0, 0, 0.16203153, 0.04500842, 0, -0.04500842, 0.16203153, 0.50675714, -0.43937743, -0.9821892)
 
 [node name="VisionOverlay" type="CanvasLayer" parent="." unique_id=267744132]
 layer = 100
@@ -496,5 +505,6 @@ player = NodePath("../Player")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00041365623, 0, 0.002642393)
 navigation_mesh = SubResource("NavigationMesh_tipki")
 
+[editable path="Player"]
 [editable path="Props/fan"]
 [editable path="SteppingStones/stepping-stone"]

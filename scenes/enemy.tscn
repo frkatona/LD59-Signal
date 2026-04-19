@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://cfaa6d3t863va"]
 
 [ext_resource type="Script" uid="uid://djsr7hotk8htv" path="res://scripts/enemy.gd" id="1_4a83h"]
+[ext_resource type="PackedScene" uid="uid://bwkh10wgul3et" path="res://assets/models/dalek.glb" id="2_md0e3"]
+[ext_resource type="AudioStream" uid="uid://dgcqwmpla7o11" path="res://assets/audio/sfx/gross-noise.wav" id="3_4ra3w"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_o6xl0"]
 metallic = 0.2
@@ -20,6 +22,7 @@ script = ExtResource("1_4a83h")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=2066241855]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+visible = false
 material_override = SubResource("StandardMaterial3D_o6xl0")
 mesh = SubResource("CapsuleMesh_tipki")
 
@@ -41,3 +44,17 @@ mass = 50.0
 [node name="CollisionShape3D" type="CollisionShape3D" parent="EnemyRigidBody" unique_id=720882290]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 shape = SubResource("CapsuleShape3D_85g3d")
+
+[node name="dalek2" parent="." unique_id=1435492741 instance=ExtResource("2_md0e3")]
+transform = Transform3D(-0.5158722, 0, 4.509898e-08, 0, 0.5158722, 0, -4.509898e-08, 0, -0.5158722, -0.010447651, 0, -0.03338802)
+
+[node name="robot-static-noise" type="AudioStreamPlayer3D" parent="." unique_id=1346748014]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.03003934, 0.9088471, -0.13517618)
+stream = ExtResource("3_4ra3w")
+attenuation_model = 1
+max_db = 2.0
+autoplay = true
+max_distance = 20.0
+bus = &"SFX"
+attenuation_filter_cutoff_hz = 20500.0
+attenuation_filter_db = 0.0

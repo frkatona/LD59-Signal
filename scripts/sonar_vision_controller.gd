@@ -70,6 +70,7 @@ var ping_frozen := false
 var ping_radius := 0.0
 var ping_origin_ws := Vector3.ZERO
 var ping_cooldown_remaining := 0.0
+var ping_cooldown_duration := 0.0
 var last_viewport_size := Vector2i.ZERO
 
 var reveal_proxy_pairs: Array = []
@@ -115,6 +116,8 @@ var ping_hud_panel: PanelContainer
 var ping_speed_label: Label
 var ping_cooldown_label: Label
 var ping_cooldown_bar: ProgressBar
+var push_cooldown_label: Label
+var push_cooldown_bar: ProgressBar
 var volume_sliders: Dictionary = {}
 var volume_value_labels: Dictionary = {}
 
@@ -230,12 +233,15 @@ func _process(delta: float) -> void:
 	_update_light_switch_toggle_cooldown(delta)
 
 	if ping_cooldown_remaining > 0.0 and not ping_frozen:
-		ping_cooldown_remaining = max(ping_cooldown_remaining - delta, 0.0)
+		ping_cooldown_remaining = maxf(ping_cooldown_remaining - delta, 0.0)
 
 	if ping_active and not ping_frozen:
 		ping_radius += ping_speed * delta
 		if ping_radius > ping_max_radius:
 			_clear_ping()
+		else:
+			ping_cooldown_remaining = maxf(ping_cooldown_remaining, _get_ping_remaining_travel_duration())
+			ping_cooldown_duration = maxf(ping_cooldown_duration, ping_cooldown_remaining)
 
 	_update_shader_state()
 	_update_ping_hud()
@@ -295,6 +301,22 @@ func _sanitize_ping_speed_limit(value: float) -> float:
 func _clamp_ping_speed(value: float) -> float:
 	var snapped_value: float = roundf(value / PING_SPEED_STEP) * PING_SPEED_STEP
 	return clampf(snapped_value, ping_speed_floor, ping_speed_ceiling)
+
+
+func _get_ping_travel_duration() -> float:
+	var clamped_ping_speed: float = maxf(ping_speed, 0.001)
+	var clamped_ping_radius: float = maxf(ping_max_radius, 0.0)
+	return clamped_ping_radius / clamped_ping_speed
+
+
+func _get_effective_ping_cooldown_duration() -> float:
+	return maxf(ping_cooldown_seconds, _get_ping_travel_duration())
+
+
+func _get_ping_remaining_travel_duration() -> float:
+	var clamped_ping_speed: float = maxf(ping_speed, 0.001)
+	var remaining_distance: float = maxf(ping_max_radius - ping_radius, 0.0)
+	return remaining_distance / clamped_ping_speed
 
 
 func _configure_audio_buses() -> void:
@@ -429,6 +451,8 @@ func _sync_signal_scope_overlay_cutout() -> void:
 	var cutout_enabled := false
 	var cutout_center := Vector2(0.0, 0.0)
 	var cutout_half_size := Vector2(0.0, 0.0)
+	var cutout_corner_radius := 0.03
+	var cutout_softness := 0.012
 
 	if player.has_method("get_signal_scope_overlay_cutout"):
 		var viewport_size := get_viewport().get_visible_rect().size
@@ -437,11 +461,15 @@ func _sync_signal_scope_overlay_cutout() -> void:
 			cutout_enabled = true
 			cutout_center = cutout.get("center_uv", cutout_center)
 			cutout_half_size = cutout.get("half_size_uv", cutout_half_size)
+			cutout_corner_radius = cutout.get("corner_radius_uv", cutout_corner_radius)
+			cutout_softness = cutout.get("corner_softness_uv", cutout_softness)
 
 	for material in [static_material, composite_material]:
 		material.set_shader_parameter("scope_cutout_enabled", cutout_enabled)
 		material.set_shader_parameter("scope_cutout_center", cutout_center)
 		material.set_shader_parameter("scope_cutout_half_size", cutout_half_size)
+		material.set_shader_parameter("scope_cutout_corner_radius", cutout_corner_radius)
+		material.set_shader_parameter("scope_cutout_softness", cutout_softness)
 
 
 func _configure_interaction_prompt() -> void:
@@ -546,7 +574,7 @@ func _build_ping_hud() -> void:
 	ping_hud_panel.anchor_top = 1.0
 	ping_hud_panel.anchor_bottom = 1.0
 	ping_hud_panel.offset_left = 16.0
-	ping_hud_panel.offset_top = -142.0
+	ping_hud_panel.offset_top = -190.0
 	ping_hud_panel.offset_right = 252.0
 	ping_hud_panel.offset_bottom = -16.0
 	ping_hud_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -586,13 +614,29 @@ func _build_ping_hud() -> void:
 	ping_cooldown_label.add_theme_font_size_override("font_size", 13)
 	content.add_child(ping_cooldown_label)
 
-	ping_cooldown_bar = ProgressBar.new()
+	ping_cooldown_bar = _create_hud_progress_bar(Color(0.2, 0.92, 1.0, 0.95))
 	ping_cooldown_bar.name = "PingCooldownBar"
-	ping_cooldown_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	ping_cooldown_bar.show_percentage = false
-	ping_cooldown_bar.custom_minimum_size = Vector2(0.0, 20.0)
-	ping_cooldown_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.add_child(ping_cooldown_bar)
+
+	push_cooldown_label = Label.new()
+	push_cooldown_label.name = "PushCooldownLabel"
+	push_cooldown_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	push_cooldown_label.add_theme_font_size_override("font_size", 13)
+	content.add_child(push_cooldown_label)
+
+	push_cooldown_bar = _create_hud_progress_bar(Color(1.0, 0.55, 0.2, 0.95))
+	push_cooldown_bar.name = "PushCooldownBar"
+	content.add_child(push_cooldown_bar)
+
+	_update_ping_hud()
+
+
+func _create_hud_progress_bar(fill_color: Color) -> ProgressBar:
+	var progress_bar := ProgressBar.new()
+	progress_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	progress_bar.show_percentage = false
+	progress_bar.custom_minimum_size = Vector2(0.0, 20.0)
+	progress_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	var bar_background := StyleBoxFlat.new()
 	bar_background.bg_color = Color(0.08, 0.12, 0.16, 0.95)
@@ -605,17 +649,17 @@ func _build_ping_hud() -> void:
 	bar_background.corner_radius_top_right = 3
 	bar_background.corner_radius_bottom_right = 3
 	bar_background.corner_radius_bottom_left = 3
-	ping_cooldown_bar.add_theme_stylebox_override("background", bar_background)
+	progress_bar.add_theme_stylebox_override("background", bar_background)
 
 	var bar_fill := StyleBoxFlat.new()
-	bar_fill.bg_color = Color(0.2, 0.92, 1.0, 0.95)
+	bar_fill.bg_color = fill_color
 	bar_fill.corner_radius_top_left = 3
 	bar_fill.corner_radius_top_right = 3
 	bar_fill.corner_radius_bottom_right = 3
 	bar_fill.corner_radius_bottom_left = 3
-	ping_cooldown_bar.add_theme_stylebox_override("fill", bar_fill)
+	progress_bar.add_theme_stylebox_override("fill", bar_fill)
 
-	_update_ping_hud()
+	return progress_bar
 
 
 func _create_start_menu_panel() -> PanelContainer:
@@ -1062,7 +1106,8 @@ func _start_ping() -> void:
 	ping_frozen = false
 	ping_radius = 0.0
 	ping_origin_ws = player_camera.global_position
-	ping_cooldown_remaining = ping_cooldown_seconds
+	ping_cooldown_duration = _get_effective_ping_cooldown_duration()
+	ping_cooldown_remaining = ping_cooldown_duration
 	if sonar_ping_player != null:
 		_update_ping_sound_pitch()
 		sonar_ping_player.play()
@@ -1264,7 +1309,7 @@ func _get_wrapped_playback_position(player: AudioStreamPlayer, target_stream: Au
 
 
 func _update_ping_hud() -> void:
-	if ping_hud_panel == null or ping_speed_label == null or ping_cooldown_label == null or ping_cooldown_bar == null:
+	if ping_hud_panel == null or ping_speed_label == null or ping_cooldown_label == null or ping_cooldown_bar == null or push_cooldown_label == null or push_cooldown_bar == null:
 		return
 
 	ping_hud_panel.visible = gameplay_started and not pause_menu_visible and not win_screen_visible
@@ -1273,9 +1318,26 @@ func _update_ping_hud() -> void:
 	ping_speed_label.text = "Ping Speed: %d/%d" % [_get_ping_speed_ui_value(), PING_SPEED_UI_MAX]
 	ping_cooldown_label.text = "Ping Cooldown (Paused)" if ping_frozen else "Ping Cooldown"
 
-	var cooldown_max: float = maxf(ping_cooldown_seconds, 0.001)
+	var cooldown_max: float = maxf(
+		ping_cooldown_duration if ping_cooldown_remaining > 0.0 or ping_active else _get_effective_ping_cooldown_duration(),
+		0.001
+	)
 	ping_cooldown_bar.max_value = cooldown_max
 	ping_cooldown_bar.value = minf(ping_cooldown_remaining, cooldown_max)
+
+	push_cooldown_label.text = "Push Cooldown"
+	var push_cooldown_duration: float = 5.0
+	var push_cooldown_remaining_value: float = 0.0
+	if player != null and player.has_method("get_push_cooldown_state"):
+		var push_cooldown_state_variant: Variant = player.call("get_push_cooldown_state")
+		if push_cooldown_state_variant is Dictionary:
+			var push_cooldown_state: Dictionary = push_cooldown_state_variant
+			push_cooldown_duration = float(push_cooldown_state.get("duration", push_cooldown_duration))
+			push_cooldown_remaining_value = float(push_cooldown_state.get("remaining", push_cooldown_remaining_value))
+
+	push_cooldown_duration = maxf(push_cooldown_duration, 0.001)
+	push_cooldown_bar.max_value = push_cooldown_duration
+	push_cooldown_bar.value = minf(push_cooldown_remaining_value, push_cooldown_duration)
 
 
 func _is_ping_speed_adjust_event(event: InputEvent) -> bool:

@@ -2,6 +2,8 @@ shader_type spatial;
 render_mode unshaded, cull_disabled, depth_draw_never, depth_test_disabled, fog_disabled;
 
 uniform float signal_strength : hint_range(0.0, 1.0) = 0.0;
+uniform float corner_radius : hint_range(0.0, 0.5) = 0.08;
+uniform float corner_softness : hint_range(0.001, 0.1) = 0.015;
 
 float hash(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
@@ -12,11 +14,20 @@ float trace_line(float y, float center, float thickness) {
 	return 1.0 - smoothstep(thickness, thickness * 2.8, distance_to_line);
 }
 
+float rounded_box_sdf(vec2 point, vec2 half_size, float radius) {
+	vec2 clamped_half_size = max(half_size - vec2(radius), vec2(0.0));
+	vec2 distance_to_box = abs(point) - clamped_half_size;
+	return length(max(distance_to_box, 0.0)) + min(max(distance_to_box.x, distance_to_box.y), 0.0) - radius;
+}
+
 void fragment() {
 	vec2 uv = UV;
 	float clamped_strength = clamp(signal_strength, 0.0, 1.0);
-	float edge_distance = min(min(uv.x, uv.y), min(1.0 - uv.x, 1.0 - uv.y));
-	float screen_mask = smoothstep(0.0, 0.06, edge_distance);
+	float screen_mask = 1.0 - smoothstep(
+		0.0,
+		corner_softness,
+		rounded_box_sdf(uv - vec2(0.5), vec2(0.5), corner_radius)
+	);
 
 	float grid_x = 1.0 - smoothstep(0.44, 0.5, abs(fract(uv.x * 8.0) - 0.5));
 	float grid_y = 1.0 - smoothstep(0.44, 0.5, abs(fract(uv.y * 4.0) - 0.5));

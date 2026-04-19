@@ -27,14 +27,25 @@ butler push LD59.zip akatona/geordi-la-forge:web
 - keep player better oriented
   - [x] pause the pulse on hit targets
   - [x] make some floor/ceiling tiles pulse reactive
-- [ ] better way to be "signal" theme
-  - 180d out-of-phase sine waves on oscilloscope screen begin to emerge from noise with proximity to enemy
-- [ ] audio still not working in web
+- [x] better way to be "signal" theme
+  - [x] 180d out-of-phase sine waves on oscilloscope screen begin to emerge from noise with proximity to enemy
+  - [ ] something else
 - blender
   - [x] model a light switch for the room to make the sonar useful
   - [x] model a handheld oscilloscope
-- actually pause the game during pause menu and start screen
-- sfx for for enemy movement and oscilloscopes sinewaves
+- [x] swap in the dalek model
+- [ ] actually pause the game during pause menu and start screen
+- [x] sfx for for enemy movement and/or oscilloscopes sinewaves
+- [ ] take on stick animation and static sound for enemy proximity
+- [x] make enemy turn towards player
+- [x] make sure the ping cooldown is longer than the pulse duration
+
+
+- next josh ideas?
+  - let's expand to a bigger space --> give the enemies a patrol with a leash
+    - [ ] line of sight -> investigate last known position, then return to patrol if they lose sight of the player
+    - [ ] visual indicator for active state (light color: yellow investigate, red chase, blue return to patrol?)
+  - [ ] audio still not working in web
 
 ### cool clever little ideas
 - finding the lightswitch is the first part of the puzzle
@@ -42,9 +53,9 @@ butler push LD59.zip akatona/geordi-la-forge:web
 - encourage the player to pace out the room with their footsteps to navigate while blind
 
 josh ideas:
-- make placeholder capsule enemy which hurts player on contact
-- make combat system with placeholder stick to swat at enemies, knocking them back (maybe kill them eventually, maybe not, idk)
-- ramp up volume on a noise channel when an enemy is near
+- [x] make placeholder capsule enemy which hurts player on contact
+- [x]make combat system with placeholder stick to swat at enemies, knocking them back (maybe kill them eventually, maybe not, idk)
+- [x] ramp up volume on a noise channel when an enemy is near
 
 Questions:
 - how to manually run the headless startup in "Validation: headless Godot 4.6.1 startup passed cleanly"
