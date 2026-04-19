@@ -9,6 +9,7 @@ const SFX_BUS_NAME := &"SFX"
 const NORMAL_MUSIC_PATH := "res://assets/audio/music/menu-loop.mp3"
 const SONAR_MUSIC_PATH := "res://assets/audio/music/menu_static-loop.mp3"
 const SONAR_PING_SFX_PATH := "res://assets/audio/sfx/ping_2.mp3"
+const LIGHT_SWITCH_SFX_PATH := "res://assets/audio/sfx/switch_1.wav"
 const DEBUG_TOGGLE_KEY := KEY_QUOTELEFT
 const DEBUG_SAMPLE_WINDOW := 5.0
 const DEBUG_REFRESH_INTERVAL := 0.2
@@ -22,8 +23,12 @@ const PING_SOUND_MAX_PITCH := 1.35
 const DOOR_OPEN_ANGLE := deg_to_rad(100.0)
 const DOOR_OPEN_DURATION := 0.45
 const DOOR_FACING_THRESHOLD := 0.72
+const LIGHT_SWITCH_ANIMATION_NAME := &"switch-down"
+const LIGHT_SWITCH_TOGGLE_DEBOUNCE_SECONDS := 0.25
 const MIN_VOLUME_DB := -80.0
 const DOOR_PROMPT_TEXT := "Press E to open door"
+const LIGHT_SWITCH_ON_PROMPT_TEXT := "Press E to turn lights on"
+const LIGHT_SWITCH_OFF_PROMPT_TEXT := "Press E to turn lights off"
 const WIN_ORB_PROMPT_TEXT := "Press E to touch the sphere"
 
 @export var ping_cooldown_seconds: float = 0.6
@@ -49,8 +54,11 @@ const WIN_ORB_PROMPT_TEXT := "Press E to touch the sphere"
 @onready var door_pivot: Node3D = $Room/Doorway/DoorPivot
 @onready var door_body: StaticBody3D = $Room/Doorway/DoorPivot/Door
 @onready var door_interaction_area: Area3D = $Room/Doorway/InteractionArea
+@onready var room_omni_light: OmniLight3D = $Room/OmniLight3D
 @onready var win_orb_body: StaticBody3D = $Props/WinOrb/OrbBody
 @onready var win_orb_interaction_area: Area3D = $Props/WinOrb/InteractionArea
+@onready var light_switch_root: Node3D = $"Props/light-switch"
+@onready var light_switch_interaction_area: Area3D = $"Props/light-switch/InteractionArea"
 @onready var prompt_root: Control = $InteractionUI/PromptRoot
 @onready var interaction_prompt: Label = $InteractionUI/PromptRoot/InteractionPrompt
 @onready var fan_root: Node = $Props/fan
@@ -73,10 +81,14 @@ var occluder_material: StandardMaterial3D
 var normal_music_player: AudioStreamPlayer
 var sonar_music_player: AudioStreamPlayer
 var sonar_ping_player: AudioStreamPlayer
+var light_switch_player: AudioStreamPlayer
 var door_closed_rotation_y := 0.0
 var door_is_open := false
 var door_is_animating := false
 var door_open_tween: Tween
+var light_switch_animation_player: AnimationPlayer
+var room_light_enabled := true
+var light_switch_toggle_cooldown_remaining := 0.0
 var player_spawn_transform := Transform3D.IDENTITY
 var gameplay_started := false
 var pause_menu_visible := false
@@ -126,6 +138,8 @@ func _ready() -> void:
 	_sync_sonar_camera()
 	_sync_proxy_transforms()
 	door_closed_rotation_y = door_pivot.rotation.y
+	light_switch_animation_player = _find_animation_player(light_switch_root)
+	room_light_enabled = room_omni_light != null and room_omni_light.visible
 	player_spawn_transform = player.global_transform
 	_set_sonar_mode(false)
 	_update_shader_state()
@@ -171,6 +185,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_show_win_screen()
 			return
 
+		if _can_toggle_room_light():
+			_toggle_room_light()
+			return
+
 		if _can_open_door():
 			_open_door()
 			return
@@ -197,6 +215,7 @@ func _process(delta: float) -> void:
 	_sync_sonar_camera()
 	_sync_proxy_transforms()
 	_update_interaction_prompt()
+	_update_light_switch_toggle_cooldown(delta)
 
 	if ping_cooldown_remaining > 0.0 and not ping_frozen:
 		ping_cooldown_remaining = max(ping_cooldown_remaining - delta, 0.0)
@@ -359,13 +378,20 @@ func _create_sfx_players() -> void:
 	sonar_ping_player.stream = load(SONAR_PING_SFX_PATH)
 	add_child(sonar_ping_player)
 
+	light_switch_player = AudioStreamPlayer.new()
+	light_switch_player.name = "LightSwitchPlayer"
+	light_switch_player.bus = SFX_BUS_NAME
+	light_switch_player.stream = load(LIGHT_SWITCH_SFX_PATH)
+	add_child(light_switch_player)
+
 
 func _release_sfx_players() -> void:
-	if sonar_ping_player == null:
-		return
+	for player in [sonar_ping_player, light_switch_player]:
+		if player == null:
+			continue
 
-	sonar_ping_player.stop()
-	sonar_ping_player.stream = null
+		player.stop()
+		player.stream = null
 
 
 func _configure_overlay() -> void:
@@ -1006,6 +1032,9 @@ func _get_interaction_prompt_text() -> String:
 	if _can_trigger_win():
 		return WIN_ORB_PROMPT_TEXT
 
+	if _can_toggle_room_light():
+		return LIGHT_SWITCH_ON_PROMPT_TEXT if not room_light_enabled else LIGHT_SWITCH_OFF_PROMPT_TEXT
+
 	if _can_open_door():
 		return DOOR_PROMPT_TEXT
 
@@ -1022,6 +1051,14 @@ func _player_is_near_door() -> bool:
 
 func _player_is_facing_door() -> bool:
 	return _player_is_facing_target(door_body.global_position)
+
+
+func _can_toggle_room_light() -> bool:
+	return light_switch_toggle_cooldown_remaining <= 0.0 and _player_is_near_light_switch() and _player_is_facing_target(light_switch_root.global_position)
+
+
+func _player_is_near_light_switch() -> bool:
+	return player != null and light_switch_interaction_area != null and light_switch_interaction_area.overlaps_body(player)
 
 
 func _can_trigger_win() -> bool:
@@ -1053,6 +1090,44 @@ func _open_door() -> void:
 func _on_door_open_finished() -> void:
 	door_is_animating = false
 	door_is_open = true
+
+
+func _toggle_room_light() -> void:
+	room_light_enabled = not room_light_enabled
+	light_switch_toggle_cooldown_remaining = LIGHT_SWITCH_TOGGLE_DEBOUNCE_SECONDS
+	interaction_prompt.visible = false
+	_sync_room_light_state()
+	_play_light_switch_sound()
+	_play_light_switch_animation(not room_light_enabled)
+
+
+func _sync_room_light_state() -> void:
+	if room_omni_light != null:
+		room_omni_light.visible = room_light_enabled
+
+
+func _play_light_switch_animation(play_forward: bool) -> void:
+	if light_switch_animation_player == null:
+		return
+
+	if play_forward:
+		light_switch_animation_player.play(LIGHT_SWITCH_ANIMATION_NAME)
+	else:
+		light_switch_animation_player.play(LIGHT_SWITCH_ANIMATION_NAME, -1.0, -1.0, true)
+
+
+func _play_light_switch_sound() -> void:
+	if light_switch_player == null:
+		return
+
+	light_switch_player.play()
+
+
+func _update_light_switch_toggle_cooldown(delta: float) -> void:
+	if light_switch_toggle_cooldown_remaining <= 0.0:
+		return
+
+	light_switch_toggle_cooldown_remaining = max(light_switch_toggle_cooldown_remaining - delta, 0.0)
 
 
 func _on_kill_floor_body_entered(body: Node) -> void:

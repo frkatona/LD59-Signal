@@ -3,11 +3,13 @@
 [ext_resource type="Script" uid="uid://b3ebx2i83ld2t" path="res://scripts/sonar_vision_controller.gd" id="2_sonar"]
 [ext_resource type="PackedScene" uid="uid://bme1uywuhta4a" path="res://scenes/player.tscn" id="2_tipki"]
 [ext_resource type="PackedScene" uid="uid://mb7hqotwfu75" path="res://assets/models/chair.glb" id="3_chair"]
+[ext_resource type="PackedScene" uid="uid://c5xt53r6xiuur" path="res://assets/models/oscilloscope.glb" id="3_choun"]
 [ext_resource type="PackedScene" uid="uid://d13xnsm7t448a" path="res://assets/models/fan.glb" id="3_jyhfs"]
 [ext_resource type="PackedScene" uid="uid://bwkh10wgul3et" path="res://assets/models/dalek.glb" id="3_tefeu"]
 [ext_resource type="PackedScene" uid="uid://m3lxy2w7yit0" path="res://assets/models/stepping-stone.glb" id="5_tbgi4"]
 [ext_resource type="PackedScene" uid="uid://dl0p5kuohdqja" path="res://assets/models/lab-bench.glb" id="6_o6xl0"]
 [ext_resource type="PackedScene" uid="uid://cfaa6d3t863va" path="res://scenes/enemy.tscn" id="8_tipki"]
+[ext_resource type="PackedScene" uid="uid://c5l62di7vxio2" path="res://assets/models/light-switch.glb" id="9_85g3d"]
 
 [sub_resource type="Environment" id="Environment_tbgi4"]
 background_energy_multiplier = 0.0
@@ -73,7 +75,7 @@ roughness = 0.92
 material = SubResource("StandardMaterial3D_door_panel")
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_door_interaction"]
-size = Vector3(2.8, 3.2, 2.4)
+size = Vector3(2.8, 3.2, 1.2161133)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall_side"]
 size = Vector3(0.5, 4, 12)
@@ -100,6 +102,9 @@ height = 1.1
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_win_orb_interaction"]
 radius = 1.8
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_light_switch_interaction"]
+size = Vector3(5.9825044, 7.521753, 5.748584)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tu7hw"]
 resource_name = "stone"
@@ -186,8 +191,8 @@ script = ExtResource("2_sonar")
 ping_cooldown_seconds = 2.0
 ping_speed = 10.0
 ping_max_radius = 20.0
-ping_band_width = 1.0
-ping_band_fade = 2.0
+ping_band_width = 2.0
+ping_band_fade = 5.0
 
 [node name="Environment" type="Node3D" parent="." unique_id=2031291799]
 
@@ -223,7 +228,10 @@ layout_mode = 0
 text = "Press E to open door"
 
 [node name="Player" parent="." unique_id=22887971 instance=ExtResource("2_tipki")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 2.8153815)
+
+[node name="oscilloscope" parent="Player" unique_id=1917917503 instance=ExtResource("3_choun")]
+transform = Transform3D(0.16816652, 0, 0, 0, 0.16203153, 0.04500842, 0, -0.04500842, 0.16203153, 0.709725, 1.1606226, -0.9821894)
 
 [node name="VisionOverlay" type="CanvasLayer" parent="." unique_id=267744132]
 layer = 100
@@ -301,7 +309,7 @@ transform = Transform3D(0.408333, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("BoxShape3D_wall_wide")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Room/SouthWallRight" unique_id=1950400851]
-transform = Transform3D(0.408333, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(0.408333, 0, 0, 0, 1, 0, 0, 0, 1, -0.0005354881, 0, 0.0032510757)
 mesh = SubResource("BoxMesh_wall_wide")
 
 [node name="SouthWallHeader" type="StaticBody3D" parent="Room" unique_id=540004564 groups=["sonar_occluder"]]
@@ -360,6 +368,7 @@ mesh = SubResource("BoxMesh_door_panel")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -1.2)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Room/Doorway/InteractionArea" unique_id=1339914028]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.59194326)
 shape = SubResource("BoxShape3D_door_interaction")
 
 [node name="WestWall" type="StaticBody3D" parent="Room" unique_id=452767522 groups=["sonar_occluder"]]
@@ -381,7 +390,7 @@ shape = SubResource("BoxShape3D_wall_side")
 mesh = SubResource("BoxMesh_wall_side")
 
 [node name="OmniLight3D" type="OmniLight3D" parent="Room" unique_id=1383541854]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.44857037, 2.8331141, 0.37845945)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6940484, 3.2523572, 0.6161754)
 light_energy = 1.5
 shadow_enabled = true
 omni_range = 10.0
@@ -421,14 +430,24 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35, 0)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Props/WinOrb/InteractionArea" unique_id=390475869]
 shape = SubResource("SphereShape3D_win_orb_interaction")
 
-[node name="lab-bench" parent="Props" unique_id=2129328667 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("6_o6xl0")]
+[node name="lab-bench" parent="Props" unique_id=941744125 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("6_o6xl0")]
 transform = Transform3D(-3.3236365e-08, 0, 0.7603594, 0, 0.7603594, 0, -0.7603594, 0, -3.3236365e-08, -5.3361416, 0.09189254, -1.9738336)
 
-[node name="lab-bench2" parent="Props" unique_id=416406535 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("6_o6xl0")]
+[node name="lab-bench2" parent="Props" unique_id=261363570 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("6_o6xl0")]
 transform = Transform3D(-0.76035935, 0, -6.647272e-08, 0, 0.76035935, 0, 6.647272e-08, 0, -0.76035935, -2.9891753, 0.09189254, 5.3862796)
 
-[node name="lab-bench3" parent="Props" unique_id=197663401 groups=["sonar_occluder"] instance=ExtResource("6_o6xl0")]
-transform = Transform3D(-0.76035935, 0, -6.647272e-08, 0, 0.76035935, 0, 6.647272e-08, 0, -0.76035935, -0.0763433, 0.0918923, 0.18074417)
+[node name="lab-bench3" parent="Props" unique_id=2025360472 groups=["sonar_occluder"] instance=ExtResource("6_o6xl0")]
+transform = Transform3D(0.7603593, 0, -7.1054274e-15, 0, 0.7603593, 0, 7.1054274e-15, 0, 0.7603593, 1.0842574, 0.0918923, -5.3680596)
+
+[node name="light-switch" parent="Props" unique_id=914163819 groups=["sonar_reveal"] instance=ExtResource("9_85g3d")]
+transform = Transform3D(-0.18130338, 0, -1.5850045e-08, 0, 0.18130338, 0, 1.5850045e-08, 0, -0.18130338, 2.5497, 1.3073962, 5.9604416)
+
+[node name="InteractionArea" type="Area3D" parent="Props/light-switch" unique_id=1090664854]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 2.3)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Props/light-switch/InteractionArea" unique_id=836380636]
+transform = Transform3D(1, 0, 1.4210855e-14, 0, 1, 0, -1.4210855e-14, 0, 1, 0.10915756, -0.019591808, 0.4271145)
+shape = SubResource("BoxShape3D_light_switch_interaction")
 
 [node name="SteppingStones" type="Node3D" parent="." unique_id=81523368]
 
@@ -460,12 +479,13 @@ transform = Transform3D(0.88732, 0, 0.96189797, 0, 1, 0, -0.9815687, 0, 0.869538
 shape = SubResource("ConvexPolygonShape3D_tbgi4")
 
 [node name="Enemy" parent="." unique_id=196884257 node_paths=PackedStringArray("nav_mesh", "player") groups=["sonar_reveal"] instance=ExtResource("8_tipki")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.268036, -1.1920929e-07, 2.8400624)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1053405, -3.5762787e-07, -3.8320973)
 move_speed = 1.0
 nav_mesh = NodePath("../NavigationRegion3D")
 player = NodePath("../Player")
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=239465632]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00041365623, 0, 0.002642393)
 navigation_mesh = SubResource("NavigationMesh_tipki")
 
 [editable path="Props/fan"]
