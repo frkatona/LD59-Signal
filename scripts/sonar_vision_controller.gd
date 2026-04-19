@@ -217,6 +217,7 @@ func _process(delta: float) -> void:
 	_record_frame_sample(delta)
 	_update_debug_overlay(delta)
 	_resize_sonar_viewport()
+	_sync_signal_scope_overlay_cutout()
 
 	if _is_menu_open():
 		interaction_prompt.visible = false
@@ -419,6 +420,28 @@ func _configure_overlay() -> void:
 	sonar_rect.stretch_mode = TextureRect.STRETCH_SCALE
 	sonar_rect.material = composite_material
 	sonar_rect.texture = sonar_viewport.get_texture()
+
+
+func _sync_signal_scope_overlay_cutout() -> void:
+	if static_material == null or composite_material == null or player == null:
+		return
+
+	var cutout_enabled := false
+	var cutout_center := Vector2(0.0, 0.0)
+	var cutout_half_size := Vector2(0.0, 0.0)
+
+	if player.has_method("get_signal_scope_overlay_cutout"):
+		var viewport_size := get_viewport().get_visible_rect().size
+		var cutout: Dictionary = player.call("get_signal_scope_overlay_cutout", viewport_size)
+		if not cutout.is_empty():
+			cutout_enabled = true
+			cutout_center = cutout.get("center_uv", cutout_center)
+			cutout_half_size = cutout.get("half_size_uv", cutout_half_size)
+
+	for material in [static_material, composite_material]:
+		material.set_shader_parameter("scope_cutout_enabled", cutout_enabled)
+		material.set_shader_parameter("scope_cutout_center", cutout_center)
+		material.set_shader_parameter("scope_cutout_half_size", cutout_half_size)
 
 
 func _configure_interaction_prompt() -> void:

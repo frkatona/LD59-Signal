@@ -8,6 +8,7 @@ const SIGNAL_SCOPE_SHADER := preload("res://shaders/oscilloscope_signal.gdshader
 const DEFAULT_FOOTSTEP_BUS := &"SFX"
 const SIGNAL_ENEMY_GROUP := &"signal_enemy"
 const SIGNAL_SCOPE_RESPONSE_SPEED := 2.8
+const SIGNAL_SCOPE_OVERLAY_PADDING := Vector2(40.0, 32.0)
 
 @export var move_speed: float = 5.0
 @export var jump_velocity: float = 4.5
@@ -209,6 +210,56 @@ func _get_signal_scope_target_strength() -> float:
 		return 0.0
 
 	return 1.0 - inverse_lerp(clamped_min_distance, clamped_max_distance, nearest_enemy_distance)
+
+
+func get_signal_scope_overlay_cutout(viewport_size: Vector2) -> Dictionary:
+	if signal_scope_display == null or player_camera == null:
+		return {}
+
+	if viewport_size.x <= 0.0 or viewport_size.y <= 0.0:
+		return {}
+
+	var scope_mesh := signal_scope_display.mesh as QuadMesh
+	if scope_mesh == null:
+		return {}
+
+	var half_mesh_size := scope_mesh.size * 0.5
+	var corners := [
+		Vector3(-half_mesh_size.x, -half_mesh_size.y, 0.0),
+		Vector3(half_mesh_size.x, -half_mesh_size.y, 0.0),
+		Vector3(half_mesh_size.x, half_mesh_size.y, 0.0),
+		Vector3(-half_mesh_size.x, half_mesh_size.y, 0.0),
+	]
+	var min_screen := Vector2(INF, INF)
+	var max_screen := Vector2(-INF, -INF)
+
+	for corner in corners:
+		var world_point := signal_scope_display.to_global(corner)
+		if player_camera.is_position_behind(world_point):
+			return {}
+
+		var screen_point := player_camera.unproject_position(world_point)
+		min_screen.x = minf(min_screen.x, screen_point.x)
+		min_screen.y = minf(min_screen.y, screen_point.y)
+		max_screen.x = maxf(max_screen.x, screen_point.x)
+		max_screen.y = maxf(max_screen.y, screen_point.y)
+
+	min_screen -= SIGNAL_SCOPE_OVERLAY_PADDING
+	max_screen += SIGNAL_SCOPE_OVERLAY_PADDING
+
+	var rect_center := (min_screen + max_screen) * 0.5
+	var rect_half_size := (max_screen - min_screen) * 0.5
+
+	return {
+		"center_uv": Vector2(
+			clampf(rect_center.x / viewport_size.x, 0.0, 1.0),
+			clampf(rect_center.y / viewport_size.y, 0.0, 1.0)
+		),
+		"half_size_uv": Vector2(
+			clampf(rect_half_size.x / viewport_size.x, 0.0, 0.5),
+			clampf(rect_half_size.y / viewport_size.y, 0.0, 0.5)
+		),
+	}
 
 
 func _update_footsteps(delta: float) -> void:

@@ -34,6 +34,7 @@ butler push LD59.zip akatona/geordi-la-forge:web
   - [x] model a light switch for the room to make the sonar useful
   - [x] model a handheld oscilloscope
 - actually pause the game during pause menu and start screen
+- sfx for for enemy movement and oscilloscopes sinewaves
 
 ### cool clever little ideas
 - finding the lightswitch is the first part of the puzzle
