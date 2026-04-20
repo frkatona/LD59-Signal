@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://dcaf0162623dw"]
+
+[ext_resource type="PackedScene" uid="uid://dl0p5kuohdqja" path="res://assets/models/lab-bench.glb" id="1_a202f"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_noarx"]
+points = PackedVector3Array(-1.819461, -0.07547168, -0.757637, 1.8949573, 2.1880333, -0.43407342, 1.6855524, 1.428, 0.7210608, -1.8950093, 2.1880333, -0.43407342, -1.7776663, -0.05000267, 0.7599, 1.819409, -0.07547168, -0.757637, 1.7776144, -0.05000267, 0.7599, -1.6856043, 1.428, 0.7210608, -1.8248249, 2.1452641, -0.7599, 1.824773, 2.1452641, -0.7599)
+
+[node name="Sink" type="Node3D" unique_id=2038279140]
+
+[node name="lab-bench" parent="." unique_id=941744125 instance=ExtResource("1_a202f")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="lab-bench" unique_id=1250545979]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.11690569, 0, -0.119244576)
+shape = SubResource("ConvexPolygonShape3D_noarx")
+
+[editable path="lab-bench"]

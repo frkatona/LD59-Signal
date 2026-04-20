@@ -828,15 +828,17 @@ func _create_pause_menu_panel() -> PanelContainer:
 	pause_tab.add_child(HSeparator.new())
 
 	var goal_title := Label.new()
-	goal_title.text = "Goal"
+	goal_title.text = "Goal: Escape to the next room"
 	goal_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	pause_tab.add_child(goal_title)
 
-	var goal_label := Label.new()
-	goal_label.text = "Escape the building."
-	goal_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	pause_tab.add_child(goal_label)
+	# var goal_label := Label.new()
+	# goal_label.text = "Escape the building."
+	# goal_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	# goal_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# pause_tab.add_child(goal_label)
+
+	pause_tab.add_child(HSeparator.new())
 
 	var controls_title := Label.new()
 	controls_title.text = "Controls"
@@ -844,7 +846,7 @@ func _create_pause_menu_panel() -> PanelContainer:
 	pause_tab.add_child(controls_title)
 
 	var controls_label := Label.new()
-	controls_label.text = "Move: WASD\nLook: Mouse\nJump: Space\nSwing: Left Click\nInteract: E\nStatic Vision: G\nSonar Ping: F\nPing Speed: Mouse Wheel\nPause: Tab\nWorld Light: Backspace\nDebug: `"
+	controls_label.text = "Jump: Space\nSwing: Mouse2\nStatic Vision: G\nSonar Ping: F\nPing Speed: Mouse Wheel\nPause: Tab"
 	controls_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	controls_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	pause_tab.add_child(controls_label)
@@ -950,22 +952,22 @@ func _add_volume_slider(parent: VBoxContainer, label_text: String, bus_name: Str
 
 func _add_graphics_quality_selector(parent: VBoxContainer) -> void:
 	var row := VBoxContainer.new()
-	row.add_theme_constant_override("separation", 4)
-	parent.add_child(row)
+	# row.add_theme_constant_override("separation", 4)
+	# parent.add_child(row)
 
-	var label := Label.new()
-	label.text = "Graphics Quality"
-	row.add_child(label)
+	# var label := Label.new()
+	# label.text = "Graphics Quality"
+	# row.add_child(label)
 
-	quality_mode_selector = OptionButton.new()
-	quality_mode_selector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	quality_mode_selector.add_item("Auto", GraphicsQualityMode.AUTO)
-	quality_mode_selector.add_item("High", GraphicsQualityMode.HIGH)
-	quality_mode_selector.add_item("Performance", GraphicsQualityMode.PERFORMANCE)
-	quality_mode_selector.item_selected.connect(_on_graphics_quality_selected)
-	row.add_child(quality_mode_selector)
+	# quality_mode_selector = OptionButton.new()
+	# quality_mode_selector.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	# quality_mode_selector.add_item("Auto", GraphicsQualityMode.AUTO)
+	# quality_mode_selector.add_item("High", GraphicsQualityMode.HIGH)
+	# quality_mode_selector.add_item("Performance", GraphicsQualityMode.PERFORMANCE)
+	# quality_mode_selector.item_selected.connect(_on_graphics_quality_selected)
+	# row.add_child(quality_mode_selector)
 
-	_sync_graphics_quality_control()
+	# _sync_graphics_quality_control()
 
 
 func _add_mouse_sensitivity_slider(parent: VBoxContainer) -> void:

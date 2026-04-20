@@ -62,17 +62,15 @@ josh test play results:
     - [ ] room 2: introduce the ping tool and the noise overlay
     - [ ] room 3: introduce a disabled, static enemy (light color to indicate disabled? also implement a short stun to the hit enemies in general which will trigger this light color); pick up the crowbar
     - [ ] room 4: introduce the stick and combat
-- stetch:
-  - variations in wave generation
-  - mcguffins
-- polish: sine waves scroll speed
-
 - [x] simplify door shader, make it parallel the door buttons
+- stetch:
+  - [x] variations in wave generation for mcguffins
+  - [ ] polish: sine waves scroll speed
 
 - next josh ideas?
   - let's expand to a bigger space --> give the enemies a patrol with a leash
-    - [ ] line of sight -> investigate last known position, then return to patrol if they lose sight of the player
-    - [ ] visual indicator for active state (light color: yellow investigate, red chase, blue return to patrol?)
+    - [x] line of sight -> investigate last known position, then return to patrol if they lose sight of the player
+    - [x] visual indicator for active state (light color: yellow investigate, red chase, blue return to patrol?)
   - [x] audio still not working in web
 
 ### cool clever little ideas
