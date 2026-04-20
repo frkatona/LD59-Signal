@@ -20,10 +20,8 @@ const PING_SPEED_UI_MIN := 1
 const PING_SPEED_UI_MAX := 10
 const PING_SOUND_MIN_PITCH := 0.85
 const PING_SOUND_MAX_PITCH := 1.35
-const DOOR_OPEN_ANGLE := deg_to_rad(100.0)
-const DOOR_OPEN_DURATION := 0.45
 const DOOR_FACING_THRESHOLD := 0.72
-const SLIDING_DOOR_GROUP := &"sliding_door"
+const DOOR_BUTTON_GROUP := &"door_button"
 const LIGHT_SWITCH_ANIMATION_NAME := &"switch-down"
 const LIGHT_SWITCH_TOGGLE_DEBOUNCE_SECONDS := 0.25
 const ROOM_LIGHT_START_ENABLED := false
@@ -43,7 +41,6 @@ const UI_REFERENCE_SIZE := Vector2(1280.0, 720.0)
 const UI_MIN_SCALE := 1.0
 const DEBUG_PANEL_BASE_POSITION := Vector2(12.0, 12.0)
 const MIN_VOLUME_DB := -80.0
-const DOOR_PROMPT_TEXT := "Press E to open door"
 const LIGHT_SWITCH_ON_PROMPT_TEXT := "Press E to turn lights on"
 const LIGHT_SWITCH_OFF_PROMPT_TEXT := "Press E to turn lights off"
 const WIN_ORB_PROMPT_TEXT := "Press E to touch the sphere"
@@ -75,9 +72,6 @@ enum GraphicsQualityMode {
 @onready var static_rect: ColorRect = $Player/VisionOverlay/OverlayRoot/StaticRect
 @onready var sonar_rect: TextureRect = $Player/VisionOverlay/OverlayRoot/SonarRect
 @onready var world_environment: WorldEnvironment = $Environment/WorldEnvironment
-@onready var door_pivot: Node3D = $Room1/Doorway/DoorPivot
-@onready var door_body: StaticBody3D = $Room1/Doorway/DoorPivot/Door
-@onready var door_interaction_area: Area3D = $Room1/Doorway/InteractionArea
 @onready var room_omni_light: OmniLight3D = $Room1/OmniLight3D
 @onready var win_orb_body: StaticBody3D = $EndGame/WinOrb/OrbBody
 @onready var win_orb_omni_light: OmniLight3D = $EndGame/WinOrb/OrbBody/OmniLight3D
@@ -114,10 +108,6 @@ var normal_music_player: AudioStreamPlayer
 var sonar_music_player: AudioStreamPlayer
 var sonar_ping_player: AudioStreamPlayer
 var light_switch_player: AudioStreamPlayer
-var door_closed_rotation_y := 0.0
-var door_is_open := false
-var door_is_animating := false
-var door_open_tween: Tween
 var light_switch_animation_player: AnimationPlayer
 var room_light_enabled := true
 var world_energy_enabled := false
@@ -180,7 +170,6 @@ func _ready() -> void:
 	_rebuild_proxy_scene()
 	_sync_sonar_camera()
 	_sync_proxy_transforms()
-	door_closed_rotation_y = door_pivot.rotation.y
 	light_switch_animation_player = _find_animation_player(light_switch_root)
 	room_light_enabled = ROOM_LIGHT_START_ENABLED
 	_sync_room_light_state()
@@ -254,14 +243,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			_toggle_room_light()
 			return
 
-		var sliding_door := _get_interactable_sliding_door()
-		if sliding_door != null:
-			sliding_door.interact()
+		var door_button := _get_interactable_door_button()
+		if door_button != null:
+			door_button.interact()
 			interaction_prompt.visible = false
-			return
-
-		if _can_open_door():
-			_open_door()
 			return
 
 	if event.is_action_pressed("toggle_sonar_mode"):
@@ -546,7 +531,7 @@ func _configure_interaction_prompt() -> void:
 
 	interaction_prompt.visible = false
 	interaction_prompt.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	interaction_prompt.text = DOOR_PROMPT_TEXT
+	interaction_prompt.text = ""
 	interaction_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	interaction_prompt.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	interaction_prompt.anchor_left = 0.5
@@ -1418,38 +1403,23 @@ func _get_interaction_prompt_text() -> String:
 	if _can_toggle_room_light():
 		return LIGHT_SWITCH_ON_PROMPT_TEXT if not room_light_enabled else LIGHT_SWITCH_OFF_PROMPT_TEXT
 
-	var sliding_door := _get_interactable_sliding_door()
-	if sliding_door != null:
-		return sliding_door.get_prompt_text()
-
-	if _can_open_door():
-		return DOOR_PROMPT_TEXT
+	var door_button := _get_interactable_door_button()
+	if door_button != null:
+		return door_button.get_prompt_text()
 
 	return ""
 
 
-func _get_interactable_sliding_door() -> SlidingHaloDoor:
-	for node in get_tree().get_nodes_in_group(SLIDING_DOOR_GROUP):
-		var sliding_door := node as SlidingHaloDoor
-		if sliding_door == null:
+func _get_interactable_door_button() -> DoorButton:
+	for node in get_tree().get_nodes_in_group(DOOR_BUTTON_GROUP):
+		var door_button := node as DoorButton
+		if door_button == null:
 			continue
 
-		if sliding_door.can_player_interact(player, player_camera):
-			return sliding_door
+		if door_button.can_player_interact(player, player_camera):
+			return door_button
 
 	return null
-
-
-func _can_open_door() -> bool:
-	return not door_is_open and not door_is_animating and _player_is_near_door() and _player_is_facing_door()
-
-
-func _player_is_near_door() -> bool:
-	return player != null and door_interaction_area != null and door_interaction_area.overlaps_body(player)
-
-
-func _player_is_facing_door() -> bool:
-	return _player_is_facing_target(door_body.global_position)
 
 
 func _can_toggle_room_light() -> bool:
@@ -1472,23 +1442,6 @@ func _player_is_facing_target(target_position: Vector3) -> bool:
 	var to_target := (target_position - player_camera.global_position).normalized()
 	var camera_forward := -player_camera.global_transform.basis.z.normalized()
 	return camera_forward.dot(to_target) >= DOOR_FACING_THRESHOLD
-
-
-func _open_door() -> void:
-	door_is_animating = true
-	interaction_prompt.visible = false
-
-	if is_instance_valid(door_open_tween):
-		door_open_tween.kill()
-
-	door_open_tween = create_tween()
-	door_open_tween.tween_property(door_pivot, "rotation:y", door_closed_rotation_y - DOOR_OPEN_ANGLE, DOOR_OPEN_DURATION).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	door_open_tween.finished.connect(_on_door_open_finished, CONNECT_ONE_SHOT)
-
-
-func _on_door_open_finished() -> void:
-	door_is_animating = false
-	door_is_open = true
 
 
 func _toggle_room_light() -> void:

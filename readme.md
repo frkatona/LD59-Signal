@@ -47,7 +47,7 @@ butler push LD59.zip akatona/geordi-la-forge:web
 - [ ] implement enemy collision = death screen (try to make it clear to the player what happened...maybe pull back the camera and make a short-range omnilight at the player position to show the enemy for a moment before the 'retry' screen?)
 - [x] working web audio
   - [x] make sure web audio either has a good starting volume or it's overwhelmingly clear to the player immediately at the start screen how to get to the volume control...maybe just start volume at 0.5
-- [ ] why is it so laggy in full screen?  what can I do to keep it lightweight?
+- [?] why is it so laggy in full screen?  what can I do to keep it lightweight?
 
 josh test play results:
 - [x] start volume at ~5-10%
@@ -72,7 +72,7 @@ josh test play results:
   - let's expand to a bigger space --> give the enemies a patrol with a leash
     - [ ] line of sight -> investigate last known position, then return to patrol if they lose sight of the player
     - [ ] visual indicator for active state (light color: yellow investigate, red chase, blue return to patrol?)
-  - [ ] audio still not working in web
+  - [x] audio still not working in web
 
 ### cool clever little ideas
 - finding the lightswitch is the first part of the puzzle

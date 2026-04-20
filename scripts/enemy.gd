@@ -3,7 +3,6 @@ extends CharacterBody3D
 
 const SIGNAL_ENEMY_GROUP := &"signal_enemy"
 const MAIN_PLAYER_GROUP := &"main_player"
-const NAV_MESH_OFFSET := Vector3(0, 0.5, 0)
 const INDICATOR_PUSH_DURATION_SECONDS := 2.0
 
 @export var nav_mesh: NavigationRegion3D
@@ -61,6 +60,7 @@ func _ready() -> void:
 	_update_indicator_light()
 
 	ai.state_changed.connect(_on_enemy_ai_state_changed)
+	_on_enemy_ai_state_changed(ai.current_state)
 
 
 func _resolve_player() -> void:
@@ -85,27 +85,18 @@ func _physics_process(_delta: float) -> void:
 		enemy_rigid_body.linear_velocity = Vector3.ZERO
 		enemy_rigid_body.global_position = global_position
 
-	if ai.current_state != EnemyAI.State.CHASING:
+	if not nav_mesh:
+		_stop_navigation(_delta)
 		return
 
-	if not nav_mesh:
-		return
-	elif not navigation_agent_3d.get_navigation_map():
+	if not navigation_agent_3d.get_navigation_map():
 		navigation_agent_3d.set_navigation_map(nav_mesh)
 
-	navigation_agent_3d.target_position = player.global_transform.origin
-	_face_player(_delta)
-
-	if navigation_agent_3d.is_navigation_finished():
+	if not ai.should_move():
+		_stop_navigation(_delta)
 		return
-	else:
-		var next_path_position: Vector3 = navigation_agent_3d.get_next_path_position()
-		var direction: Vector3 = (next_path_position - global_transform.origin).normalized()
-		velocity = direction - NAV_MESH_OFFSET * move_speed
 
-		# Apply gravity
-		velocity.y -= gravity * _delta
-		move_and_slide()
+	_move_toward_target(ai.get_movement_target_position(), _delta)
 
 func _update_color() -> void:
 	if not enemy_material:
@@ -152,28 +143,61 @@ func _update_indicator_light() -> void:
 	indicator_light_material.emission = target_color
 
 
-func _face_player(delta: float) -> void:
-	if player == null:
+func _face_target(target_position: Vector3, delta: float) -> void:
+	var to_target: Vector3 = target_position - global_position
+	to_target.y = 0.0
+	if to_target.length_squared() <= 0.0001:
 		return
 
-	var to_player: Vector3 = player.global_position - global_position
-	to_player.y = 0.0
-	if to_player.length_squared() <= 0.0001:
-		return
-
-	var target_yaw: float = atan2(to_player.x, to_player.z) + PI + deg_to_rad(facing_yaw_offset_degrees)
+	var target_yaw: float = atan2(to_target.x, to_target.z) + PI + deg_to_rad(facing_yaw_offset_degrees)
 	rotation.y = lerp_angle(rotation.y, target_yaw, clampf(turn_speed * delta, 0.0, 1.0))
+
+
+func _move_toward_target(target_position: Vector3, delta: float) -> void:
+	navigation_agent_3d.target_position = target_position
+
+	if navigation_agent_3d.is_navigation_finished():
+		_stop_navigation(delta)
+		return
+
+	var next_path_position: Vector3 = navigation_agent_3d.get_next_path_position()
+	var direction: Vector3 = next_path_position - global_position
+	direction.y = 0.0
+	if direction.length_squared() <= 0.0001:
+		_stop_navigation(delta)
+		return
+
+	direction = direction.normalized()
+	velocity.x = direction.x * move_speed
+	velocity.z = direction.z * move_speed
+	_face_target(target_position, delta)
+	_apply_gravity(delta)
+	move_and_slide()
+
+
+func _stop_navigation(delta: float) -> void:
+	velocity.x = move_toward(velocity.x, 0.0, move_speed * 4.0 * delta)
+	velocity.z = move_toward(velocity.z, 0.0, move_speed * 4.0 * delta)
+	_apply_gravity(delta)
+	move_and_slide()
+
+
+func _apply_gravity(delta: float) -> void:
+	if not is_on_floor():
+		velocity.y -= gravity * delta
+	else:
+		velocity.y = 0.0
 		
 func do_push(direction: Vector3) -> void:
-	print("Enemy is being pushed!")
+	if ai != null:
+		ai.stun(INDICATOR_PUSH_DURATION_SECONDS)
+
 	is_being_pushed = true
 	indicator_push_remaining = INDICATOR_PUSH_DURATION_SECONDS
 	enemy_rigid_body.linear_velocity = direction
-	print("Push velocity applied to enemy: ", direction)
 
 
 func _on_enemy_ai_state_changed(new_state: EnemyAI.State) -> void:
-	print("Enemy state changed to: ", new_state)
 	match new_state:
 		EnemyAI.State.IDLE:
 			$Label3D.text = "Idle"

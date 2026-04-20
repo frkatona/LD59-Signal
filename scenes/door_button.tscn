@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://assets/models/light-switch.glb" id="1_switch"]
+[ext_resource type="Script" path="res://scripts/door_button.gd" id="2_script"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_interaction"]
+size = Vector3(5.9825044, 7.521753, 5.748584)
+
+[node name="DoorButton" type="Node3D"]
+script = ExtResource("2_script")
+
+[node name="light-switch" parent="." instance=ExtResource("1_switch")]
+
+[node name="InteractionArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 2.3)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea"]
+transform = Transform3D(1, 0, 1.4210855e-14, 0, 1, 0, -1.4210855e-14, 0, 1, 0.10915756, -0.019591808, 0.4271145)
+shape = SubResource("BoxShape3D_interaction")
+
+[editable path="light-switch"]

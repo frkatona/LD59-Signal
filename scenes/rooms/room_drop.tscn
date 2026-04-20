@@ -228,7 +228,7 @@ transform = Transform3D(-0.76035935, 0, -6.647272e-08, 0, 0.76035935, 0, 6.64727
 [node name="lab-bench3" parent="Room1/Props" unique_id=207563285 groups=["sonar_occluder"] instance=ExtResource("4_a2sae")]
 transform = Transform3D(0.7603593, 0, -7.1054274e-15, 0, 0.7603593, 0, 7.1054274e-15, 0, 0.7603593, 1.0842574, 0.0918923, -5.3680596)
 
-[node name="light-switch" parent="Room1/Props" unique_id=914163819 groups=["sonar_reveal"] instance=ExtResource("5_jsoye")]
+[node name="light-switch" parent="Room1/Props" unique_id=914163819 groups=["signal_light_switch", "sonar_reveal"] instance=ExtResource("5_jsoye")]
 transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -5.9441714, 1.3073962, 2.6469533)
 
 [node name="InteractionArea" type="Area3D" parent="Room1/Props/light-switch" unique_id=1712369767]

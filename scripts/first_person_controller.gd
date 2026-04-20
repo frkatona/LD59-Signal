@@ -11,6 +11,8 @@ const SIGNAL_SCOPE_SHADER := preload("res://shaders/oscilloscope_signal.gdshader
 const DEFAULT_FOOTSTEP_BUS := &"SFX"
 const MAIN_PLAYER_GROUP := &"main_player"
 const SIGNAL_ENEMY_GROUP := &"signal_enemy"
+const SIGNAL_DOOR_BUTTON_GROUP := &"door_button"
+const SIGNAL_LIGHT_SWITCH_GROUP := &"signal_light_switch"
 const SIGNAL_SCOPE_RESPONSE_SPEED := 2.8
 const CROWBAR_SMACK_ANIMATION := &"smack"
 const CROWBAR_SMACK_SPEED_SCALE := 3.0
@@ -57,7 +59,9 @@ var push_player: AudioStreamPlayer
 var crowbar_animation_player: AnimationPlayer
 var signal_scope_display: MeshInstance3D
 var signal_scope_material: ShaderMaterial
-var signal_scope_strength: float = 0.0
+var enemy_signal_scope_strength := 0.0
+var door_button_signal_scope_strength := 0.0
+var light_switch_signal_scope_strength := 0.0
 var push_cooldown_remaining: float = 0.0
 
 
@@ -204,7 +208,9 @@ func _create_signal_scope_display() -> void:
 
 	signal_scope_material = ShaderMaterial.new()
 	signal_scope_material.shader = SIGNAL_SCOPE_SHADER
-	signal_scope_material.set_shader_parameter("signal_strength", 0.0)
+	signal_scope_material.set_shader_parameter("enemy_signal_strength", 0.0)
+	signal_scope_material.set_shader_parameter("door_signal_strength", 0.0)
+	signal_scope_material.set_shader_parameter("light_switch_signal_strength", 0.0)
 	signal_scope_display.material_override = signal_scope_material
 	_sync_signal_scope_display_configuration()
 
@@ -259,36 +265,78 @@ func _update_signal_scope(delta: float) -> void:
 	if signal_scope_material == null:
 		return
 
-	var target_strength: float = _get_signal_scope_target_strength()
-	signal_scope_strength = move_toward(signal_scope_strength, target_strength, SIGNAL_SCOPE_RESPONSE_SPEED * delta)
-	signal_scope_material.set_shader_parameter("signal_strength", signal_scope_strength)
+	var response_delta: float = SIGNAL_SCOPE_RESPONSE_SPEED * delta
+	var target_signals: Dictionary = _get_signal_scope_target_signals()
+
+	enemy_signal_scope_strength = move_toward(
+		enemy_signal_scope_strength,
+		float(target_signals.get("enemy", 0.0)),
+		response_delta
+	)
+	door_button_signal_scope_strength = move_toward(
+		door_button_signal_scope_strength,
+		float(target_signals.get("door", 0.0)),
+		response_delta
+	)
+	light_switch_signal_scope_strength = move_toward(
+		light_switch_signal_scope_strength,
+		float(target_signals.get("light_switch", 0.0)),
+		response_delta
+	)
+
+	signal_scope_material.set_shader_parameter("enemy_signal_strength", enemy_signal_scope_strength)
+	signal_scope_material.set_shader_parameter("door_signal_strength", door_button_signal_scope_strength)
+	signal_scope_material.set_shader_parameter("light_switch_signal_strength", light_switch_signal_scope_strength)
 
 
-func _get_signal_scope_target_strength() -> float:
+func _get_signal_scope_target_signals() -> Dictionary:
 	var clamped_min_distance: float = maxf(signal_scope_min_distance, 0.0)
 	var clamped_max_distance: float = maxf(signal_scope_max_distance, clamped_min_distance + 0.001)
-	var nearest_enemy_distance: float = clamped_max_distance
-	var has_enemy := false
+	return {
+		"enemy": _get_group_signal_strength(SIGNAL_ENEMY_GROUP, clamped_min_distance, clamped_max_distance),
+		"door": _get_group_signal_strength(SIGNAL_DOOR_BUTTON_GROUP, clamped_min_distance, clamped_max_distance),
+		"light_switch": _get_group_signal_strength(SIGNAL_LIGHT_SWITCH_GROUP, clamped_min_distance, clamped_max_distance),
+	}
 
-	for enemy_node in get_tree().get_nodes_in_group(SIGNAL_ENEMY_GROUP):
-		var enemy_body := enemy_node as Node3D
-		if enemy_body == null:
+
+func _get_group_signal_strength(group_name: StringName, min_distance: float, max_distance: float) -> float:
+	var nearest_distance: float = max_distance
+	var has_source := false
+
+	for node in get_tree().get_nodes_in_group(group_name):
+		var source_position_variant: Variant = _get_signal_source_position(node)
+		if source_position_variant == null:
 			continue
 
-		has_enemy = true
-		var enemy_distance: float = global_position.distance_to(enemy_body.global_position)
-		nearest_enemy_distance = minf(nearest_enemy_distance, enemy_distance)
+		var source_position: Vector3 = source_position_variant
+		has_source = true
+		var source_distance: float = global_position.distance_to(source_position)
+		nearest_distance = minf(nearest_distance, source_distance)
 
-	if not has_enemy:
+	if not has_source:
 		return 0.0
 
-	if nearest_enemy_distance <= clamped_min_distance:
+	if nearest_distance <= min_distance:
 		return 1.0
 
-	if nearest_enemy_distance >= clamped_max_distance:
+	if nearest_distance >= max_distance:
 		return 0.0
 
-	return 1.0 - inverse_lerp(clamped_min_distance, clamped_max_distance, nearest_enemy_distance)
+	return 1.0 - inverse_lerp(min_distance, max_distance, nearest_distance)
+
+
+func _get_signal_source_position(node: Node) -> Variant:
+	if node == null:
+		return null
+
+	if node.has_method("get_signal_source_position"):
+		return node.call("get_signal_source_position")
+
+	var node_3d := node as Node3D
+	if node_3d != null:
+		return node_3d.global_position
+
+	return null
 
 
 func get_signal_scope_overlay_cutout(viewport_size: Vector2) -> Dictionary:

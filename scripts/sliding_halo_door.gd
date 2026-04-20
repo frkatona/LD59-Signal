@@ -62,6 +62,18 @@ func interact() -> void:
 	animation_player.play(open_animation_name)
 
 
+func can_open_from_button() -> bool:
+	return not is_open and not is_animating
+
+
+func open_from_button() -> bool:
+	if not can_open_from_button():
+		return false
+
+	interact()
+	return true
+
+
 func _on_animation_finished(animation_name: StringName) -> void:
 	if animation_name != open_animation_name:
 		return
