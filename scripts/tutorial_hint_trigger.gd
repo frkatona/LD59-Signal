@@ -27,5 +27,5 @@ func _on_body_entered(body: Node) -> void:
 	controller.call("show_temporary_hint", hint_text, hint_duration_seconds)
 	if one_shot:
 		has_triggered = true
-		monitoring = false
-		monitorable = false
+		set_deferred("monitoring", false)
+		set_deferred("monitorable", false)
