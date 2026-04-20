@@ -193,6 +193,7 @@ points = PackedVector3Array(-0.00023770332, -0.07741142, -1, -0.00023770332, 0.0
 script = ExtResource("2_sonar")
 ping_cooldown_seconds = 1.0
 ping_speed = 10.0
+ping_scrub_step_distance = 1.0
 ping_max_radius = 30.0
 ping_band_width = 0.5
 ping_band_fade = 10.0
@@ -210,7 +211,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5979614, 0, 27.145569)
 shape = SubResource("WorldBoundaryShape3D_ya4ey")
 
 [node name="Player" parent="." unique_id=22887971 instance=ExtResource("2_tipki")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 15.880372, 1.5514636, -0.10308476)
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, 15.521719, 1.3753744, -1.208656)
 push_cooldown_seconds = 1.0
 signal_scope_min_distance = 0.5
 signal_scope_max_distance = 10.0
@@ -311,6 +312,12 @@ hint_duration_seconds = 5.0
 
 [node name="Room1" type="Node3D" parent="." unique_id=472349600 groups=["NAVMESH"]]
 transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)
+
+[node name="OmniLight3D2" type="OmniLight3D" parent="Room1" unique_id=138849267]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.3872137, 1.174054, 0.0026443007)
+light_energy = 0.1
+light_size = 1.0
+omni_range = 0.1
 
 [node name="Floor" type="StaticBody3D" parent="Room1" unique_id=1600432920 groups=["sonar_occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
@@ -435,14 +442,15 @@ omni_attenuation = 1.5
 [node name="fan" parent="Room1/Props" unique_id=594698607 groups=["sonar_reveal"] instance=ExtResource("3_jyhfs")]
 transform = Transform3D(0.6276457, 0, 0, 0, 0.6276457, 0, 0, 0, 0.6276457, 0.66948557, 3.4538434, 0.6211808)
 
-[node name="fan" parent="Room1/Props/fan" index="0" unique_id=749048863 groups=["sonar_occluder"]]
+[node name="fan" parent="Room1/Props/fan" index="0" unique_id=1932814783 groups=["sonar_occluder"]]
 cast_shadow = 0
 
-[node name="fanblades" parent="Room1/Props/fan/fan" index="1" unique_id=95822170]
+[node name="fanblades" parent="Room1/Props/fan/fan" index="1" unique_id=1602824703]
 cast_shadow = 0
 
 [node name="light-switch" parent="Room1/Props" unique_id=914163819 instance=ExtResource("18_light_switch")]
 transform = Transform3D(-3.9625114e-08, 0, -0.18130338, 0, 0.18130338, 0, 0.18130338, 0, -3.9625114e-08, 5.4481297, 1.3073962, 0.009178985)
+target_light_path = NodePath("../../OmniLight3D")
 apply_initial_state = true
 initial_on = true
 
@@ -585,7 +593,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0120852, -3.730074, 4.2958
 [node name="stepping-stone" parent="EndGame/SteppingStones" unique_id=1158499491 instance=ExtResource("5_tbgi4")]
 transform = Transform3D(-0.39261004, 0, -0.91970503, 0, 1, 0, 0.91970503, 0, -0.39261004, -1.8814359, -0.5801451, 11.389015)
 
-[node name="Cylinder" parent="EndGame/SteppingStones/stepping-stone" index="0" unique_id=755835401 groups=["sonar_reveal"]]
+[node name="Cylinder" parent="EndGame/SteppingStones/stepping-stone" index="0" unique_id=1442778864 groups=["sonar_reveal"]]
 
 [node name="Cylinder2" type="MeshInstance3D" parent="EndGame/SteppingStones/stepping-stone" unique_id=605880380 groups=["sonar_reveal"]]
 transform = Transform3D(1.3231832, 0, 2.9802322e-08, 0, 1, 0, 0, 0, 1.2966664, 5.1419945, 0.8881767, -2.6012752)

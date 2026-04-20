@@ -13,13 +13,11 @@ const DEATH_SFX_PATH := "res://assets/audio/sfx/oof.mp3"
 const DEBUG_TOGGLE_KEY := KEY_QUOTELEFT
 const DEBUG_SAMPLE_WINDOW := 5.0
 const DEBUG_REFRESH_INTERVAL := 0.2
-const PING_SPEED_STEP := 5.0
 const PING_SPEED_MIN_LIMIT := 5.0
 const PING_SPEED_MAX_LIMIT := 50.0
-const PING_SPEED_UI_MIN := 1
-const PING_SPEED_UI_MAX := 10
 const PING_SOUND_MIN_PITCH := 0.85
 const PING_SOUND_MAX_PITCH := 1.35
+const PING_SCRUB_STEP_MIN := 0.1
 const DOOR_FACING_THRESHOLD := 0.72
 const DOOR_BUTTON_GROUP := &"door_button"
 const WORLD_ENERGY_DISABLED_MULTIPLIER := 0.0
@@ -52,10 +50,10 @@ enum GraphicsQualityMode {
 }
 
 @export var ping_cooldown_seconds: float = 0.6
-@export_range(5.0, 50.0, 5.0) var ping_speed: float = 20.0
-@export_group("Ping Speed Limits")
-@export_range(5.0, 50.0, 5.0) var ping_speed_floor: float = 5.0
-@export_range(5.0, 50.0, 5.0) var ping_speed_ceiling: float = 50.0
+@export_range(5.0, 50.0, 0.5) var ping_speed: float = 20.0
+@export_group("Ping Scrub")
+@export_range(0.1, 10.0, 0.1) var ping_scrub_step_distance: float = 1.5
+@export_range(0.0, 10.0, 0.1) var ping_scrub_min_radius: float = 0.5
 @export_group("")
 @export var ping_max_radius: float = 18.0
 @export var ping_band_width: float = 0.9
@@ -156,7 +154,7 @@ var authored_win_orb_light_shadow_enabled := false
 func _ready() -> void:
 	add_to_group(GAME_CONTROLLER_GROUP)
 	_ensure_input_actions()
-	_normalize_ping_speed_settings()
+	_normalize_ping_settings()
 	_configure_audio_buses()
 	_create_music_players()
 	_create_sfx_players()
@@ -230,9 +228,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if _is_menu_open():
 		return
 
-	if _is_ping_speed_adjust_event(event):
+	if ping_active and _is_ping_scrub_event(event):
 		var mouse_button_event := event as InputEventMouseButton
-		_adjust_ping_speed(PING_SPEED_STEP if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_UP else -PING_SPEED_STEP)
+		var scrub_delta := ping_scrub_step_distance if mouse_button_event.button_index == MOUSE_BUTTON_WHEEL_UP else -ping_scrub_step_distance
+		_scrub_ping(scrub_delta)
 		return
 
 	if event.is_action_pressed("interact"):
@@ -256,7 +255,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		_set_sonar_mode(not sonar_mode_enabled)
 		return
 
-	if event.is_action_pressed("sonar_ping") and sonar_mode_enabled:
+	if event.is_action_pressed("sonar_ping"):
+		if not sonar_mode_enabled:
+			_set_sonar_mode(true)
 		_handle_sonar_ping_input()
 		return
 
@@ -304,7 +305,7 @@ func _process(delta: float) -> void:
 
 func _ensure_input_actions() -> void:
 	_ensure_key_action("toggle_sonar_mode", KEY_G)
-	_ensure_key_action("sonar_ping", KEY_F)
+	_replace_mouse_button_action("sonar_ping", MOUSE_BUTTON_LEFT)
 	_ensure_key_action("interact", KEY_E)
 	_ensure_key_action("toggle_world_energy", KEY_BACKSPACE)
 	_replace_key_action("pause_menu", KEY_TAB)
@@ -338,25 +339,24 @@ func _replace_key_action(action_name: StringName, keycode: Key) -> void:
 	InputMap.action_add_event(action_name, input_event)
 
 
-func _normalize_ping_speed_settings() -> void:
-	ping_speed_floor = _sanitize_ping_speed_limit(ping_speed_floor)
-	ping_speed_ceiling = _sanitize_ping_speed_limit(ping_speed_ceiling)
-	if ping_speed_floor > ping_speed_ceiling:
-		var previous_floor := ping_speed_floor
-		ping_speed_floor = ping_speed_ceiling
-		ping_speed_ceiling = previous_floor
+func _replace_mouse_button_action(action_name: StringName, button_index: MouseButton) -> void:
+	if not InputMap.has_action(action_name):
+		InputMap.add_action(action_name)
 
-	ping_speed = _clamp_ping_speed(ping_speed)
+	for event in InputMap.action_get_events(action_name):
+		if event is InputEventMouseButton or event is InputEventKey:
+			InputMap.action_erase_event(action_name, event)
 
-
-func _sanitize_ping_speed_limit(value: float) -> float:
-	var snapped_value: float = roundf(value / PING_SPEED_STEP) * PING_SPEED_STEP
-	return clampf(snapped_value, PING_SPEED_MIN_LIMIT, PING_SPEED_MAX_LIMIT)
+	var input_event := InputEventMouseButton.new()
+	input_event.button_index = button_index
+	InputMap.action_add_event(action_name, input_event)
 
 
-func _clamp_ping_speed(value: float) -> float:
-	var snapped_value: float = roundf(value / PING_SPEED_STEP) * PING_SPEED_STEP
-	return clampf(snapped_value, ping_speed_floor, ping_speed_ceiling)
+func _normalize_ping_settings() -> void:
+	ping_speed = clampf(ping_speed, PING_SPEED_MIN_LIMIT, PING_SPEED_MAX_LIMIT)
+	ping_max_radius = maxf(ping_max_radius, 0.0)
+	ping_scrub_step_distance = maxf(ping_scrub_step_distance, PING_SCRUB_STEP_MIN)
+	ping_scrub_min_radius = clampf(ping_scrub_min_radius, 0.0, ping_max_radius)
 
 
 func _get_ping_travel_duration() -> float:
@@ -954,7 +954,7 @@ func _create_pause_menu_panel() -> PanelContainer:
 	pause_tab.add_child(controls_title)
 
 	var controls_label := Label.new()
-	controls_label.text = "Jump: Space\nSwing: Mouse2\nStatic Vision: G\nSonar Ping: F\nPing Speed: Mouse Wheel\nPause: Tab"
+	controls_label.text = "Jump: Space\nSwing: Mouse2\nStatic Vision: G\nSonar Ping: Mouse1\nPing Scrub: Mouse Wheel (active pulse)\nPause: Tab"
 	controls_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	controls_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	pause_tab.add_child(controls_label)
@@ -1536,16 +1536,7 @@ func _set_sonar_mode(enabled: bool) -> void:
 
 
 func _handle_sonar_ping_input() -> void:
-	if ping_active:
-		if ping_frozen:
-			ping_frozen = false
-			_update_ping_hud()
-		else:
-			ping_frozen = true
-			_update_ping_hud()
-		return
-
-	if ping_cooldown_remaining <= 0.0:
+	if ping_active or ping_cooldown_remaining <= 0.0:
 		_start_ping()
 
 
@@ -1566,6 +1557,16 @@ func _clear_ping() -> void:
 	ping_active = false
 	ping_frozen = false
 	ping_radius = 0.0
+
+
+func _scrub_ping(delta_radius: float) -> void:
+	if not ping_active:
+		return
+
+	ping_frozen = true
+	ping_radius = clampf(ping_radius + delta_radius, ping_scrub_min_radius, ping_max_radius)
+	_update_shader_state()
+	_update_ping_hud()
 
 
 func _update_shader_state() -> void:
@@ -1791,15 +1792,19 @@ func _update_ping_hud() -> void:
 	ping_hud_panel.visible = gameplay_started and not pause_menu_visible and not win_screen_visible
 	ping_hud_panel.self_modulate = Color(1.0, 1.0, 1.0, 1.0 if sonar_mode_enabled else 0.7)
 
-	ping_speed_label.text = "Ping Speed: %d/%d" % [_get_ping_speed_ui_value(), PING_SPEED_UI_MAX]
-	ping_cooldown_label.text = "Ping Cooldown (Paused)" if ping_frozen else "Ping Cooldown"
+	var displayed_ping_radius := ping_radius if ping_active else 0.0
+	ping_speed_label.text = "Ping Radius: %.1fm" % displayed_ping_radius
+	if ping_active:
+		ping_cooldown_label.text = "Ping Scroll" % [
+			ping_scrub_step_distance,
+			"Stopped" if ping_frozen else "Radiating",
+		]
+	else:
+		ping_cooldown_label.text = "Ping Scroll" % ping_scrub_step_distance
 
-	var cooldown_max: float = maxf(
-		ping_cooldown_duration if ping_cooldown_remaining > 0.0 or ping_active else _get_effective_ping_cooldown_duration(),
-		0.001
-	)
-	ping_cooldown_bar.max_value = cooldown_max
-	ping_cooldown_bar.value = minf(ping_cooldown_remaining, cooldown_max)
+	var radius_max: float = maxf(ping_max_radius, 0.001)
+	ping_cooldown_bar.max_value = radius_max
+	ping_cooldown_bar.value = clampf(displayed_ping_radius, 0.0, radius_max)
 
 	push_cooldown_label.text = "Swing Cooldown"
 	var push_cooldown_duration: float = 5.0
@@ -1816,25 +1821,10 @@ func _update_ping_hud() -> void:
 	push_cooldown_bar.value = minf(push_cooldown_remaining_value, push_cooldown_duration)
 
 
-func _is_ping_speed_adjust_event(event: InputEvent) -> bool:
+func _is_ping_scrub_event(event: InputEvent) -> bool:
 	return event is InputEventMouseButton and event.pressed and (
 		event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN
 	)
-
-
-func _adjust_ping_speed(delta_amount: float) -> void:
-	var next_speed: float = _clamp_ping_speed(ping_speed + delta_amount)
-	if is_equal_approx(next_speed, ping_speed):
-		return
-
-	ping_speed = next_speed
-	_update_ping_sound_pitch()
-	_update_ping_hud()
-
-
-func _get_ping_speed_ui_value() -> int:
-	var clamped_speed: float = clampf(ping_speed, PING_SPEED_MIN_LIMIT, PING_SPEED_MAX_LIMIT)
-	return int(roundi(clamped_speed / PING_SPEED_STEP))
 
 
 func _update_ping_sound_pitch() -> void:

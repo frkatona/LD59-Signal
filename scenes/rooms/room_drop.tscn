@@ -193,7 +193,7 @@ cast_shadow = 0
 cast_shadow = 0
 
 [node name="light-switch" parent="Room1/Props" unique_id=914163819 instance=ExtResource("7_light_switch")]
-transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -5.9441714, 1.3073962, 2.6469533)
+transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -2.684149, 4.790676, 2.646953)
 
 [node name="TutorialHintTrigger" parent="Room1" unique_id=927418305 instance=ExtResource("8_hint_trigger")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85549307, -6.025391)

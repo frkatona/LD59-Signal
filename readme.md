@@ -108,6 +108,14 @@ Questions:
 - glitch: robot proximity noise stays on you when you die
 - update: maybe move the respawn point to room 3 or 4
 
+- kaya notes
+  - [x] fix the UI scaling
+  - [ ] try omni light or some shader for next to you
+    - [ ] josh is making a shader
+  - [x] remove the light switch from room3
+  - [x] add a light to the first room switch 
+  - [ ] add noise specifically to the door switch
+
 ### exporter
 ```
 The simplest reliable setup is: export the Web build to a folder, zip that folder as an artifact, then have butler push the folder. butler can accept a zip, but its own docs say that for portable builds there’s no real upside to pushing the zip directly because it extracts it anyway. I built that flow for this project.

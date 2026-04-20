@@ -204,7 +204,7 @@ cast_shadow = 0
 cast_shadow = 0
 
 [node name="light-switch" parent="Room1/Props" unique_id=914163819 instance=ExtResource("7_light_switch")]
-transform = Transform3D(-0.18130338, 0, -1.5850045e-08, 0, 0.18130338, 0, 1.5850045e-08, 0, -0.18130338, -4.675048, 1.3073962, 5.9494686)
+transform = Transform3D(-0.18130338, 0, -1.5850045e-08, 0, 0.18130338, 0, 1.5850045e-08, 0, -0.18130338, -4.675048, 4.81652, 5.9494686)
 apply_initial_state = true
 initial_on = true
 
