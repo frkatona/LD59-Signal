@@ -15,7 +15,12 @@ const INDICATOR_PUSH_DURATION_SECONDS := 2.0
 @export_range(-180.0, 180.0, 0.1) var facing_yaw_offset_degrees: float = 0.0
 @export var normal_color: Color = Color(0.20241532, 0.17677477, 0.4619112, 1.0)
 @export var pushed_color: Color = Color(1.0, 0.25, 0.25, 1.0)
+@export_group("Indicator Light")
 @export var indicator_default_color: Color = Color(0.6089677, 0.1788316, 0.18341184, 1.0)
+@export var indicator_patrolling_color: Color = Color(0.98, 0.62, 0.14, 1.0)
+@export var indicator_chasing_color: Color = Color(0.12, 0.92, 1.0, 1.0)
+@export var indicator_searching_color: Color = Color(0.62, 0.46, 1.0, 1.0)
+@export var indicator_returning_color: Color = Color(0.38, 0.78, 1.0, 1.0)
 @export var indicator_pushed_color: Color = Color(1.0, 0.92, 0.2, 1.0)
 
 @onready var navigation_agent_3d: NavigationAgent3D = $NavigationAgent3D
@@ -140,10 +145,27 @@ func _update_indicator_light() -> void:
 	if indicator_light_material == null:
 		return
 
-	var target_color: Color = indicator_pushed_color if indicator_push_remaining > 0.0 else indicator_default_color
+	var target_color: Color = indicator_pushed_color if indicator_push_remaining > 0.0 else _get_indicator_state_color()
 	indicator_light_material.albedo_color = target_color
 	indicator_light_material.emission_enabled = true
 	indicator_light_material.emission = target_color
+
+
+func _get_indicator_state_color() -> Color:
+	if ai == null:
+		return indicator_default_color
+
+	match ai.current_state:
+		EnemyAI.State.PATROLLING:
+			return indicator_patrolling_color
+		EnemyAI.State.CHASING:
+			return indicator_chasing_color
+		EnemyAI.State.CHASING_LAST_KNOWN_POSITION:
+			return indicator_searching_color
+		EnemyAI.State.RETURNING_TO_LEASH:
+			return indicator_returning_color
+		_:
+			return indicator_default_color
 
 
 func _face_target(target_position: Vector3, delta: float) -> void:

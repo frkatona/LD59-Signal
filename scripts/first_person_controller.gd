@@ -1,6 +1,8 @@
 class_name Player
 extends CharacterBody3D
 
+signal enemy_touched(enemy: Enemy)
+
 const LEFT_FOOTSTEP_STREAM := preload("res://assets/audio/sfx/fist_2.wav")
 const RIGHT_FOOTSTEP_STREAM := preload("res://assets/audio/sfx/fist_3.wav")
 const JUMP_STREAM := preload("res://assets/audio/sfx/fist_5.wav")
@@ -151,10 +153,37 @@ func _physics_process(delta: float) -> void:
 	velocity.z = move_toward(velocity.z, target_velocity.z, acceleration * delta)
 
 	move_and_slide()
+	_check_enemy_collisions()
 	if not was_on_floor and is_on_floor():
 		_play_landing_sound()
 		footstep_interval_remaining = footstep_interval_seconds
 	_update_footsteps(delta)
+
+
+func _check_enemy_collisions() -> void:
+	var slide_collision_count := get_slide_collision_count()
+	for collision_index in range(slide_collision_count):
+		var collision := get_slide_collision(collision_index)
+		if collision == null:
+			continue
+
+		var enemy := _resolve_enemy_from_collision_collider(collision.get_collider())
+		if enemy == null:
+			continue
+
+		enemy_touched.emit(enemy)
+		return
+
+
+func _resolve_enemy_from_collision_collider(collider: Variant) -> Enemy:
+	var current := collider as Node
+	while current != null:
+		var enemy := current as Enemy
+		if enemy != null:
+			return enemy
+		current = current.get_parent()
+
+	return null
 
 
 func _create_footstep_players() -> void:

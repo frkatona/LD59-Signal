@@ -9,6 +9,7 @@ const SFX_BUS_NAME := &"SFX"
 const NORMAL_MUSIC_PATH := "res://assets/audio/music/menu-loop.mp3"
 const SONAR_MUSIC_PATH := "res://assets/audio/music/menu_static-loop.mp3"
 const SONAR_PING_SFX_PATH := "res://assets/audio/sfx/ping_2.mp3"
+const DEATH_SFX_PATH := "res://assets/audio/sfx/oof.mp3"
 const DEBUG_TOGGLE_KEY := KEY_QUOTELEFT
 const DEBUG_SAMPLE_WINDOW := 5.0
 const DEBUG_REFRESH_INTERVAL := 0.2
@@ -60,7 +61,7 @@ enum GraphicsQualityMode {
 @export var ping_band_width: float = 0.9
 @export var ping_band_fade: float = 0.2
 
-@onready var player: CharacterBody3D = $Player
+@onready var player: Player = $Player
 @onready var player_camera: Camera3D = $Player/CameraPivot/Camera3D
 @onready var kill_floor: Area3D = $Environment/KillFloor
 @onready var sonar_viewport: SubViewport = $Player/SonarViewport
@@ -104,11 +105,13 @@ var occluder_material: StandardMaterial3D
 var normal_music_player: AudioStreamPlayer
 var sonar_music_player: AudioStreamPlayer
 var sonar_ping_player: AudioStreamPlayer
+var death_sound_player: AudioStreamPlayer
 var world_energy_enabled := false
 var player_spawn_transform := Transform3D.IDENTITY
 var gameplay_started := false
 var pause_menu_visible := false
 var win_screen_visible := false
+var death_screen_visible := false
 var game_won := false
 var audio_playback_unlocked := false
 var debug_overlay_visible := false
@@ -123,6 +126,7 @@ var start_menu_panel: PanelContainer
 var pause_menu_panel: PanelContainer
 var pause_menu_tabs: TabContainer
 var win_menu_panel: PanelContainer
+var death_menu_panel: PanelContainer
 var debug_layer: CanvasLayer
 var debug_panel: PanelContainer
 var debug_label: Label
@@ -167,6 +171,7 @@ func _ready() -> void:
 	_cache_graphics_quality_baseline()
 	_configure_sonar_viewport()
 	_configure_kill_floor()
+	_configure_player_signals()
 	_rebuild_proxy_scene()
 	_sync_sonar_camera()
 	_sync_proxy_transforms()
@@ -213,7 +218,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event.is_action_pressed("pause_menu"):
-		if not gameplay_started or win_screen_visible:
+		if not gameplay_started or win_screen_visible or death_screen_visible:
 			return
 
 		if pause_menu_visible:
@@ -472,9 +477,15 @@ func _create_sfx_players() -> void:
 	sonar_ping_player.stream = load(SONAR_PING_SFX_PATH)
 	add_child(sonar_ping_player)
 
+	death_sound_player = AudioStreamPlayer.new()
+	death_sound_player.name = "DeathSoundPlayer"
+	death_sound_player.bus = SFX_BUS_NAME
+	death_sound_player.stream = load(DEATH_SFX_PATH)
+	add_child(death_sound_player)
+
 
 func _release_sfx_players() -> void:
-	for player in [sonar_ping_player]:
+	for player in [sonar_ping_player, death_sound_player]:
 		if player == null:
 			continue
 
@@ -700,6 +711,9 @@ func _build_menu_ui() -> void:
 	win_menu_panel = _create_win_menu_panel()
 	menus_root.add_child(win_menu_panel)
 
+	death_menu_panel = _create_death_menu_panel()
+	menus_root.add_child(death_menu_panel)
+
 
 func _build_debug_overlay() -> void:
 	debug_layer = CanvasLayer.new()
@@ -860,7 +874,7 @@ func _create_start_menu_panel() -> PanelContainer:
 	content.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "Click, tap, or press any key to begin. Use G for static vision, F for sonar ping, mouse wheel for ping speed (1-10), and Tab for pause."
+	subtitle.text = "Goal: Escape to the next room\n\nPress `Tab` to change settings."
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	content.add_child(subtitle)
@@ -1001,6 +1015,44 @@ func _create_win_menu_panel() -> PanelContainer:
 	return panel
 
 
+func _create_death_menu_panel() -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.name = "DeathMenu"
+	_set_centered_panel_rect(panel, Vector2(420.0, 250.0))
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 24)
+	margin.add_theme_constant_override("margin_top", 24)
+	margin.add_theme_constant_override("margin_right", 24)
+	margin.add_theme_constant_override("margin_bottom", 24)
+	panel.add_child(margin)
+
+	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation", 14)
+	content.alignment = BoxContainer.ALIGNMENT_CENTER
+	margin.add_child(content)
+
+	var title := Label.new()
+	title.text = "Signal Lost"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 32)
+	content.add_child(title)
+
+	var message := Label.new()
+	message.text = "You collided with an enemy."
+	message.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	content.add_child(message)
+
+	var respawn_button := Button.new()
+	respawn_button.text = "Respawn"
+	respawn_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	respawn_button.pressed.connect(_respawn_from_death_screen)
+	content.add_child(respawn_button)
+
+	return panel
+
+
 func _set_centered_panel_rect(panel: Control, size: Vector2) -> void:
 	panel.anchor_left = 0.5
 	panel.anchor_right = 0.5
@@ -1097,6 +1149,7 @@ func _show_start_menu() -> void:
 	gameplay_started = false
 	pause_menu_visible = false
 	win_screen_visible = false
+	death_screen_visible = false
 	game_won = false
 	_set_player_controls_enabled(false)
 	interaction_prompt.visible = false
@@ -1104,6 +1157,7 @@ func _show_start_menu() -> void:
 	start_menu_panel.visible = true
 	pause_menu_panel.visible = false
 	win_menu_panel.visible = false
+	death_menu_panel.visible = false
 	_sync_volume_controls()
 	_sync_mouse_sensitivity_control()
 	_sync_graphics_quality_control()
@@ -1129,10 +1183,12 @@ func _start_game_internal(capture_mouse: bool) -> void:
 	gameplay_started = true
 	pause_menu_visible = false
 	win_screen_visible = false
+	death_screen_visible = false
 	menus_root.visible = false
 	start_menu_panel.visible = false
 	pause_menu_panel.visible = false
 	win_menu_panel.visible = false
+	death_menu_panel.visible = false
 	_set_player_controls_enabled(true, capture_mouse)
 
 
@@ -1144,6 +1200,7 @@ func _pause_game() -> void:
 	start_menu_panel.visible = false
 	pause_menu_panel.visible = true
 	win_menu_panel.visible = false
+	death_menu_panel.visible = false
 	_sync_volume_controls()
 	_sync_mouse_sensitivity_control()
 	_sync_graphics_quality_control()
@@ -1162,6 +1219,7 @@ func _resume_game_internal(capture_mouse: bool) -> void:
 	pause_menu_visible = false
 	menus_root.visible = false
 	pause_menu_panel.visible = false
+	death_menu_panel.visible = false
 	_set_player_controls_enabled(true, capture_mouse)
 
 
@@ -1177,6 +1235,7 @@ func _show_win_screen() -> void:
 	gameplay_started = false
 	pause_menu_visible = false
 	win_screen_visible = true
+	death_screen_visible = false
 	game_won = true
 	_set_player_controls_enabled(false)
 	interaction_prompt.visible = false
@@ -1185,6 +1244,45 @@ func _show_win_screen() -> void:
 	start_menu_panel.visible = false
 	pause_menu_panel.visible = false
 	win_menu_panel.visible = true
+	death_menu_panel.visible = false
+
+
+func _show_death_screen() -> void:
+	if death_screen_visible:
+		return
+
+	gameplay_started = false
+	pause_menu_visible = false
+	win_screen_visible = false
+	death_screen_visible = true
+	_set_player_controls_enabled(false)
+	interaction_prompt.visible = false
+	_set_sonar_mode(false)
+	if death_sound_player != null:
+		death_sound_player.stop()
+		death_sound_player.play()
+	menus_root.visible = true
+	start_menu_panel.visible = false
+	pause_menu_panel.visible = false
+	win_menu_panel.visible = false
+	death_menu_panel.visible = true
+
+
+func _respawn_from_death_screen() -> void:
+	if player == null:
+		return
+
+	player.call("respawn_at", player_spawn_transform)
+	gameplay_started = true
+	pause_menu_visible = false
+	win_screen_visible = false
+	death_screen_visible = false
+	menus_root.visible = false
+	start_menu_panel.visible = false
+	pause_menu_panel.visible = false
+	win_menu_panel.visible = false
+	death_menu_panel.visible = false
+	_set_player_controls_enabled(true, false)
 
 
 func _set_player_controls_enabled(enabled: bool, capture_mouse: bool = true) -> void:
@@ -1195,15 +1293,15 @@ func _set_player_controls_enabled(enabled: bool, capture_mouse: bool = true) -> 
 
 
 func _can_start_game_from_event(event: InputEvent) -> bool:
-	return not gameplay_started and not win_screen_visible and start_menu_panel != null and start_menu_panel.visible and _is_audio_unlock_event(event)
+	return not gameplay_started and not win_screen_visible and not death_screen_visible and start_menu_panel != null and start_menu_panel.visible and _is_audio_unlock_event(event)
 
 
 func _is_menu_open() -> bool:
-	return not gameplay_started or pause_menu_visible or win_screen_visible
+	return not gameplay_started or pause_menu_visible or win_screen_visible or death_screen_visible
 
 
 func _should_resume_pause_menu_from_event(event: InputEvent) -> bool:
-	return pause_menu_visible and gameplay_started and not win_screen_visible and event.is_action_pressed("pause_menu")
+	return pause_menu_visible and gameplay_started and not win_screen_visible and not death_screen_visible and event.is_action_pressed("pause_menu")
 
 
 func _reset_pause_menu_tab() -> void:
@@ -1322,6 +1420,14 @@ func _configure_kill_floor() -> void:
 		kill_floor.body_entered.connect(_on_kill_floor_body_entered)
 
 
+func _configure_player_signals() -> void:
+	if player == null:
+		return
+
+	if not player.enemy_touched.is_connected(_on_player_enemy_touched):
+		player.enemy_touched.connect(_on_player_enemy_touched)
+
+
 func _resize_sonar_viewport() -> void:
 	var viewport_size := _get_visible_viewport_size()
 	if viewport_size.x <= 0 or viewport_size.y <= 0:
@@ -1429,7 +1535,8 @@ func _set_sonar_mode(enabled: bool) -> void:
 func _handle_sonar_ping_input() -> void:
 	if ping_active:
 		if ping_frozen:
-			_clear_ping()
+			ping_frozen = false
+			_update_ping_hud()
 		else:
 			ping_frozen = true
 			_update_ping_hud()
@@ -1591,6 +1698,13 @@ func _on_kill_floor_body_entered(body: Node) -> void:
 	var enemy := _resolve_enemy_from_kill_floor_body(body)
 	if enemy != null:
 		_despawn_enemy_from_kill_floor(enemy)
+
+
+func _on_player_enemy_touched(_enemy: Enemy) -> void:
+	if not gameplay_started or win_screen_visible or death_screen_visible:
+		return
+
+	_show_death_screen()
 
 
 func _resolve_enemy_from_kill_floor_body(body: Node) -> Enemy:

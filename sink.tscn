@@ -9,7 +9,9 @@ points = PackedVector3Array(-1.819461, -0.07547168, -0.757637, 1.8949573, 2.1880
 
 [node name="lab-bench" parent="." unique_id=941744125 instance=ExtResource("1_0f0hj")]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="lab-bench" unique_id=1250545979]
+[node name="StaticBody3D" type="StaticBody3D" parent="." unique_id=2080879041]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D" unique_id=1250545979]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.11690569, 0, -0.119244576)
 shape = SubResource("ConvexPolygonShape3D_noarx")
 

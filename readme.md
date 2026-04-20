@@ -102,6 +102,7 @@ Questions:
 - check on performance dips in the profiler
 - update the notifications boxes
 - add xbox achievement for the bottom stepping stones
+- it's not very clear what color the robot lights are
 
 ### exporter
 ```

@@ -212,15 +212,28 @@ initial_on = true
 transform = Transform3D(-0.18130338, 0, -1.5850045e-08, 0, 0.18130338, 0, 1.5850045e-08, 0, -0.18130338, 3.120998, 1.3073962, 5.977425)
 
 [node name="TutorialHintTrigger" parent="Room1" unique_id=965435746 instance=ExtResource("8_hint_trigger")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.123247445, 0, 1, -6.2229614)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.123247445, 0, 1, -8.508123)
 hint_text = "mouse 2 to swing and stun enemies"
+
+[node name="TutorialHintTrigger2" parent="Room1" unique_id=1354176304 instance=ExtResource("8_hint_trigger")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.123247445, 0, 1, 0.96176)
+hint_text = "escape by losing line of sight or creating distance"
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="Room1" unique_id=1920495575]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00041365623, 0, 0.002642393)
 navigation_mesh = SubResource("NavigationMesh_7q5uw")
 
-[node name="Enemy" parent="." unique_id=1286619820 node_paths=PackedStringArray("nav_mesh") instance=ExtResource("5_iurs1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.035635114, 0.05767197, -0.3100357)
+[node name="EnemyB2" parent="." unique_id=1286619820 node_paths=PackedStringArray("nav_mesh") groups=["sonar_reveal"] instance=ExtResource("5_iurs1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.04809, 1.4305115e-06, -0.059444427)
 nav_mesh = NodePath("../Room1/NavigationRegion3D")
+move_speed = 1.0
+turn_speed = 1.0
+pushed_color = Color(0.87884164, 0.68109435, 0, 1)
+indicator_default_color = Color(0.15137786, 0.2935035, 0.7710194, 1)
+indicator_patrolling_color = Color(0, 0.3433894, 0.61198694, 1)
+indicator_chasing_color = Color(0.875282, 0, 0.21367815, 1)
+indicator_searching_color = Color(0, 0.7051007, 0.09122781, 1)
+indicator_returning_color = Color(0, 0.4308392, 0.11648048, 1)
+indicator_pushed_color = Color(0.9634194, 0.8817842, 0, 1)
 
 [editable path="Room1/Props/fan"]

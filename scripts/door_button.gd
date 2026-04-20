@@ -5,7 +5,7 @@ const DOOR_BUTTON_GROUP := &"door_button"
 const SONAR_REVEAL_GROUP := &"sonar_reveal"
 const BUTTON_ANIMATION_NAME := &"switch-down"
 const SFX_BUS_NAME := &"SFX"
-const DOOR_OPEN_SFX := preload("res://assets/audio/sfx/oof.mp3")
+const DOOR_OPEN_SFX := preload("res://assets/audio/sfx/door-open.wav")
 
 @export var prompt_text: String = "Press E to open door"
 @export_range(-1.0, 1.0, 0.01) var facing_threshold: float = 0.65
