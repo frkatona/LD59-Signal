@@ -1,19 +1,27 @@
 [gd_scene format=3 uid="uid://b2clkddfgsfl4"]
 
 [ext_resource type="PackedScene" uid="uid://dlag3eoimwcnm" path="res://assets/models/door.glb" id="1_cnfy6"]
-[ext_resource type="Shader" path="res://shaders/alien_placard_swirl.gdshader" id="2_swirl"]
-[ext_resource type="Script" path="res://scripts/sliding_halo_door.gd" id="3_door"]
-
-[sub_resource type="QuadMesh" id="QuadMesh_cnfy6"]
+[ext_resource type="Shader" uid="uid://cxt23084gj1b0" path="res://shaders/alien_placard_swirl.gdshader" id="2_swirl"]
+[ext_resource type="Script" uid="uid://c2xclo33b06v5" path="res://scripts/sliding_halo_door.gd" id="3_door"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_placard"]
+render_priority = 0
 shader = ExtResource("2_swirl")
+shader_parameter/background_color = Color(0.01, 0.05, 0.07, 1)
+shader_parameter/swirl_color = Color(0.021320093, 0.65835875, 0.727421, 1)
+shader_parameter/accent_color = Color(0.22429758, 0.38749716, 0.34556037, 1)
+shader_parameter/swirl_speed = 0.05600000266
+shader_parameter/ring_density = 2.0
+shader_parameter/glyph_density = 2.0
+shader_parameter/glow_strength = 3.8000001805
+
+[sub_resource type="QuadMesh" id="QuadMesh_cnfy6"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_door_body"]
 size = Vector3(1.28, 2.98, 0.46)
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_interaction"]
-size = Vector3(3.0, 3.4, 2.8)
+size = Vector3(3, 3.4, 2.8)
 
 [node name="Node3D" type="Node3D" unique_id=1973194571]
 script = ExtResource("3_door")
@@ -21,16 +29,16 @@ script = ExtResource("3_door")
 [node name="door2" parent="." unique_id=251979430 instance=ExtResource("1_cnfy6")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.09305382, 0, 0.03531909)
 
-[node name="DoorBody" type="StaticBody3D" parent="door2/door" parent_id_path=PackedInt32Array(251979430, 93350511) unique_id=457418693]
+[node name="AlienPlacard" type="MeshInstance3D" parent="door2/door" parent_id_path=PackedInt32Array(251979430, 93350511) index="2" unique_id=1229606605]
+transform = Transform3D(0.33974785, 0, 0, 0, 0.5192448, 0, 0, 0, 0.65491605, 0.006456688, 0.9711796, 0.13148446)
+material_override = SubResource("ShaderMaterial_placard")
+mesh = SubResource("QuadMesh_cnfy6")
+
+[node name="DoorBody" type="StaticBody3D" parent="door2/door" parent_id_path=PackedInt32Array(251979430, 93350511) index="3" unique_id=457418693]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="door2/door/DoorBody" unique_id=1548579524]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.460296, 0)
 shape = SubResource("BoxShape3D_door_body")
-
-[node name="AlienPlacard" type="MeshInstance3D" parent="door2/door" parent_id_path=PackedInt32Array(251979430, 93350511) index="2" unique_id=1229606605]
-transform = Transform3D(0.33974785, 0, 0, 0, 0.5192448, 0, 0, 0, 0.65491605, 0.006456688, 0.9711796, 0.13148446)
-mesh = SubResource("QuadMesh_cnfy6")
-material_override = SubResource("ShaderMaterial_placard")
 
 [node name="InteractionArea" type="Area3D" parent="." unique_id=814262995]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.09305382, 1.45, 0.03531909)

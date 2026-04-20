@@ -3,8 +3,8 @@
 [ext_resource type="PackedScene" uid="uid://mb7hqotwfu75" path="res://assets/models/chair.glb" id="1_chair"]
 [ext_resource type="PackedScene" uid="uid://d13xnsm7t448a" path="res://assets/models/fan.glb" id="2_fan"]
 [ext_resource type="PackedScene" uid="uid://dl0p5kuohdqja" path="res://assets/models/lab-bench.glb" id="3_bench"]
-[ext_resource type="PackedScene" uid="uid://c5l62di7vxio2" path="res://assets/models/light-switch.glb" id="4_switch"]
 [ext_resource type="PackedScene" uid="uid://cfaa6d3t863va" path="res://scenes/enemy.tscn" id="5_enemy"]
+[ext_resource type="PackedScene" path="res://scenes/light_switch_interactable.tscn" id="6_light_switch"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(26, 0.5, 28)
@@ -167,15 +167,9 @@ transform = Transform3D(-0.76035935, 0, -6.647272e-08, 0, 0.76035935, 0, 6.64727
 [node name="lab-bench3" parent="RoomLarge/Props" unique_id=1063839432 groups=["sonar_occluder"] instance=ExtResource("3_bench")]
 transform = Transform3D(0.7603593, 0, -7.1054274e-15, 0, 0.7603593, 0, 7.1054274e-15, 0, 0.7603593, 1.214, 0.0918923, 9.88)
 
-[node name="light-switch" parent="RoomLarge/Props" unique_id=1631709526 groups=["signal_light_switch", "sonar_reveal"] instance=ExtResource("4_switch")]
+[node name="light-switch" parent="RoomLarge/Props" unique_id=1631709526 node_paths=PackedStringArray("target_light_path") instance=ExtResource("6_light_switch")]
 transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -12.946, 1.3073962, -5.264)
-
-[node name="InteractionArea" type="Area3D" parent="RoomLarge/Props/light-switch" unique_id=1670601265]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 2.3)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="RoomLarge/Props/light-switch/InteractionArea" unique_id=1233791604]
-transform = Transform3D(1, 0, 1.4210855e-14, 0, 1, 0, -1.4210855e-14, 0, 1, 0.10915756, -0.019591808, 0.4271145)
-shape = SubResource("BoxShape3D_light_switch_interaction")
+target_light_path = NodePath("../../OmniLight3D")
 
 [node name="EnemyA" parent="RoomLarge" unique_id=2003294534 node_paths=PackedStringArray("nav_mesh") groups=["sonar_reveal"] instance=ExtResource("5_enemy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.245, 0, -3.844)

@@ -57,9 +57,8 @@ josh test play results:
 - even he struggles to get the rhythm for the geordi-vision and ping tool
   - [x]add the hotkeys to the sliders and controls hints in the pause menu
   - design the rooms with gradual concept introductions:
-    - [ ] room 1: basic movement
-      - [ ] remake the door into a fancy gate or sliding door to make it more clear that it will require a button to open (halo doors?  car door swoosh?)
-        - [ ] (make a window between the first rooms or from the first room to the goal to foreshadow?)
+    - [x] room 1: basic movement
+      - [x] make it clear that doors/lights will require a button
     - [ ] room 2: introduce the ping tool and the noise overlay
     - [ ] room 3: introduce a disabled, static enemy (light color to indicate disabled? also implement a short stun to the hit enemies in general which will trigger this light color); pick up the crowbar
     - [ ] room 4: introduce the stick and combat
@@ -67,6 +66,8 @@ josh test play results:
   - variations in wave generation
   - mcguffins
 - polish: sine waves scroll speed
+
+- [x] simplify door shader, make it parallel the door buttons
 
 - next josh ideas?
   - let's expand to a bigger space --> give the enemies a patrol with a leash
@@ -86,6 +87,20 @@ josh ideas:
 
 Questions:
 - how to manually run the headless startup in "Validation: headless Godot 4.6.1 startup passed cleanly"
+
+### final day to-do
+- fix daleks running backwards sometimes (are they not pulling from the same scene or is the chase logic dependant on something inconsistent?)
+- consider how to make the player want to use the sonar tool in the second room (the door button is visible because of its shader...maybe cover it until the lights are on?  maybe reverse its color scheme and make it non-emissive until it is pressed?)
+- replace door open sound with bolt hatch opening like halo
+- did the 'broken enemy' checkbox come through?  make it work for room 3
+- add the crowbar as a pickup like a doom weapon in room 3 or 4
+- get collision on the lab benches for room 4 to demonstrate line of sight and leashing
+- final room ideas
+  - lights flicker?
+  - new bgm?
+  - bigger challenge
+    - box jumping?
+    - give player a unique vantage when they jump down?
 
 ### exporter
 ```

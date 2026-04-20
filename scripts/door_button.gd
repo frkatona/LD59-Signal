@@ -11,9 +11,9 @@ const DOOR_OPEN_SFX := preload("res://assets/audio/sfx/oof.mp3")
 @export_range(-1.0, 1.0, 0.01) var facing_threshold: float = 0.65
 @export var target_door_path: NodePath
 
-@onready var button_root: Node3D = $"light-switch"
 @onready var interaction_area: Area3D = $InteractionArea
 
+var button_root: Node3D
 var animation_player: AnimationPlayer
 var sfx_player: AudioStreamPlayer
 var target_door: Node
@@ -21,6 +21,7 @@ var is_pressed := false
 
 
 func _ready() -> void:
+	button_root = _resolve_button_root()
 	add_to_group(DOOR_BUTTON_GROUP)
 	if button_root != null:
 		button_root.add_to_group(SONAR_REVEAL_GROUP)
@@ -141,3 +142,13 @@ func _find_animation_player(root: Node) -> AnimationPlayer:
 			return candidate
 
 	return null
+
+
+func _resolve_button_root() -> Node3D:
+	var preferred_names := [&"light-switch", &"blackplasticframe"]
+	for node_name in preferred_names:
+		var candidate := get_node_or_null(NodePath(String(node_name))) as Node3D
+		if candidate != null:
+			return candidate
+
+	return self

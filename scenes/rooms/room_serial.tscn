@@ -1,11 +1,9 @@
 [gd_scene format=3 uid="uid://bhvo2p6dl8m8w"]
 
 [ext_resource type="PackedScene" uid="uid://b2clkddfgsfl4" path="res://halo-door.tscn" id="1_2kggb"]
-[ext_resource type="PackedScene" uid="uid://mb7hqotwfu75" path="res://assets/models/chair.glb" id="2_kax5n"]
 [ext_resource type="PackedScene" uid="uid://d13xnsm7t448a" path="res://assets/models/fan.glb" id="3_urbhd"]
-[ext_resource type="PackedScene" uid="uid://dl0p5kuohdqja" path="res://assets/models/lab-bench.glb" id="4_a2sae"]
-[ext_resource type="PackedScene" uid="uid://c5l62di7vxio2" path="res://assets/models/light-switch.glb" id="5_jsoye"]
 [ext_resource type="PackedScene" path="res://scenes/door_button.tscn" id="6_button"]
+[ext_resource type="PackedScene" path="res://scenes/light_switch_interactable.tscn" id="7_light_switch"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6xppq"]
 size = Vector3(12, 0.5, 12)
@@ -44,9 +42,6 @@ size = Vector3(0.5, 4, 12)
 [sub_resource type="BoxMesh" id="BoxMesh_5mrov"]
 material = SubResource("StandardMaterial3D_wall")
 size = Vector3(0.5, 4, 12)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_lwnyg"]
-size = Vector3(5.9825044, 7.521753, 5.748584)
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_7q5uw"]
 vertices = PackedVector3Array(-5.5, 5, 6, 5.5, 5, 6, 6, 5, 5.5, 6, 5, -5.5, -5.5, 5, -5.5, -3.25, 0.5, -4.75, -3.25, 0.5, -4, -2.75, 0.5, -3.75, -5.25, 0.5, -5.25, -5.25, 0.5, -4.75, 4, 0.5, -5.25, -3, 0.5, -2.75, -1.5, 0.5, -1, 1.75, 0.5, -1, 2, 0.5, 0.25, 5.5, 0.5, 0.25, 5.5, 0.5, -4, 4.5, 0.5, -4, -2, 0.5, -0.75, -4.25, 0.5, -2.25, -4.25, 0.5, -0.25, -1.75, 0.5, 1.5, 1.75, 0.5, 1.5, -1.25, 0.5, 4.25, -1, 0.5, 5.5, 5.5, 0.5, 5.5, -5.25, 0.5, 0, -4.75, 0.5, 4.25, -5.25, 0.5, 5.5, -0.75, 0.5, 7, -0.75, 0.5, 8.5, 0.75, 0.5, 8.5, 0.75, 0.5, 7)
@@ -165,7 +160,7 @@ transform = Transform3D(0.208333, 0, 0, 0, 1, 0, 0, 0, 0.25, 0, 0, 0)
 mesh = SubResource("BoxMesh_g8d8l")
 
 [node name="door2" parent="Room1" unique_id=251979430 instance=ExtResource("1_2kggb")]
-transform = Transform3D(1.6758232, 0, 0, 0, 1.6758232, 0, 0, 0, 1.6758233, 0.026432991, -0.022327885, 6.2363124)
+transform = Transform3D(-1.6758232, 0, 1.4650513e-07, 0, 1.6758232, 0, -1.4650512e-07, 0, -1.6758233, 0.026432991, -0.022327885, 6.2363124)
 
 [node name="WestWall" type="StaticBody3D" parent="Room1" unique_id=1969074543 groups=["sonar_occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.25, 2, 0)
@@ -174,6 +169,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.25, 2, 0)
 shape = SubResource("BoxShape3D_5o5xp")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/WestWall" unique_id=432470692]
+mesh = SubResource("BoxMesh_5mrov")
+
+[node name="WestWall2" type="StaticBody3D" parent="Room1" unique_id=873963843 groups=["sonar_occluder"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.75, 2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/WestWall2" unique_id=1984723763]
+shape = SubResource("BoxShape3D_5o5xp")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/WestWall2" unique_id=66795653]
 mesh = SubResource("BoxMesh_5mrov")
 
 [node name="EastWall" type="StaticBody3D" parent="Room1" unique_id=1240700051 groups=["sonar_occluder"]]
@@ -188,9 +192,6 @@ omni_attenuation = 1.5
 
 [node name="Props" type="Node3D" parent="Room1" unique_id=1189510033 groups=["NAVMESH"]]
 
-[node name="chair2" parent="Room1/Props" unique_id=1377584579 groups=["sonar_reveal"] instance=ExtResource("2_kax5n")]
-transform = Transform3D(0.50558525, 0, -0.50558525, 0, 0.7150055, 0, 0.50558525, 0, 0.50558525, 5.0347924, 0.00074707816, -5.185207)
-
 [node name="fan" parent="Room1/Props" unique_id=594698607 groups=["sonar_reveal"] instance=ExtResource("3_urbhd")]
 transform = Transform3D(0.6276457, 0, 0, 0, 0.6276457, 0, 0, 0, 0.6276457, 0.66948557, 3.4538434, 0.6211808)
 
@@ -200,28 +201,11 @@ cast_shadow = 0
 [node name="fanblades" parent="Room1/Props/fan/fan" index="1" unique_id=1602824703]
 cast_shadow = 0
 
-[node name="lab-bench" parent="Room1/Props" unique_id=941744125 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("4_a2sae")]
-transform = Transform3D(-3.3236365e-08, 0, 0.7603594, 0, 0.7603594, 0, -0.7603594, 0, -3.3236365e-08, -5.3361416, 0.09189254, -1.9738336)
-
-[node name="lab-bench2" parent="Room1/Props" unique_id=1925459772 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("4_a2sae")]
-transform = Transform3D(-0.76035935, 0, -6.647272e-08, 0, 0.76035935, 0, 6.647272e-08, 0, -0.76035935, -2.9891753, 0.09189254, 5.3862796)
-
-[node name="lab-bench3" parent="Room1/Props" unique_id=207563285 groups=["sonar_occluder"] instance=ExtResource("4_a2sae")]
-transform = Transform3D(0.7603593, 0, -7.1054274e-15, 0, 0.7603593, 0, 7.1054274e-15, 0, 0.7603593, 1.0842574, 0.0918923, -5.3680596)
-
-[node name="light-switch" parent="Room1/Props" unique_id=914163819 groups=["signal_light_switch", "sonar_reveal"] instance=ExtResource("5_jsoye")]
+[node name="light-switch" parent="Room1/Props" unique_id=914163819 instance=ExtResource("7_light_switch")]
 transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -5.9441714, 1.3073962, 2.6469533)
 
-[node name="InteractionArea" type="Area3D" parent="Room1/Props/light-switch" unique_id=1712369767]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 2.3)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/Props/light-switch/InteractionArea" unique_id=2078761003]
-transform = Transform3D(1, 0, 1.4210855e-14, 0, 1, 0, -1.4210855e-14, 0, 1, 0.10915756, -0.019591808, 0.4271145)
-shape = SubResource("BoxShape3D_lwnyg")
-
-[node name="door-button" parent="Room1/Props" unique_id=214042236 node_paths=PackedStringArray("target_door_path") instance=ExtResource("6_button")]
+[node name="door-button" parent="Room1/Props" unique_id=214042236 instance=ExtResource("6_button")]
 transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -5.9441714, 1.3073962, 4.776953)
-target_door_path = NodePath("../../door2")
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="Room1" unique_id=1920495575]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00041365623, 0, 0.002642393)

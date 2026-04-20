@@ -2,20 +2,18 @@
 
 [ext_resource type="Script" uid="uid://b3ebx2i83ld2t" path="res://scripts/sonar_vision_controller.gd" id="2_sonar"]
 [ext_resource type="PackedScene" uid="uid://bme1uywuhta4a" path="res://scenes/player.tscn" id="2_tipki"]
-[ext_resource type="PackedScene" uid="uid://mb7hqotwfu75" path="res://assets/models/chair.glb" id="3_chair"]
 [ext_resource type="PackedScene" uid="uid://c5xt53r6xiuur" path="res://assets/models/oscilloscope.glb" id="3_choun"]
 [ext_resource type="PackedScene" uid="uid://d13xnsm7t448a" path="res://assets/models/fan.glb" id="3_jyhfs"]
-[ext_resource type="PackedScene" uid="uid://bwkh10wgul3et" path="res://assets/models/dalek.glb" id="3_tefeu"]
 [ext_resource type="PackedScene" uid="uid://m3lxy2w7yit0" path="res://assets/models/stepping-stone.glb" id="5_tbgi4"]
-[ext_resource type="PackedScene" uid="uid://dl0p5kuohdqja" path="res://assets/models/lab-bench.glb" id="6_o6xl0"]
-[ext_resource type="PackedScene" uid="uid://cfaa6d3t863va" path="res://scenes/enemy.tscn" id="8_tipki"]
-[ext_resource type="PackedScene" uid="uid://c5l62di7vxio2" path="res://assets/models/light-switch.glb" id="9_85g3d"]
 [ext_resource type="PackedScene" uid="uid://bv0hnms6140rh" path="res://assets/models/crowbar.glb" id="11_ya4ey"]
-[ext_resource type="PackedScene" uid="uid://bhvo2p6dl8m8w" path="res://scenes/rooms/room_serial.tscn" id="12_room2"]
+[ext_resource type="PackedScene" uid="uid://c1q0y6u2681ha" path="res://scenes/rooms/room_02.tscn" id="12_room2"]
+[ext_resource type="PackedScene" path="res://scenes/rooms/room_03.tscn" id="12_room3"]
 [ext_resource type="PackedScene" uid="uid://ddj3m4m8j8qaq" path="res://scenes/rooms/room_drop.tscn" id="13_room4"]
+[ext_resource type="PackedScene" uid="uid://b2clkddfgsfl4" path="res://halo-door.tscn" id="13_trceg"]
 [ext_resource type="PackedScene" uid="uid://c3hwb06r5v2st" path="res://scenes/rooms/room_large.tscn" id="14_room5"]
-[ext_resource type="Script" path="res://scripts/swing_room_door.gd" id="15_swing_door"]
-[ext_resource type="PackedScene" path="res://scenes/door_button.tscn" id="16_door_button"]
+[ext_resource type="PackedScene" uid="uid://b882htpj775ly" path="res://scenes/door_button.tscn" id="16_door_button"]
+[ext_resource type="PackedScene" uid="uid://b2qcdjth00d8s" path="res://assets/models/btr-sm.glb" id="17_muem4"]
+[ext_resource type="PackedScene" uid="uid://bsryc6nhwx63q" path="res://scenes/light_switch_interactable.tscn" id="18_light_switch"]
 
 [sub_resource type="Environment" id="Environment_tbgi4"]
 background_energy_multiplier = 0.0
@@ -55,40 +53,12 @@ albedo_color = Color(0.741176, 0.741176, 0.776471, 1)
 material = SubResource("StandardMaterial3D_wall")
 size = Vector3(12, 4, 0.5)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_door_frame"]
-albedo_color = Color(0.243137, 0.176471, 0.113725, 1)
-roughness = 0.88
-
-[sub_resource type="BoxMesh" id="BoxMesh_door_frame"]
-material = SubResource("StandardMaterial3D_door_frame")
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_door_panel"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_door_panel"]
-albedo_color = Color(0.372549, 0.239216, 0.145098, 1)
-roughness = 0.92
-
-[sub_resource type="BoxMesh" id="BoxMesh_door_panel"]
-material = SubResource("StandardMaterial3D_door_panel")
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_door_interaction"]
-size = Vector3(2.8, 3.2, 1.2161133)
-
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall_side"]
 size = Vector3(0.5, 4, 12)
 
 [sub_resource type="BoxMesh" id="BoxMesh_wall_side"]
 material = SubResource("StandardMaterial3D_wall")
 size = Vector3(0.5, 4, 12)
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_light_switch_interaction"]
-size = Vector3(5.9825044, 7.521753, 5.748584)
-
-[sub_resource type="NavigationMesh" id="NavigationMesh_tipki"]
-vertices = PackedVector3Array(-5.5, 5, 6, 5.5, 5, 6, 6, 5, 5.5, 6, 5, -5.5, -5.5, 5, -5.5, -3.25, 0.5, -4.75, -3.25, 0.5, -4, -2.75, 0.5, -3.75, -5.25, 0.5, -5.25, -5.25, 0.5, -4.75, 4, 0.5, -5.25, -3, 0.5, -2.75, -1.5, 0.5, -1, 1.75, 0.5, -1, 2, 0.5, 0.25, 5.5, 0.5, 0.25, 5.5, 0.5, -4, 4.5, 0.5, -4, -2, 0.5, -0.75, -4.25, 0.5, -2.25, -4.25, 0.5, -0.25, -1.75, 0.5, 1.5, 1.75, 0.5, 1.5, -1.25, 0.5, 4.25, -1, 0.5, 5.5, 5.5, 0.5, 5.5, -5.25, 0.5, 0, -4.75, 0.5, 4.25, -5.25, 0.5, 5.5, -0.75, 0.5, 7, -0.75, 0.5, 8.5, 0.75, 0.5, 8.5, 0.75, 0.5, 7)
-polygons = [PackedInt32Array(1, 0, 2), PackedInt32Array(2, 0, 3), PackedInt32Array(3, 0, 4), PackedInt32Array(7, 6, 5), PackedInt32Array(9, 8, 5), PackedInt32Array(5, 8, 10), PackedInt32Array(11, 7, 12), PackedInt32Array(12, 7, 13), PackedInt32Array(14, 13, 15), PackedInt32Array(15, 13, 17), PackedInt32Array(15, 17, 16), PackedInt32Array(17, 13, 10), PackedInt32Array(10, 13, 7), PackedInt32Array(10, 7, 5), PackedInt32Array(18, 11, 12), PackedInt32Array(19, 11, 20), PackedInt32Array(20, 11, 18), PackedInt32Array(20, 18, 21), PackedInt32Array(23, 22, 24), PackedInt32Array(24, 22, 25), PackedInt32Array(25, 22, 15), PackedInt32Array(23, 21, 22), PackedInt32Array(20, 21, 26), PackedInt32Array(26, 21, 27), PackedInt32Array(27, 21, 23), PackedInt32Array(22, 14, 15), PackedInt32Array(27, 28, 26), PackedInt32Array(32, 31, 29), PackedInt32Array(29, 31, 30)]
-geometry_source_geometry_mode = 1
-geometry_source_group_name = &"NAVMESH"
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_final_floor"]
 size = Vector3(16, 0.5, 30)
@@ -312,14 +282,7 @@ shape = SubResource("BoxShape3D_floor")
 mesh = SubResource("BoxMesh_floor")
 
 [node name="Room1" type="Node3D" parent="." unique_id=472349600 groups=["NAVMESH"]]
-
-[node name="Enemy" parent="Room1" unique_id=196884257 node_paths=PackedStringArray("nav_mesh") groups=["sonar_reveal"] instance=ExtResource("8_tipki")]
-transform = Transform3D(0.47065774, 0, -0.8823159, 0, 1, 0, 0.8823159, 0, 0.47065774, -4.2075486, -3.5762787e-07, 3.714383)
-nav_mesh = NodePath("../NavigationRegion3D")
-move_speed = 1.0
-
-[node name="enemy_broken" parent="Room1" unique_id=1435492741 groups=["sonar_reveal"] instance=ExtResource("3_tefeu")]
-transform = Transform3D(0.38935253, 0, 0.27857435, 0, 0.47874743, 0, -0.27857435, 0, 0.38935253, -4.2593403, 0.11179507, -3.8599977)
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 0)
 
 [node name="Floor" type="StaticBody3D" parent="Room1" unique_id=1600432920 groups=["sonar_occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
@@ -337,6 +300,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.25, 0)
 shape = SubResource("BoxShape3D_ceiling")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/Ceiling" unique_id=1459229483 groups=["sonar_reveal"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0027008054, -4.7683716e-07, 0.0026443007)
 mesh = SubResource("BoxMesh_ceiling")
 
 [node name="NorthWallLeft" type="StaticBody3D" parent="Room1" unique_id=2091474859 groups=["sonar_occluder"]]
@@ -347,7 +311,7 @@ transform = Transform3D(0.408333, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("BoxShape3D_wall_wide")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/NorthWallLeft" unique_id=667988605 groups=["sonar_reveal"]]
-transform = Transform3D(0.408333, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(0.58173424, 0, 0, 0, 1, 0, 0, 0, 1, 1.1600254, 0, -1.4210855e-14)
 mesh = SubResource("BoxMesh_wall_wide")
 
 [node name="NorthWallRight" type="StaticBody3D" parent="Room1" unique_id=469985829 groups=["sonar_occluder"]]
@@ -367,10 +331,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.6, -6.25)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/NorthWallHeader" unique_id=1049243440]
 transform = Transform3D(0.183333, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("BoxShape3D_wall_wide")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/NorthWallHeader" unique_id=1886226769 groups=["sonar_reveal"]]
-transform = Transform3D(0.183333, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, 0, 0)
-mesh = SubResource("BoxMesh_wall_wide")
 
 [node name="SouthWallLeft" type="StaticBody3D" parent="Room1" unique_id=1262331745 groups=["sonar_occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.55, 2, 6.25)
@@ -401,10 +361,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.6, 6.25)
 transform = Transform3D(0.183333, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("BoxShape3D_wall_wide")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/SouthWallHeader" unique_id=481347494]
-transform = Transform3D(0.183333, 0, 0, 0, 0.2, 0, 0, 0, 1, 0, 0, 0)
-mesh = SubResource("BoxMesh_wall_wide")
-
 [node name="ExteriorLanding" type="StaticBody3D" parent="Room1" unique_id=1598973284 groups=["sonar_occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 7.5)
 
@@ -424,49 +380,11 @@ transform = Transform3D(0.208333, 0, 0, 0, 1, 0, 0, 0, 0.25, 0, 0, 0)
 shape = SubResource("BoxShape3D_floor")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/InteriorLanding" unique_id=1124322956 groups=["sonar_reveal"]]
-transform = Transform3D(0.208333, 0, 0, 0, 1, 0, 0, 0, 0.25, 0, 0, 0)
+transform = Transform3D(0.208333, 0, 0, 0, 1, 0, 0, 0, 0.25, 0, 0, 15)
 mesh = SubResource("BoxMesh_floor")
 
-[node name="Doorway" type="Node3D" parent="Room1" unique_id=684477432]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6.19)
-script = ExtResource("15_swing_door")
-
-[node name="DoorFrame" type="Node3D" parent="Room1/Doorway" unique_id=1974869100]
-
-[node name="LeftPost" type="MeshInstance3D" parent="Room1/Doorway/DoorFrame" unique_id=530056779 groups=["sonar_occluder"]]
-transform = Transform3D(0.20157968, 0, 0, 0, 3.2, 0, 0, 0, 0.16, -1, 1.6, 0)
-mesh = SubResource("BoxMesh_door_frame")
-
-[node name="RightPost" type="MeshInstance3D" parent="Room1/Doorway/DoorFrame" unique_id=125824782 groups=["sonar_occluder"]]
-transform = Transform3D(0.1853994, 0, 0, 0, 3.2, 0, 0, 0, 0.16, 1, 1.6, 0)
-mesh = SubResource("BoxMesh_door_frame")
-
-[node name="TopBeam" type="MeshInstance3D" parent="Room1/Doorway/DoorFrame" unique_id=797922968]
-transform = Transform3D(2.32, 0, 0, 0, 0.16, 0, 0, 0, 0.16, 0, 3.28, 0)
-mesh = SubResource("BoxMesh_door_frame")
-
-[node name="DoorPivot" type="Node3D" parent="Room1/Doorway" unique_id=1638369415]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0, 0)
-
-[node name="Door" type="StaticBody3D" parent="Room1/Doorway/DoorPivot" unique_id=1232769452 groups=["sonar_occluder"]]
-transform = Transform3D(1.6, 0, 0, 0, 3.2, 0, 0, 0, 0.12, 0.8, 1.6, 0)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/Doorway/DoorPivot/Door" unique_id=1351634291]
-shape = SubResource("BoxShape3D_door_panel")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/Doorway/DoorPivot/Door" unique_id=1565844678 groups=["sonar_occluder"]]
-transform = Transform3D(1.1679566, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
-mesh = SubResource("BoxMesh_door_panel")
-
-[node name="InteractionArea" type="Area3D" parent="Room1/Doorway" unique_id=779427271]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -1.2)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/Doorway/InteractionArea" unique_id=1339914028]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.59194326)
-shape = SubResource("BoxShape3D_door_interaction")
-
 [node name="WestWall" type="StaticBody3D" parent="Room1" unique_id=452767522 groups=["sonar_occluder"]]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.25, 2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7473617, 2, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/WestWall" unique_id=1591144810]
 shape = SubResource("BoxShape3D_wall_side")
@@ -486,9 +404,6 @@ omni_attenuation = 1.5
 
 [node name="Props" type="Node3D" parent="Room1" unique_id=693231226 groups=["NAVMESH"]]
 
-[node name="chair2" parent="Room1/Props" unique_id=1377584579 groups=["sonar_reveal"] instance=ExtResource("3_chair")]
-transform = Transform3D(0.50558525, 0, -0.50558525, 0, 0.7150055, 0, 0.50558525, 0, 0.50558525, 5.0347924, 0.00074707816, -5.185207)
-
 [node name="fan" parent="Room1/Props" unique_id=594698607 groups=["sonar_reveal"] instance=ExtResource("3_jyhfs")]
 transform = Transform3D(0.6276457, 0, 0, 0, 0.6276457, 0, 0, 0, 0.6276457, 0.66948557, 3.4538434, 0.6211808)
 
@@ -498,37 +413,20 @@ cast_shadow = 0
 [node name="fanblades" parent="Room1/Props/fan/fan" index="1" unique_id=1602824703]
 cast_shadow = 0
 
-[node name="lab-bench" parent="Room1/Props" unique_id=941744125 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("6_o6xl0")]
-transform = Transform3D(-3.3236365e-08, 0, 0.7603594, 0, 0.7603594, 0, -0.7603594, 0, -3.3236365e-08, -5.3361416, 0.09189254, -1.9738336)
-
-[node name="lab-bench2" parent="Room1/Props" unique_id=261363570 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("6_o6xl0")]
-transform = Transform3D(-0.76035935, 0, -6.647272e-08, 0, 0.76035935, 0, 6.647272e-08, 0, -0.76035935, -2.9891753, 0.09189254, 5.3862796)
-
-[node name="lab-bench3" parent="Room1/Props" unique_id=2025360472 groups=["sonar_occluder"] instance=ExtResource("6_o6xl0")]
-transform = Transform3D(0.7603593, 0, -7.1054274e-15, 0, 0.7603593, 0, 7.1054274e-15, 0, 0.7603593, 1.0842574, 0.0918923, -5.3680596)
-
-[node name="light-switch" parent="Room1/Props" unique_id=914163819 groups=["signal_light_switch", "sonar_reveal"] instance=ExtResource("9_85g3d")]
-transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -5.9441714, 1.3073962, 2.6469533)
-
-[node name="InteractionArea" type="Area3D" parent="Room1/Props/light-switch" unique_id=1090664854]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 2.3)
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/Props/light-switch/InteractionArea" unique_id=836380636]
-transform = Transform3D(1, 0, 1.4210855e-14, 0, 1, 0, -1.4210855e-14, 0, 1, 0.10915756, -0.019591808, 0.4271145)
-shape = SubResource("BoxShape3D_light_switch_interaction")
+[node name="light-switch" parent="Room1/Props" unique_id=914163819 instance=ExtResource("18_light_switch")]
+transform = Transform3D(-3.9625114e-08, 0, -0.18130338, 0, 0.18130338, 0, 0.18130338, 0, -3.9625114e-08, 5.4481297, 1.3073962, 0.009178985)
+apply_initial_state = true
+initial_on = true
 
 [node name="door-button" parent="Room1/Props" unique_id=1517220325 instance=ExtResource("16_door_button")]
-transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -5.9441714, 1.3073962, 4.776953)
-
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="Room1" unique_id=239465632]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00041365623, 0, 0.002642393)
-navigation_mesh = SubResource("NavigationMesh_tipki")
+transform = Transform3D(-0.18130338, 0, -1.5850047e-08, 0, 0.18130338, 0, 1.5850047e-08, 0, -0.18130338, 2.7354176, 1.3073962, 6.033618)
+target_door_path = NodePath("../../../door1")
 
 [node name="Room2" parent="." unique_id=1770556226 instance=ExtResource("12_room2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0018127561, -2.9802322e-07, -15.010301)
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -0.0018127561, -2.9802322e-07, -15.010301)
 
-[node name="Room3" parent="." unique_id=857258731 instance=ExtResource("12_room2")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -30)
+[node name="Room3" parent="." unique_id=857258731 instance=ExtResource("12_room3")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, -30)
 
 [node name="Room4" parent="." unique_id=1074277457 instance=ExtResource("13_room4")]
 transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 0, 0, -45)
@@ -680,8 +578,13 @@ shape = SubResource("ConvexPolygonShape3D_tbgi4")
 transform = Transform3D(0.88732, 0, 0.96189797, 0, 1, 0, -0.9815687, 0, 0.8695381, 1.5306025, 0.29769003, -2.8050463)
 shape = SubResource("ConvexPolygonShape3D_tbgi4")
 
+[node name="btr-sm" parent="." unique_id=2105850005 instance=ExtResource("17_muem4")]
+transform = Transform3D(-0.9659258, 0.25881913, 0, 1.1313344e-08, 4.2221956e-08, -1, -0.25881913, -0.9659258, -4.3711385e-08, -2.437276, -9.741422, -39.49244)
+
+[node name="door1" parent="." unique_id=1973194571 instance=ExtResource("13_trceg")]
+transform = Transform3D(1.6653142, 0, 0, 0, 1.6653142, 0, 0, 0, 1.6653142, -0.06147909, 0, -6.336138)
+
 [editable path="Player"]
 [editable path="Player/CameraPivot/Camera3D/crowbar"]
-[editable path="Room1/enemy_broken"]
 [editable path="Room1/Props/fan"]
 [editable path="EndGame/SteppingStones/stepping-stone"]

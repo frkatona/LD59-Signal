@@ -22,6 +22,7 @@ const INDICATOR_PUSH_DURATION_SECONDS := 2.0
 @onready var enemy_rigid_body: RigidBody3D = %EnemyRigidBody
 @onready var enemy_mesh: MeshInstance3D = $MeshInstance3D
 @onready var indicator_light: MeshInstance3D = $dalek2/IndicatorLight
+@onready var debug_label: Label3D = $Label3D
 
 var gravity: float = float(ProjectSettings.get_setting("physics/3d/default_gravity"))
 
@@ -37,10 +38,11 @@ func _ready() -> void:
 	add_to_group(SIGNAL_ENEMY_GROUP)
 	_resolve_player()
 	assert(player, "Player node could not be resolved. Expected an explicit assignment or a node in group 'main_player'.")
-	assert(nav_mesh, "NavigationRegion3D not assigned.")
+	#assert(nav_mesh, "NavigationRegion3D not assigned.")
 	assert(navigation_agent_3d, "NavigationAgent3D node not found in the scene tree.")
 	assert(enemy_mesh, "MeshInstance3D node not found in the scene tree.")
 	assert(indicator_light, "IndicatorLight node not found in the scene tree.")
+	assert(debug_label, "Label3D node not found in the scene tree.")
 	assert(ai, "EnemyAI node not assigned.")
 
 	enemy_rigid_body.top_level = true
@@ -58,6 +60,7 @@ func _ready() -> void:
 	indicator_light_material = _duplicate_standard_material(indicator_light)
 	_update_color()
 	_update_indicator_light()
+	set_debug_label_visible(false)
 
 	ai.state_changed.connect(_on_enemy_ai_state_changed)
 	_on_enemy_ai_state_changed(ai.current_state)
@@ -197,17 +200,26 @@ func do_push(direction: Vector3) -> void:
 	enemy_rigid_body.linear_velocity = direction
 
 
+func set_debug_label_visible(visible: bool) -> void:
+	if debug_label == null:
+		return
+
+	debug_label.visible = visible
+
+
 func _on_enemy_ai_state_changed(new_state: EnemyAI.State) -> void:
 	match new_state:
 		EnemyAI.State.IDLE:
-			$Label3D.text = "Idle"
+			debug_label.text = "Idle"
 		EnemyAI.State.PATROLLING:
-			$Label3D.text = "Patrolling"
+			debug_label.text = "Patrolling"
 		EnemyAI.State.CHASING:
-			$Label3D.text = "Chasing"
+			debug_label.text = "Chasing"
 		EnemyAI.State.CHASING_LAST_KNOWN_POSITION:
-			$Label3D.text = "Chasing Last Known Position"
+			debug_label.text = "Chasing Last Known Position"
+		EnemyAI.State.RETURNING_TO_LEASH:
+			debug_label.text = "Returning to Leash"
 		EnemyAI.State.STUNNED:
-			$Label3D.text = "Stunned"
+			debug_label.text = "Stunned"
 		_:
-			$Label3D.text = "Unknown State"
+			debug_label.text = "Unknown State"

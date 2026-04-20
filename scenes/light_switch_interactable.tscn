@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://bsryc6nhwx63q"]
+
+[ext_resource type="PackedScene" uid="uid://c5l62di7vxio2" path="res://assets/models/light-switch.glb" id="1_switch"]
+[ext_resource type="Script" uid="uid://do6sborgul8uo" path="res://scripts/light_switch_interactable.gd" id="2_script"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_interaction"]
+size = Vector3(5.9825044, 7.521753, 5.748584)
+
+[node name="LightSwitchInteractable" type="Node3D" unique_id=411334895]
+script = ExtResource("2_script")
+
+[node name="light-switch" parent="." unique_id=333167571 instance=ExtResource("1_switch")]
+
+[node name="InteractionArea" type="Area3D" parent="." unique_id=675882273]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 2.3)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea" unique_id=505808584]
+transform = Transform3D(1, 0, 1.4210855e-14, 0, 1, 0, -1.4210855e-14, 0, 1, 0.10915756, -0.019591808, 0.4271145)
+shape = SubResource("BoxShape3D_interaction")
+
+[editable path="light-switch"]
