@@ -24,6 +24,14 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 current = true
 near = 0.001
 
+[node name="SpotLight3D" type="SpotLight3D" parent="CameraPivot/Camera3D" unique_id=1870546298]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.12416625, 0.2721218)
+light_color = Color(0.19682255, 0.12370298, 0.0887196, 1)
+light_energy = 0.01
+spot_range = 0.5
+spot_attenuation = 10.0
+spot_angle = 30.0
+
 [node name="PushArea" type="Area3D" parent="." unique_id=1916487078]
 unique_name_in_owner = true
 visible = false
@@ -36,8 +44,3 @@ transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 1
 visible = false
 shape = SubResource("CapsuleShape3D_3vyb7")
 debug_color = Color(0, 0.6, 0.69803923, 0)
-
-[node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=179341696]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4902942, -0.54680276)
-light_energy = 0.01
-omni_range = 0.1

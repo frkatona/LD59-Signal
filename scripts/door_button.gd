@@ -4,6 +4,8 @@ extends Node3D
 const DOOR_BUTTON_GROUP := &"door_button"
 const SONAR_REVEAL_GROUP := &"sonar_reveal"
 const BUTTON_ANIMATION_NAME := &"switch-down"
+const SFX_BUS_NAME := &"SFX"
+const SWITCH_ACTIVATE_SFX := preload("res://assets/audio/sfx/fist_5.wav")
 
 @export var prompt_text: String = "Press E to open door"
 @export_range(-1.0, 1.0, 0.01) var facing_threshold: float = 0.65
@@ -14,6 +16,7 @@ const BUTTON_ANIMATION_NAME := &"switch-down"
 var button_root: Node3D
 var animation_player: AnimationPlayer
 var target_door: Node
+var activate_sfx_player: AudioStreamPlayer3D
 var is_pressed := false
 
 
@@ -27,6 +30,8 @@ func _ready() -> void:
 	target_door = _resolve_target_door()
 	if target_door == null:
 		push_warning("DoorButton target door is missing for %s." % [name])
+
+	_configure_activate_sfx()
 
 
 func get_prompt_text() -> String:
@@ -70,6 +75,9 @@ func interact() -> bool:
 
 	if animation_player != null and animation_player.has_animation(BUTTON_ANIMATION_NAME):
 		animation_player.play(BUTTON_ANIMATION_NAME)
+
+	if activate_sfx_player != null:
+		activate_sfx_player.play()
 
 	return true
 
@@ -140,3 +148,17 @@ func _resolve_button_root() -> Node3D:
 			return candidate
 
 	return self
+
+
+func _configure_activate_sfx() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+
+	var audio_parent := button_root if button_root != null else self
+	activate_sfx_player = AudioStreamPlayer3D.new()
+	activate_sfx_player.name = "SwitchActivatePlayer3D"
+	activate_sfx_player.stream = SWITCH_ACTIVATE_SFX
+	activate_sfx_player.bus = SFX_BUS_NAME
+	activate_sfx_player.max_distance = 14.0
+	activate_sfx_player.unit_size = 3.0
+	audio_parent.add_child(activate_sfx_player)

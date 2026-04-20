@@ -212,8 +212,7 @@ transform = Transform3D(0.18130338, 0, 8.881784e-16, 0, 0.18130338, 0, -8.881784
 
 [node name="TutorialHintTrigger" parent="Room1" unique_id=1467170282 instance=ExtResource("8_hint_trigger")]
 transform = Transform3D(0.37645608, 0, 0, 0, 1, 0, 0, 0, 0.18922979, 0, 1, -6.285994)
-hint_text = "in dark spaces, enter sonar mode (`G`)
-emit pulses with `left click` and control their position with `scroll`"
+hint_text = "in dark spaces, emit sonar pulses with `left click`\ncontrol their position with `scroll`"
 one_shot = false
 
 [editable path="Room1/Props/fan"]

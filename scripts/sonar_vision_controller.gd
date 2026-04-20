@@ -136,6 +136,7 @@ var ping_cooldown_bar: ProgressBar
 var push_cooldown_label: Label
 var push_cooldown_bar: ProgressBar
 var tutorial_hint_label: Label
+var sonar_exit_hint_label: Label
 var tutorial_hint_remaining := 0.0
 var achievement_notification_panel: PanelContainer
 var achievement_title_label: Label
@@ -272,6 +273,7 @@ func _process(delta: float) -> void:
 	if _is_menu_open():
 		interaction_prompt.visible = false
 		_update_tutorial_hint()
+		_update_sonar_exit_hint()
 		_update_achievement_notification()
 		_update_ping_hud()
 		return
@@ -287,6 +289,7 @@ func _process(delta: float) -> void:
 	if achievement_notification_remaining > 0.0:
 		achievement_notification_remaining = maxf(achievement_notification_remaining - delta, 0.0)
 	_update_achievement_notification()
+	_update_sonar_exit_hint()
 
 	if ping_cooldown_remaining > 0.0 and not ping_frozen:
 		ping_cooldown_remaining = maxf(ping_cooldown_remaining - delta, 0.0)
@@ -580,6 +583,25 @@ func _configure_interaction_prompt() -> void:
 	tutorial_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	tutorial_hint_label.label_settings = label_settings
 	prompt_root.add_child(tutorial_hint_label)
+
+	sonar_exit_hint_label = Label.new()
+	sonar_exit_hint_label.name = "SonarExitHint"
+	sonar_exit_hint_label.visible = false
+	sonar_exit_hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	sonar_exit_hint_label.text = "Press G to exit sonar mode"
+	sonar_exit_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	sonar_exit_hint_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	sonar_exit_hint_label.anchor_left = 0.5
+	sonar_exit_hint_label.anchor_right = 0.5
+	sonar_exit_hint_label.anchor_top = 1.0
+	sonar_exit_hint_label.anchor_bottom = 1.0
+	sonar_exit_hint_label.offset_left = -220.0
+	sonar_exit_hint_label.offset_right = 220.0
+	sonar_exit_hint_label.offset_top = -40.0
+	sonar_exit_hint_label.offset_bottom = -12.0
+	sonar_exit_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	sonar_exit_hint_label.label_settings = label_settings
+	prompt_root.add_child(sonar_exit_hint_label)
 
 	achievement_notification_panel = PanelContainer.new()
 	achievement_notification_panel.name = "AchievementNotification"
@@ -1156,6 +1178,7 @@ func _show_start_menu() -> void:
 	game_won = false
 	_set_player_controls_enabled(false)
 	interaction_prompt.visible = false
+	_update_sonar_exit_hint()
 	menus_root.visible = true
 	start_menu_panel.visible = true
 	pause_menu_panel.visible = false
@@ -1198,6 +1221,7 @@ func _start_game_internal(capture_mouse: bool) -> void:
 func _pause_game() -> void:
 	pause_menu_visible = true
 	interaction_prompt.visible = false
+	_update_sonar_exit_hint()
 	_set_player_controls_enabled(false)
 	menus_root.visible = true
 	start_menu_panel.visible = false
@@ -1243,6 +1267,7 @@ func _show_win_screen() -> void:
 	_set_player_controls_enabled(false)
 	interaction_prompt.visible = false
 	_set_sonar_mode(false)
+	_update_sonar_exit_hint()
 	menus_root.visible = true
 	start_menu_panel.visible = false
 	pause_menu_panel.visible = false
@@ -1261,6 +1286,7 @@ func _show_death_screen() -> void:
 	_set_player_controls_enabled(false)
 	interaction_prompt.visible = false
 	_set_sonar_mode(false)
+	_update_sonar_exit_hint()
 	if death_sound_player != null:
 		death_sound_player.stop()
 		death_sound_player.play()
@@ -1533,6 +1559,7 @@ func _set_sonar_mode(enabled: bool) -> void:
 	_sync_sonar_viewport_update_mode()
 	_sync_music_players()
 	_update_shader_state()
+	_update_sonar_exit_hint()
 
 
 func _handle_sonar_ping_input() -> void:
@@ -1600,6 +1627,13 @@ func _update_tutorial_hint() -> void:
 	tutorial_hint_label.visible = should_show
 	if not should_show and tutorial_hint_remaining <= 0.0:
 		tutorial_hint_label.text = ""
+
+
+func _update_sonar_exit_hint() -> void:
+	if sonar_exit_hint_label == null:
+		return
+
+	sonar_exit_hint_label.visible = gameplay_started and not pause_menu_visible and not win_screen_visible and not death_screen_visible and sonar_mode_enabled
 
 
 func show_achievement_notification(message: String, duration: float = ACHIEVEMENT_NOTIFICATION_DURATION) -> void:
@@ -1795,12 +1829,12 @@ func _update_ping_hud() -> void:
 	var displayed_ping_radius := ping_radius if ping_active else 0.0
 	ping_speed_label.text = "Ping Radius: %.1fm" % displayed_ping_radius
 	if ping_active:
-		ping_cooldown_label.text = "Ping Scroll" % [
+		ping_cooldown_label.text = "Ping Scrub: %.1fm/scroll (%s)" % [
 			ping_scrub_step_distance,
 			"Stopped" if ping_frozen else "Radiating",
 		]
 	else:
-		ping_cooldown_label.text = "Ping Scroll" % ping_scrub_step_distance
+		ping_cooldown_label.text = "Ping Scrub: %.1fm/scroll" % ping_scrub_step_distance
 
 	var radius_max: float = maxf(ping_max_radius, 0.001)
 	ping_cooldown_bar.max_value = radius_max
