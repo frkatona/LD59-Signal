@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://bbasuxq72ohh6"]
+
+[ext_resource type="PackedScene" uid="uid://dl0p5kuohdqja" path="res://assets/models/lab-bench.glb" id="1_0f0hj"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_6vnpx"]
+size = Vector3(3.7307785, 2.2700372, 1.5198698)
+
+[node name="Sink" type="Node3D" unique_id=2038279140]
+
+[node name="lab-bench" parent="." unique_id=941744125 instance=ExtResource("1_0f0hj")]
+
+[node name="StaticBody3D" type="StaticBody3D" parent="lab-bench/sink" parent_id_path=PackedInt32Array(941744125, 2130151263) index="3" unique_id=1420178062]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0431261, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="lab-bench/sink/StaticBody3D" unique_id=1236390181]
+shape = SubResource("BoxShape3D_6vnpx")
+
+[editable path="lab-bench"]

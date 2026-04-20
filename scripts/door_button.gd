@@ -4,8 +4,6 @@ extends Node3D
 const DOOR_BUTTON_GROUP := &"door_button"
 const SONAR_REVEAL_GROUP := &"sonar_reveal"
 const BUTTON_ANIMATION_NAME := &"switch-down"
-const SFX_BUS_NAME := &"SFX"
-const DOOR_OPEN_SFX := preload("res://assets/audio/sfx/door-open.wav")
 
 @export var prompt_text: String = "Press E to open door"
 @export_range(-1.0, 1.0, 0.01) var facing_threshold: float = 0.65
@@ -15,7 +13,6 @@ const DOOR_OPEN_SFX := preload("res://assets/audio/sfx/door-open.wav")
 
 var button_root: Node3D
 var animation_player: AnimationPlayer
-var sfx_player: AudioStreamPlayer
 var target_door: Node
 var is_pressed := false
 
@@ -30,12 +27,6 @@ func _ready() -> void:
 	target_door = _resolve_target_door()
 	if target_door == null:
 		push_warning("DoorButton target door is missing for %s." % [name])
-
-	sfx_player = AudioStreamPlayer.new()
-	sfx_player.name = "DoorOpenPlayer"
-	sfx_player.bus = SFX_BUS_NAME
-	sfx_player.stream = DOOR_OPEN_SFX
-	add_child(sfx_player)
 
 
 func get_prompt_text() -> String:
@@ -79,9 +70,6 @@ func interact() -> bool:
 
 	if animation_player != null and animation_player.has_animation(BUTTON_ANIMATION_NAME):
 		animation_player.play(BUTTON_ANIMATION_NAME)
-
-	if sfx_player != null:
-		sfx_player.play()
 
 	return true
 

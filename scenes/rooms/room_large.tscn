@@ -1,7 +1,10 @@
 [gd_scene format=3 uid="uid://c3hwb06r5v2st"]
 
+[ext_resource type="PackedScene" uid="uid://b882htpj775ly" path="res://scenes/interactables/door_button.tscn" id="2_ird4i"]
+[ext_resource type="PackedScene" uid="uid://b2clkddfgsfl4" path="res://scenes/interactables/halo-door.tscn" id="3_oeki6"]
+[ext_resource type="PackedScene" uid="uid://bbasuxq72ohh6" path="res://scenes/props/sink.tscn" id="4_oeki6"]
 [ext_resource type="PackedScene" uid="uid://cfaa6d3t863va" path="res://scenes/enemy.tscn" id="5_enemy"]
-[ext_resource type="PackedScene" path="res://scenes/tutorial_hint_trigger.tscn" id="7_hint_trigger"]
+[ext_resource type="PackedScene" uid="uid://c0fevrase0ws" path="res://scenes/props/chair.tscn" id="5_pmfj4"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_floor"]
 size = Vector3(26, 0.5, 28)
@@ -13,6 +16,10 @@ roughness = 0.95
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
 material = SubResource("StandardMaterial3D_floor")
 size = Vector3(26, 0.5, 28)
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_pmfj4"]
+vertices = PackedVector3Array(-13, 0.25, 14, 13, 0.25, -14, 13, 0.25, 14, -13, 0.25, -14, -13, -0.25, 14, 13, -0.25, -14, 13, -0.25, 14, -13, -0.25, -14, 13, 0.25, 14, -13, 0.25, -14, 13, 0.25, -14, -13, 0.25, 14, 13, -0.25, 14, -13, -0.25, -14, 13, -0.25, -14, -13, -0.25, 14, 13, 0.25, 14, -13, -0.25, 14, -13, 0.25, 14, 13, -0.25, 14, 13, 0.25, -14, -13, -0.25, -14, -13, 0.25, -14, 13, -0.25, -14)
+polygons = [PackedInt32Array(0, 2, 4), PackedInt32Array(2, 6, 4), PackedInt32Array(1, 3, 5), PackedInt32Array(3, 7, 5), PackedInt32Array(8, 10, 12), PackedInt32Array(10, 14, 12), PackedInt32Array(9, 11, 13), PackedInt32Array(11, 15, 13), PackedInt32Array(16, 18, 20), PackedInt32Array(18, 22, 20), PackedInt32Array(17, 19, 21), PackedInt32Array(19, 23, 21)]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_wall_ns"]
 size = Vector3(26, 5, 0.5)
@@ -43,8 +50,6 @@ material = SubResource("StandardMaterial3D_landing")
 size = Vector3(8, 0.5, 3)
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_large"]
-vertices = PackedVector3Array(-12.5, 0.5, 13.5, 12.5, 0.5, 13.5, 12.5, 0.5, -13.5, -12.5, 0.5, -13.5)
-polygons = [PackedInt32Array(0, 1, 2), PackedInt32Array(0, 2, 3)]
 
 [node name="RoomLargeRoot" type="Node3D" unique_id=1786201147]
 
@@ -58,6 +63,9 @@ shape = SubResource("BoxShape3D_floor")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RoomLarge/Floor" unique_id=616143062 groups=["sonar_reveal"]]
 mesh = SubResource("BoxMesh_floor")
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="RoomLarge/Floor/MeshInstance3D" unique_id=1039625793]
+navigation_mesh = SubResource("NavigationMesh_pmfj4")
 
 [node name="SouthWall" type="StaticBody3D" parent="RoomLarge" unique_id=1997734172 groups=["sonar_occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 14.25)
@@ -130,9 +138,6 @@ mesh = SubResource("BoxMesh_landing")
 
 [node name="Props" type="Node3D" parent="RoomLarge" unique_id=712731792 groups=["NAVMESH"]]
 
-[node name="TutorialHintTrigger" parent="RoomLarge" unique_id=1693195342 instance=ExtResource("7_hint_trigger")]
-transform = Transform3D(2, 0, 0, 0, 1, 0, 0, 0, 2, 0, 1, 0)
-
 [node name="EnemyB" parent="RoomLarge" unique_id=1509456700 node_paths=PackedStringArray("nav_mesh") groups=["sonar_reveal"] instance=ExtResource("5_enemy")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.733, 0, 8.241)
 nav_mesh = NodePath("../NavigationRegion3D")
@@ -160,4 +165,42 @@ indicator_returning_color = Color(0, 0.4308392, 0.11648048, 1)
 indicator_pushed_color = Color(0.9634194, 0.8817842, 0, 1)
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="RoomLarge" unique_id=1802218465]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.00060272217, 0, -0.024652004)
 navigation_mesh = SubResource("NavigationMesh_large")
+
+[node name="DoorButton" parent="RoomLarge" unique_id=894681802 instance=ExtResource("2_ird4i")]
+transform = Transform3D(-0.3270808, 0, -2.8594311e-08, 0, 0.3270808, 0, 2.8594311e-08, 0, -0.3270808, -11.209182, 2.7310605, 14.0087185)
+target_door_path = NodePath("../Door")
+
+[node name="Door" parent="RoomLarge" unique_id=1973194571 instance=ExtResource("3_oeki6")]
+transform = Transform3D(2.2364278, 0, 0, 0, 2.2364278, 0, 0, 0, 2.2364278, 0.18762875, -0.015485585, -14.191398)
+
+[node name="Sink" parent="." unique_id=2038279140 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("4_oeki6")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 9.7410965, 0.09189254, 13.1539135)
+
+[node name="Sink7" parent="." unique_id=888351180 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("4_oeki6")]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -0.39631557, 0.09189254, 13.153914)
+
+[node name="Sink2" parent="." unique_id=763491072 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("4_oeki6")]
+transform = Transform3D(-1.1920929e-07, 0, 1, 0, 1, 0, -1, 0, -1.1920929e-07, -11.787804, 0.09189254, 5.075369)
+
+[node name="Sink3" parent="." unique_id=497973627 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("4_oeki6")]
+transform = Transform3D(1, 0, 7.54979e-08, 0, 1, 0, -7.54979e-08, 0, 1, -8.190971, 0.09189206, -13.160896)
+
+[node name="Sink4" parent="." unique_id=1787182024 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("4_oeki6")]
+transform = Transform3D(-1, 0, 1.1924875e-08, 0, 1, 0, -1.1924875e-08, 0, -1, -4.91829, 0.09189206, 4.6893406)
+
+[node name="Sink5" parent="." unique_id=1834745715 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("4_oeki6")]
+transform = Transform3D(-1, 0, 1.1924875e-08, 0, 1, 0, -1.1924875e-08, 0, -1, 5.08171, 0.09189206, 4.6893406)
+
+[node name="Sink6" parent="." unique_id=1843803479 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("4_oeki6")]
+transform = Transform3D(0, 0, -0.99999994, 0, 1, 0, 0.99999994, 0, 0, 12.08171, 0.09189206, 1.6893406)
+
+[node name="Node3D" parent="." unique_id=969336222 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("5_pmfj4")]
+transform = Transform3D(-0.73852414, 0, 0, 0, 0.7385242, 0, 0, 0, -0.73852414, -12.142278, 0.0007476742, 13.326829)
+
+[node name="Node3D2" parent="." unique_id=655118008 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("5_pmfj4")]
+transform = Transform3D(-0.73852414, 0, 0, 0, 0.7385242, 0, 0, 0, -0.73852414, -11.001672, 0.0007476742, 13.326829)
+
+[node name="Node3D3" parent="." unique_id=258764351 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("5_pmfj4")]
+transform = Transform3D(-0.73852414, 0, 0, 0, 0.7385242, 0, 0, 0, -0.73852414, -9.922303, 0.0007476742, 13.326829)

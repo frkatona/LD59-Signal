@@ -4,6 +4,9 @@ extends Node3D
 const SLIDING_DOOR_GROUP := &"sliding_door"
 const SONAR_REVEAL_GROUP := &"sonar_reveal"
 const SONAR_OCCLUDER_GROUP := &"sonar_occluder"
+const SFX_BUS_NAME := &"SFX"
+const DOOR_OPEN_SFX := preload("res://assets/audio/sfx/door-open.wav")
+const OPEN_SFX_DELAY_SECONDS := 0.5
 
 @export var prompt_text: String = "Press E to open door"
 @export var open_animation_name: StringName = &"open"
@@ -17,6 +20,8 @@ const SONAR_OCCLUDER_GROUP := &"sonar_occluder"
 
 var is_open := false
 var is_animating := false
+var open_sfx_player: AudioStreamPlayer3D
+var open_sfx_delay_timer: Timer
 
 
 func _ready() -> void:
@@ -29,6 +34,7 @@ func _ready() -> void:
 	assert(animation_player.has_animation(open_animation_name), "Halo door open animation is missing.")
 	assert(door_panel != null, "Halo door panel mesh is missing.")
 	assert(interaction_area != null, "Halo door interaction area is missing.")
+	_configure_open_sfx()
 
 	if not animation_player.animation_finished.is_connected(_on_animation_finished):
 		animation_player.animation_finished.connect(_on_animation_finished)
@@ -59,6 +65,9 @@ func interact() -> void:
 		return
 
 	is_animating = true
+	if open_sfx_delay_timer != null:
+		open_sfx_delay_timer.stop()
+		open_sfx_delay_timer.start()
 	animation_player.play(open_animation_name)
 
 
@@ -82,3 +91,29 @@ func _on_animation_finished(animation_name: StringName) -> void:
 	is_open = true
 	interaction_area.monitoring = false
 	interaction_area.monitorable = false
+
+
+func _configure_open_sfx() -> void:
+	open_sfx_player = AudioStreamPlayer3D.new()
+	open_sfx_player.name = "DoorOpenPlayer3D"
+	open_sfx_player.stream = DOOR_OPEN_SFX
+	open_sfx_player.bus = SFX_BUS_NAME
+	open_sfx_player.max_distance = 18.0
+	open_sfx_player.unit_size = 4.0
+	door_panel.add_child(open_sfx_player)
+
+	open_sfx_delay_timer = Timer.new()
+	open_sfx_delay_timer.name = "DoorOpenDelayTimer"
+	open_sfx_delay_timer.wait_time = OPEN_SFX_DELAY_SECONDS
+	open_sfx_delay_timer.one_shot = true
+	add_child(open_sfx_delay_timer)
+
+	if not open_sfx_delay_timer.timeout.is_connected(_on_open_sfx_delay_timeout):
+		open_sfx_delay_timer.timeout.connect(_on_open_sfx_delay_timeout)
+
+
+func _on_open_sfx_delay_timeout() -> void:
+	if open_sfx_player == null:
+		return
+
+	open_sfx_player.play()

@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://clex446b2yw3o" path="res://scripts/door_button.gd" id="2_script"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_interaction"]
-size = Vector3(9.59375, 9.298584, 7.329248)
+size = Vector3(14.034912, 12.662476, 8.694776)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_oqw2o"]
 render_priority = 0
@@ -27,7 +27,7 @@ script = ExtResource("2_script")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 2.3)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="InteractionArea" unique_id=1005643422]
-transform = Transform3D(1, 0, 1.4210855e-14, 0, 1, 0, -1.4210855e-14, 0, 1, 0.10915756, -0.019591808, 1.2174466)
+transform = Transform3D(1, 0, 1.4210855e-14, 0, 1, 0, -1.4210855e-14, 0, 1, 0.10915756, -1.7015376, 1.9002101)
 shape = SubResource("BoxShape3D_interaction")
 
 [node name="blackplasticframe" parent="." unique_id=1445273249 instance=ExtResource("2_prhs8")]

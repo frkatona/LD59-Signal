@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://c1q0y6u2681ha"]
 
-[ext_resource type="PackedScene" uid="uid://b2clkddfgsfl4" path="res://halo-door.tscn" id="1_2kggb"]
+[ext_resource type="PackedScene" uid="uid://b2clkddfgsfl4" path="res://scenes/interactables/halo-door.tscn" id="1_2kggb"]
 [ext_resource type="PackedScene" uid="uid://d13xnsm7t448a" path="res://assets/models/fan.glb" id="3_urbhd"]
-[ext_resource type="PackedScene" uid="uid://bbasuxq72ohh6" path="res://sink.tscn" id="5_qd0q8"]
-[ext_resource type="PackedScene" uid="uid://b882htpj775ly" path="res://scenes/door_button.tscn" id="6_button"]
-[ext_resource type="PackedScene" uid="uid://bsryc6nhwx63q" path="res://scenes/light_switch_interactable.tscn" id="7_light_switch"]
-[ext_resource type="PackedScene" path="res://scenes/tutorial_hint_trigger.tscn" id="8_hint_trigger"]
+[ext_resource type="PackedScene" uid="uid://bbasuxq72ohh6" path="res://scenes/props/sink.tscn" id="5_qd0q8"]
+[ext_resource type="PackedScene" uid="uid://b882htpj775ly" path="res://scenes/interactables/door_button.tscn" id="6_button"]
+[ext_resource type="PackedScene" uid="uid://bsryc6nhwx63q" path="res://scenes/interactables/light_switch_interactable.tscn" id="7_light_switch"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/tutorial_hint_trigger.tscn" id="8_hint_trigger"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6xppq"]
 size = Vector3(12, 0.5, 12)
@@ -155,9 +155,6 @@ shape = SubResource("BoxShape3D_6xppq")
 transform = Transform3D(0.208333, 0, 0, 0, 1, 0, 0, 0, 0.25, 0, 0, 0)
 mesh = SubResource("BoxMesh_g8d8l")
 
-[node name="door2" parent="Room1" unique_id=251979430 instance=ExtResource("1_2kggb")]
-transform = Transform3D(-1.6758232, 0, 1.4650513e-07, 0, 1.6758232, 0, -1.4650512e-07, 0, -1.6758233, 0.026432991, -0.022327885, 6.2363124)
-
 [node name="WestWall" type="StaticBody3D" parent="Room1" unique_id=1969074543 groups=["sonar_occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.25, 2, 0)
 
@@ -179,13 +176,6 @@ mesh = SubResource("BoxMesh_5mrov")
 [node name="EastWall" type="StaticBody3D" parent="Room1" unique_id=1240700051 groups=["sonar_occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.25, 2, 0)
 
-[node name="OmniLight3D" type="OmniLight3D" parent="Room1" unique_id=1230157365]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6940484, 2.84119, 0.6161754)
-light_energy = 1.5
-shadow_enabled = true
-omni_range = 10.0
-omni_attenuation = 1.5
-
 [node name="Props" type="Node3D" parent="Room1" unique_id=1189510033 groups=["NAVMESH"]]
 
 [node name="fan" parent="Room1/Props" unique_id=594698607 groups=["sonar_reveal"] instance=ExtResource("3_urbhd")]
@@ -197,11 +187,27 @@ cast_shadow = 0
 [node name="fanblades" parent="Room1/Props/fan/fan" index="1" unique_id=1602824703]
 cast_shadow = 0
 
-[node name="light-switch" parent="Room1/Props" unique_id=914163819 instance=ExtResource("7_light_switch")]
+[node name="Sink" parent="Room1/Props" unique_id=2038279140 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("5_qd0q8")]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -2.9966607, 0.09189248, -4.007303)
+
+[node name="Sink2" parent="Room1/Props" unique_id=151621723 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("5_qd0q8")]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 4.6095767, 0.09189248, 3.9051225)
+
+[node name="door2" parent="Room1" unique_id=251979430 instance=ExtResource("1_2kggb")]
+transform = Transform3D(-1.6758232, 0, 1.4650513e-07, 0, 1.6758232, 0, -1.4650512e-07, 0, -1.6758233, 0.026432991, -0.022327885, 6.2363124)
+
+[node name="OmniLight3D" type="OmniLight3D" parent="Room1" unique_id=1230157365]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6940484, 2.84119, 0.6161754)
+light_energy = 1.5
+shadow_enabled = true
+omni_range = 10.0
+omni_attenuation = 1.5
+
+[node name="light-switch" parent="Room1" unique_id=914163819 instance=ExtResource("7_light_switch")]
 transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -5.9441714, 1.3073962, 5.5380125)
 apply_initial_state = true
 
-[node name="door-button" parent="Room1/Props" unique_id=214042236 instance=ExtResource("6_button")]
+[node name="door-button" parent="Room1" unique_id=214042236 instance=ExtResource("6_button")]
 transform = Transform3D(0.18130338, 0, 8.881784e-16, 0, 0.18130338, 0, -8.881784e-16, 0, 0.18130338, -5.0543814, 1.3073962, -6.0159783)
 
 [node name="TutorialHintTrigger" parent="Room1" unique_id=1467170282 instance=ExtResource("8_hint_trigger")]
@@ -210,14 +216,5 @@ hint_text = "'g' will enter sonar mode
 'f' will emit a pulse (tap again to freeze it)
 'scroll' will change ping speed"
 one_shot = false
-
-[node name="Sink" parent="." unique_id=2038279140 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("5_qd0q8")]
-transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -3.2853508, 0.09189254, -3.9960072)
-
-[node name="Sink2" parent="." unique_id=1852560412 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("5_qd0q8")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 4.6088557, 0.09189254, 4.012537)
-
-[node name="Sink3" parent="." unique_id=1400288038 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("5_qd0q8")]
-transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 4.608856, 0.09189254, -4.1284394)
 
 [editable path="Room1/Props/fan"]

@@ -1,10 +1,9 @@
 [gd_scene format=3 uid="uid://ddj3m4m8j8qaq"]
 
-[ext_resource type="PackedScene" uid="uid://mb7hqotwfu75" path="res://assets/models/chair.glb" id="2_kax5n"]
 [ext_resource type="PackedScene" uid="uid://d13xnsm7t448a" path="res://assets/models/fan.glb" id="3_urbhd"]
-[ext_resource type="PackedScene" uid="uid://dl0p5kuohdqja" path="res://assets/models/lab-bench.glb" id="4_a2sae"]
-[ext_resource type="PackedScene" uid="uid://bsryc6nhwx63q" path="res://scenes/light_switch_interactable.tscn" id="7_light_switch"]
-[ext_resource type="PackedScene" path="res://scenes/tutorial_hint_trigger.tscn" id="8_hint_trigger"]
+[ext_resource type="PackedScene" uid="uid://c0fevrase0ws" path="res://scenes/props/chair.tscn" id="4_tret3"]
+[ext_resource type="PackedScene" uid="uid://bsryc6nhwx63q" path="res://scenes/interactables/light_switch_interactable.tscn" id="7_light_switch"]
+[ext_resource type="PackedScene" path="res://scenes/interactables/tutorial_hint_trigger.tscn" id="8_hint_trigger"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6xppq"]
 size = Vector3(12, 0.5, 12)
@@ -43,12 +42,6 @@ size = Vector3(0.5, 4, 12)
 [sub_resource type="BoxMesh" id="BoxMesh_5mrov"]
 material = SubResource("StandardMaterial3D_wall")
 size = Vector3(0.5, 4, 12)
-
-[sub_resource type="NavigationMesh" id="NavigationMesh_7q5uw"]
-vertices = PackedVector3Array(3.249586, 0.5, -0.50264263, 3.499586, 0.5, -0.0026426315, 4.999586, 0.5, -0.0026426315, 2.249586, 0.5, -2.5026426, 2.499586, 0.5, -0.50264263, 0.7495861, 0.5, -5.2526426, 0.7495861, 0.5, -8.502643, -0.7504139, 0.5, -8.502643, -0.7504139, 0.5, -5.2526426, -5.250414, 0.5, 0.99735737, -2.500414, 0.5, 0.74735737, -2.250414, 0.5, -2.5026426, -5.250414, 0.5, -5.2526426, 4.999586, 0.5, -5.2526426, -5.500414, 5, -5.5026426, -5.500414, 5, 5.9973574, 5.499586, 5, 5.9973574, 5.499586, 5, -5.5026426, 3.499586, 0.5, 1.2473574, 2.499586, 0.5, 1.4973574, 2.249586, 0.5, 2.4973574, 3.499586, 0.5, 2.4973574, 4.999586, 0.5, 2.2473574, 3.499586, 0.5, 5.4973574, -2.250414, 0.5, 2.4973574, -5.250414, 0.5, 5.4973574)
-polygons = [PackedInt32Array(2, 1, 0), PackedInt32Array(0, 4, 3), PackedInt32Array(8, 7, 5), PackedInt32Array(5, 7, 6), PackedInt32Array(10, 9, 11), PackedInt32Array(11, 9, 12), PackedInt32Array(2, 0, 3), PackedInt32Array(5, 13, 3), PackedInt32Array(3, 13, 2), PackedInt32Array(12, 8, 11), PackedInt32Array(8, 5, 11), PackedInt32Array(11, 5, 3), PackedInt32Array(17, 16, 14), PackedInt32Array(14, 16, 15), PackedInt32Array(20, 19, 21), PackedInt32Array(21, 19, 18), PackedInt32Array(21, 18, 22), PackedInt32Array(1, 2, 18), PackedInt32Array(18, 2, 22), PackedInt32Array(20, 23, 24), PackedInt32Array(24, 23, 25), PackedInt32Array(20, 21, 23), PackedInt32Array(10, 24, 9), PackedInt32Array(9, 24, 25)]
-geometry_source_geometry_mode = 1
-geometry_source_group_name = &"NAVMESH"
 
 [node name="Node3D" type="Node3D" unique_id=1561931392]
 
@@ -190,9 +183,6 @@ omni_attenuation = 1.5
 
 [node name="Props" type="Node3D" parent="Room1" unique_id=1189510033 groups=["NAVMESH"]]
 
-[node name="chair2" parent="Room1/Props" unique_id=1377584579 groups=["sonar_reveal"] instance=ExtResource("2_kax5n")]
-transform = Transform3D(0, 0, -0.7150055, 0, 0.7150055, 0, 0.7150055, 0, 0, 2.5068662, 0.00074707816, 0.37623072)
-
 [node name="fan" parent="Room1/Props" unique_id=594698607 groups=["sonar_reveal"] instance=ExtResource("3_urbhd")]
 transform = Transform3D(0.6276457, 0, 0, 0, 0.6276457, 0, 0, 0, 0.6276457, 0.66948557, 3.4538434, 0.6211808)
 
@@ -202,9 +192,6 @@ cast_shadow = 0
 [node name="fanblades" parent="Room1/Props/fan/fan" index="1" unique_id=1602824703]
 cast_shadow = 0
 
-[node name="lab-bench3" parent="Room1/Props" unique_id=207563285 groups=["sonar_occluder"] instance=ExtResource("4_a2sae")]
-transform = Transform3D(-3.323637e-08, 0, -0.7603593, 0, 0.7603593, 0, 0.7603593, 0, -3.323637e-08, 4.728275, 0.0918923, 4.1997037)
-
 [node name="light-switch" parent="Room1/Props" unique_id=914163819 instance=ExtResource("7_light_switch")]
 transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -5.9441714, 1.3073962, 2.6469533)
 
@@ -212,8 +199,13 @@ transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85549307, -6.025391)
 hint_text = "you are ready.  good luck!"
 
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="Room1" unique_id=1920495575]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00041365623, 0, 0.002642393)
-navigation_mesh = SubResource("NavigationMesh_7q5uw")
+[node name="Node3D" parent="." unique_id=969336222 instance=ExtResource("4_tret3")]
+transform = Transform3D(0.58377534, 0, 0, 0, 0.58377534, 0, 0, 0, 0.58377534, 3.5790534, 0.00074719737, -5.62514)
+
+[node name="Node3D2" parent="." unique_id=780462912 instance=ExtResource("4_tret3")]
+transform = Transform3D(0.58377534, 0, 0, 0, 0.58377534, 0, 0, 0, 0.58377534, 4.7632947, 0.00074719737, -5.62514)
+
+[node name="Node3D3" parent="." unique_id=676603996 instance=ExtResource("4_tret3")]
+transform = Transform3D(-2.551763e-08, 0, -0.58377534, 0, 0.58377534, 0, 0.58377534, 0, -2.551763e-08, 2.3648598, 0.00074719737, 0.23092175)
 
 [editable path="Room1/Props/fan"]

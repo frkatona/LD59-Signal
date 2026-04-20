@@ -1,0 +1,36 @@
+[gd_scene format=3 uid="uid://c0fevrase0ws"]
+
+[ext_resource type="PackedScene" uid="uid://mb7hqotwfu75" path="res://assets/models/chair.glb" id="1_knj3a"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_58eu7"]
+points = PackedVector3Array(0.63542366, 5.065195, -0.48147118, -1.0398953, -0.041395187, -1.0398328, 1.0346572, -0.041395187, -1.0398328, -1.0398953, -0.041395187, -0.48147118, -1.0398953, 4.6658053, -1.0398328, 1.0346572, -0.041395187, -0.48147118, 1.0346572, 4.6658053, -1.0398328, -1.0398953, 4.5863276, -0.48147118, 1.0346572, 2.4329216, -0.40163386, -1.0398953, 2.4329216, -0.40163386, -0.6408648, 5.065195, -1.0398328, 1.0346572, 4.5863276, -0.48147118, -0.6408648, 5.065195, -0.48147118, 0.63542366, 5.065195, -1.0398328, 0.95485115, 4.7457833, -0.48147118, -0.8802831, 4.8257613, -0.48147118)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_vyh3o"]
+points = PackedVector3Array(0.9785404, 1.8887362, 0.995807, -1.0398953, 1.9534448, -0.4015714, -1.0398953, 2.432055, -0.4015714, 1.0346572, 1.9534448, -0.4015714, 1.0346572, 2.432055, 1.0346571, -1.0398953, 2.432055, 1.0346571, -0.9819594, 1.889226, 0.99454767, 1.0346572, 2.432055, -0.4015714, -1.0398953, 1.8736309, 0.5558206, 1.0346572, 1.8736309, 0.5558206)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_no86n"]
+points = PackedVector3Array(-1.0398484, -0.041395187, 0.5559143, -0.56115246, 1.8735762, 1.0346571, -1.0398484, 1.8735762, 1.0346571, -0.56115246, -0.041395187, 1.0346571, -0.56115246, 1.8735762, 0.5559143, -1.0398484, 1.8735762, 0.5559143, -1.0398484, -0.041395187, 1.0346571, -0.56115246, -0.041395187, 0.5559143)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_humtb"]
+points = PackedVector3Array(1.0346571, 1.8735762, 1.0346571, 0.5559143, -0.041395187, 0.5559143, 0.5559143, -0.041395187, 1.0346571, 0.5559143, 1.8735762, 0.5559143, 1.0346571, -0.041395187, 0.5559143, 1.0346571, -0.041395187, 1.0346571, 0.5559143, 1.8735762, 1.0346571, 1.0346571, 1.8735762, 0.5559143)
+
+[node name="Node3D" type="Node3D" unique_id=969336222]
+
+[node name="chair2" parent="." unique_id=1377584579 instance=ExtResource("1_knj3a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.0022735, 0, 0.08132744)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="chair2/chair" parent_id_path=PackedInt32Array(1377584579, 668161753) index="0" unique_id=786160598]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="chair2/chair/StaticBody3D" unique_id=499208838]
+shape = SubResource("ConvexPolygonShape3D_58eu7")
+
+[node name="CollisionShape3D2" type="CollisionShape3D" parent="chair2/chair/StaticBody3D" unique_id=673620612]
+shape = SubResource("ConvexPolygonShape3D_vyh3o")
+
+[node name="CollisionShape3D3" type="CollisionShape3D" parent="chair2/chair/StaticBody3D" unique_id=2094960966]
+shape = SubResource("ConvexPolygonShape3D_no86n")
+
+[node name="CollisionShape3D4" type="CollisionShape3D" parent="chair2/chair/StaticBody3D" unique_id=184752310]
+shape = SubResource("ConvexPolygonShape3D_humtb")
+
+[editable path="chair2"]

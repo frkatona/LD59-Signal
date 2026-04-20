@@ -38,7 +38,7 @@ const UI_REFERENCE_SIZE := Vector2(1280.0, 720.0)
 const UI_MIN_SCALE := 1.0
 const DEBUG_PANEL_BASE_POSITION := Vector2(12.0, 12.0)
 const MIN_VOLUME_DB := -80.0
-const WIN_ORB_PROMPT_TEXT := "Press E to touch the sphere"
+const WIN_ORB_PROMPT_TEXT := "Press E to touch the signal orb"
 const ACHIEVEMENT_TITLE_TEXT := "Achievement Unlocked"
 const GERONIMO_ACHIEVEMENT_TEXT := "Geronimo!"
 const ACHIEVEMENT_NOTIFICATION_DURATION := 4.0
@@ -995,13 +995,16 @@ func _create_win_menu_panel() -> PanelContainer:
 	margin.add_child(content)
 
 	var title := Label.new()
-	title.text = "You Did The Thing!"
+	title.text = "You Did The Thing!  You signaled the signal orb!"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 32)
 	content.add_child(title)
 
+	content.add_child(HSeparator.new())
+
+
 	var credits := Label.new()
-	credits.text = "Placeholder Credits\n Auteur: FRK"
+	credits.text = "Game by akatona and ciph3rzer0"
 	credits.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	credits.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	content.add_child(credits)
