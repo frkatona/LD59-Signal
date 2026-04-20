@@ -104,6 +104,10 @@ Questions:
 - add xbox achievement for the bottom stepping stones
 - it's not very clear what color the robot lights are
 
+- performance has gotten pretty bad in the web
+- glitch: robot proximity noise stays on you when you die
+- update: maybe move the respawn point to room 3 or 4
+
 ### exporter
 ```
 The simplest reliable setup is: export the Web build to a folder, zip that folder as an artifact, then have butler push the folder. butler can accept a zip, but its own docs say that for portable builds there’s no real upside to pushing the zip directly because it extracts it anyway. I built that flow for this project.
