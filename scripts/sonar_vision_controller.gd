@@ -38,7 +38,11 @@ const UI_MIN_SCALE := 1.0
 const DEBUG_PANEL_BASE_POSITION := Vector2(12.0, 12.0)
 const MIN_VOLUME_DB := -80.0
 const WIN_ORB_PROMPT_TEXT := "Press E to touch the sphere"
+const ACHIEVEMENT_TITLE_TEXT := "Achievement Unlocked"
+const GERONIMO_ACHIEVEMENT_TEXT := "Geronimo!"
+const ACHIEVEMENT_NOTIFICATION_DURATION := 4.0
 const LIGHT_SWITCH_GROUP := &"light_switch_interactable"
+const GAME_CONTROLLER_GROUP := &"game_controller"
 
 enum GraphicsQualityMode {
 	AUTO,
@@ -129,6 +133,12 @@ var ping_cooldown_label: Label
 var ping_cooldown_bar: ProgressBar
 var push_cooldown_label: Label
 var push_cooldown_bar: ProgressBar
+var tutorial_hint_label: Label
+var tutorial_hint_remaining := 0.0
+var achievement_notification_panel: PanelContainer
+var achievement_title_label: Label
+var achievement_message_label: Label
+var achievement_notification_remaining := 0.0
 var mouse_sensitivity_slider: HSlider
 var mouse_sensitivity_value_label: Label
 var quality_mode_selector: OptionButton
@@ -140,6 +150,7 @@ var authored_win_orb_light_shadow_enabled := false
 
 
 func _ready() -> void:
+	add_to_group(GAME_CONTROLLER_GROUP)
 	_ensure_input_actions()
 	_normalize_ping_speed_settings()
 	_configure_audio_buses()
@@ -254,12 +265,22 @@ func _process(delta: float) -> void:
 
 	if _is_menu_open():
 		interaction_prompt.visible = false
+		_update_tutorial_hint()
+		_update_achievement_notification()
 		_update_ping_hud()
 		return
 
 	_sync_sonar_camera()
 	_sync_proxy_transforms()
 	_update_interaction_prompt()
+
+	if tutorial_hint_remaining > 0.0:
+		tutorial_hint_remaining = maxf(tutorial_hint_remaining - delta, 0.0)
+	_update_tutorial_hint()
+
+	if achievement_notification_remaining > 0.0:
+		achievement_notification_remaining = maxf(achievement_notification_remaining - delta, 0.0)
+	_update_achievement_notification()
 
 	if ping_cooldown_remaining > 0.0 and not ping_frozen:
 		ping_cooldown_remaining = maxf(ping_cooldown_remaining - delta, 0.0)
@@ -529,6 +550,79 @@ func _configure_interaction_prompt() -> void:
 	label_settings.outline_size = 4
 	label_settings.outline_color = Color(0.0, 0.0, 0.0, 0.9)
 	interaction_prompt.label_settings = label_settings
+
+	tutorial_hint_label = Label.new()
+	tutorial_hint_label.name = "TutorialHint"
+	tutorial_hint_label.visible = false
+	tutorial_hint_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tutorial_hint_label.text = ""
+	tutorial_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	tutorial_hint_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	tutorial_hint_label.anchor_left = 0.5
+	tutorial_hint_label.anchor_right = 0.5
+	tutorial_hint_label.anchor_top = 1.0
+	tutorial_hint_label.anchor_bottom = 1.0
+	tutorial_hint_label.offset_left = -220.0
+	tutorial_hint_label.offset_right = 220.0
+	tutorial_hint_label.offset_top = -124.0
+	tutorial_hint_label.offset_bottom = -68.0
+	tutorial_hint_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	tutorial_hint_label.label_settings = label_settings
+	prompt_root.add_child(tutorial_hint_label)
+
+	achievement_notification_panel = PanelContainer.new()
+	achievement_notification_panel.name = "AchievementNotification"
+	achievement_notification_panel.visible = false
+	achievement_notification_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	achievement_notification_panel.anchor_left = 1.0
+	achievement_notification_panel.anchor_right = 1.0
+	achievement_notification_panel.anchor_top = 0.0
+	achievement_notification_panel.anchor_bottom = 0.0
+	achievement_notification_panel.offset_left = -280.0
+	achievement_notification_panel.offset_right = -24.0
+	achievement_notification_panel.offset_top = 24.0
+	achievement_notification_panel.offset_bottom = 96.0
+	prompt_root.add_child(achievement_notification_panel)
+
+	var achievement_style := StyleBoxFlat.new()
+	achievement_style.bg_color = Color(0.08, 0.16, 0.07, 0.96)
+	achievement_style.border_width_left = 1
+	achievement_style.border_width_top = 1
+	achievement_style.border_width_right = 1
+	achievement_style.border_width_bottom = 1
+	achievement_style.border_color = Color(0.52, 0.92, 0.44, 0.95)
+	achievement_style.corner_radius_top_left = 3
+	achievement_style.corner_radius_top_right = 3
+	achievement_style.corner_radius_bottom_right = 3
+	achievement_style.corner_radius_bottom_left = 3
+	achievement_style.content_margin_left = 14
+	achievement_style.content_margin_top = 10
+	achievement_style.content_margin_right = 14
+	achievement_style.content_margin_bottom = 10
+	achievement_notification_panel.add_theme_stylebox_override("panel", achievement_style)
+
+	var achievement_content := VBoxContainer.new()
+	achievement_content.add_theme_constant_override("separation", 2)
+	achievement_content.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	achievement_notification_panel.add_child(achievement_content)
+
+	achievement_title_label = Label.new()
+	achievement_title_label.name = "AchievementTitle"
+	achievement_title_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	achievement_title_label.text = ACHIEVEMENT_TITLE_TEXT
+	achievement_title_label.add_theme_font_size_override("font_size", 12)
+	achievement_title_label.add_theme_color_override("font_color", Color(0.7, 1.0, 0.62, 1.0))
+	achievement_content.add_child(achievement_title_label)
+
+	achievement_message_label = Label.new()
+	achievement_message_label.name = "AchievementMessage"
+	achievement_message_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	achievement_message_label.text = ""
+	achievement_message_label.add_theme_font_size_override("font_size", 22)
+	achievement_message_label.add_theme_color_override("font_color", Color(0.97, 1.0, 0.96, 1.0))
+	achievement_content.add_child(achievement_message_label)
+
+	_update_achievement_notification()
 
 
 func _update_ui_scale() -> void:
@@ -1378,6 +1472,50 @@ func _update_interaction_prompt() -> void:
 	interaction_prompt.visible = not prompt_text.is_empty()
 
 
+func show_temporary_hint(text: String, duration: float) -> void:
+	if tutorial_hint_label == null or text.is_empty():
+		return
+
+	tutorial_hint_label.text = text
+	tutorial_hint_remaining = maxf(duration, 0.0)
+	_update_tutorial_hint()
+
+
+func _update_tutorial_hint() -> void:
+	if tutorial_hint_label == null:
+		return
+
+	var should_show := gameplay_started and not pause_menu_visible and not win_screen_visible and tutorial_hint_remaining > 0.0
+	tutorial_hint_label.visible = should_show
+	if not should_show and tutorial_hint_remaining <= 0.0:
+		tutorial_hint_label.text = ""
+
+
+func show_achievement_notification(message: String, duration: float = ACHIEVEMENT_NOTIFICATION_DURATION) -> void:
+	if achievement_message_label == null or message.is_empty():
+		return
+
+	achievement_message_label.text = message
+	achievement_notification_remaining = maxf(duration, 0.0)
+	_update_achievement_notification()
+
+
+func _update_achievement_notification() -> void:
+	if achievement_notification_panel == null or achievement_message_label == null:
+		return
+
+	var should_show := gameplay_started and not pause_menu_visible and not win_screen_visible and achievement_notification_remaining > 0.0
+	achievement_notification_panel.visible = should_show
+	if should_show:
+		var alpha := 1.0
+		if achievement_notification_remaining < 0.25:
+			alpha = achievement_notification_remaining / 0.25
+		achievement_notification_panel.self_modulate = Color(1.0, 1.0, 1.0, alpha)
+	elif achievement_notification_remaining <= 0.0:
+		achievement_message_label.text = ""
+		achievement_notification_panel.self_modulate = Color.WHITE
+
+
 func _get_interaction_prompt_text() -> String:
 	if _can_trigger_win():
 		return WIN_ORB_PROMPT_TEXT
@@ -1446,10 +1584,35 @@ func _sync_world_environment_energy_state() -> void:
 
 
 func _on_kill_floor_body_entered(body: Node) -> void:
-	if body != player:
+	if body == player:
+		player.call("respawn_at", player_spawn_transform)
 		return
 
-	player.call("respawn_at", player_spawn_transform)
+	var enemy := _resolve_enemy_from_kill_floor_body(body)
+	if enemy != null:
+		_despawn_enemy_from_kill_floor(enemy)
+
+
+func _resolve_enemy_from_kill_floor_body(body: Node) -> Enemy:
+	var current: Node = body
+	while current != null:
+		var enemy := current as Enemy
+		if enemy != null:
+			return enemy
+		current = current.get_parent()
+
+	return null
+
+
+func _despawn_enemy_from_kill_floor(enemy: Enemy) -> void:
+	if enemy == null or enemy.is_queued_for_deletion():
+		return
+	if enemy.has_meta("kill_floor_despawned"):
+		return
+
+	enemy.set_meta("kill_floor_despawned", true)
+	enemy.queue_free()
+	show_achievement_notification(GERONIMO_ACHIEVEMENT_TEXT)
 
 
 func _sync_music_players() -> void:

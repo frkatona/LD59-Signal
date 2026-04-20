@@ -29,12 +29,12 @@ butler push LD59.zip akatona/geordi-la-forge:web
   - [x] make some floor/ceiling tiles pulse reactive
 - [x] better way to be "signal" theme
   - [x] 180d out-of-phase sine waves on oscilloscope screen begin to emerge from noise with proximity to enemy
-  - [ ] something else
+  - [ ] something else?  still doesn't feel quite appropriate
 - blender
   - [x] model a light switch for the room to make the sonar useful
   - [x] model a handheld oscilloscope
 - [x] swap in the dalek model
-- [ ] actually pause the game during pause menu and start screen
+- [ ] actually pause the game during pause menu and start screen?
 - [x] sfx for for enemy movement and/or oscilloscopes sinewaves
 - [x] make enemy turn towards player
 - [x] make sure the ping cooldown is longer than the pulse duration
@@ -59,7 +59,7 @@ josh test play results:
   - design the rooms with gradual concept introductions:
     - [x] room 1: basic movement
       - [x] make it clear that doors/lights will require a button
-    - [ ] room 2: introduce the ping tool and the noise overlay
+    - [x] room 2: introduce the ping tool and the noise overlay
     - [ ] room 3: introduce a disabled, static enemy (light color to indicate disabled? also implement a short stun to the hit enemies in general which will trigger this light color); pick up the crowbar
     - [ ] room 4: introduce the stick and combat
 - [x] simplify door shader, make it parallel the door buttons
@@ -99,6 +99,9 @@ Questions:
   - bigger challenge
     - box jumping?
     - give player a unique vantage when they jump down?
+- check on performance dips in the profiler
+- update the notifications boxes
+- add xbox achievement for the bottom stepping stones
 
 ### exporter
 ```

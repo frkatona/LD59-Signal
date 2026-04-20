@@ -83,7 +83,7 @@ transform = Transform3D(-1.2948108, 0, 0, 0, 1, 0, 0, 0, -1.2948108, 0, 0, 0)
 transform = Transform3D(0.07918163, 0.062358916, 0, -0.08151791, 0.060571726, 0, 0, 0, 0.097777896, 0.5058447, 3.215167, -0.054660063)
 
 [node name="IndicatorLight" type="MeshInstance3D" parent="dalek2" unique_id=1946696396]
-transform = Transform3D(-0.27357304, 0, -2.3916515e-08, 0, 0.11565754, 0, 2.3916515e-08, 0, -0.27357304, -0.02025242, 3.5808704, -0.18382505)
+transform = Transform3D(-0.27357304, 0, -2.3916515e-08, 0, 0.11565754, 0, 2.3916515e-08, 0, -0.27357304, -0.020252386, 3.5808704, 0.18290433)
 mesh = SubResource("CylinderMesh_4ra3w")
 
 [node name="robot-static-noise" type="AudioStreamPlayer3D" parent="." unique_id=1346748014]

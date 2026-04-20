@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://d13xnsm7t448a" path="res://assets/models/fan.glb" id="3_urbhd"]
 [ext_resource type="PackedScene" path="res://scenes/door_button.tscn" id="6_button"]
 [ext_resource type="PackedScene" path="res://scenes/light_switch_interactable.tscn" id="7_light_switch"]
+[ext_resource type="PackedScene" path="res://scenes/tutorial_hint_trigger.tscn" id="8_hint_trigger"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6xppq"]
 size = Vector3(12, 0.5, 12)
@@ -206,6 +207,9 @@ transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130
 
 [node name="door-button" parent="Room1/Props" unique_id=214042236 instance=ExtResource("6_button")]
 transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -5.9441714, 1.3073962, 4.776953)
+
+[node name="TutorialHintTrigger" parent="Room1" unique_id=1660214540 instance=ExtResource("8_hint_trigger")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="Room1" unique_id=1920495575]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00041365623, 0, 0.002642393)

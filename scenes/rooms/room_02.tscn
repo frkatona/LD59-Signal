@@ -5,6 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://bbasuxq72ohh6" path="res://sink.tscn" id="5_qd0q8"]
 [ext_resource type="PackedScene" uid="uid://b882htpj775ly" path="res://scenes/door_button.tscn" id="6_button"]
 [ext_resource type="PackedScene" uid="uid://bsryc6nhwx63q" path="res://scenes/light_switch_interactable.tscn" id="7_light_switch"]
+[ext_resource type="PackedScene" path="res://scenes/tutorial_hint_trigger.tscn" id="8_hint_trigger"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6xppq"]
 size = Vector3(12, 0.5, 12)
@@ -202,6 +203,12 @@ apply_initial_state = true
 
 [node name="door-button" parent="Room1/Props" unique_id=214042236 instance=ExtResource("6_button")]
 transform = Transform3D(0.18130338, 0, 8.881784e-16, 0, 0.18130338, 0, -8.881784e-16, 0, 0.18130338, -5.0543814, 1.3073962, -6.0159783)
+
+[node name="TutorialHintTrigger" parent="Room1" unique_id=1467170282 instance=ExtResource("8_hint_trigger")]
+transform = Transform3D(0.37645608, 0, 0, 0, 1, 0, 0, 0, 0.18922979, 0, 1, -6.285994)
+hint_text = "'g' will enter sonar mode
+'f' will emit a pulse (tap again to freeze it)
+'scroll' will change ping speed"
 
 [node name="Sink" parent="." unique_id=2038279140 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("5_qd0q8")]
 transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -3.2853508, 0.09189254, -3.9960072)

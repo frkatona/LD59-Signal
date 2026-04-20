@@ -2,8 +2,10 @@
 
 [ext_resource type="PackedScene" uid="uid://b2clkddfgsfl4" path="res://halo-door.tscn" id="1_2kggb"]
 [ext_resource type="PackedScene" uid="uid://d13xnsm7t448a" path="res://assets/models/fan.glb" id="3_urbhd"]
+[ext_resource type="PackedScene" uid="uid://cfaa6d3t863va" path="res://scenes/enemy.tscn" id="5_iurs1"]
 [ext_resource type="PackedScene" uid="uid://b882htpj775ly" path="res://scenes/door_button.tscn" id="6_button"]
 [ext_resource type="PackedScene" uid="uid://bsryc6nhwx63q" path="res://scenes/light_switch_interactable.tscn" id="7_light_switch"]
+[ext_resource type="PackedScene" path="res://scenes/tutorial_hint_trigger.tscn" id="8_hint_trigger"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_6xppq"]
 size = Vector3(12, 0.5, 12)
@@ -202,13 +204,23 @@ cast_shadow = 0
 cast_shadow = 0
 
 [node name="light-switch" parent="Room1/Props" unique_id=914163819 instance=ExtResource("7_light_switch")]
-transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -5.9441714, 1.3073962, 2.6469533)
+transform = Transform3D(-0.18130338, 0, -1.5850045e-08, 0, 0.18130338, 0, 1.5850045e-08, 0, -0.18130338, -4.675048, 1.3073962, 5.9494686)
+apply_initial_state = true
+initial_on = true
 
 [node name="door-button" parent="Room1/Props" unique_id=214042236 instance=ExtResource("6_button")]
-transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -5.9441714, 1.3073962, 4.776953)
+transform = Transform3D(-0.18130338, 0, -1.5850045e-08, 0, 0.18130338, 0, 1.5850045e-08, 0, -0.18130338, 3.120998, 1.3073962, 5.977425)
+
+[node name="TutorialHintTrigger" parent="Room1" unique_id=965435746 instance=ExtResource("8_hint_trigger")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.123247445, 0, 1, -6.2229614)
+hint_text = "mouse 2 to swing and stun enemies"
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="Room1" unique_id=1920495575]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.00041365623, 0, 0.002642393)
 navigation_mesh = SubResource("NavigationMesh_7q5uw")
+
+[node name="Enemy" parent="." unique_id=1286619820 node_paths=PackedStringArray("nav_mesh") instance=ExtResource("5_iurs1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.035635114, 0.05767197, -0.3100357)
+nav_mesh = NodePath("../Room1/NavigationRegion3D")
 
 [editable path="Room1/Props/fan"]

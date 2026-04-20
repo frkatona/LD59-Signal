@@ -4,10 +4,11 @@
 [ext_resource type="PackedScene" uid="uid://bme1uywuhta4a" path="res://scenes/player.tscn" id="2_tipki"]
 [ext_resource type="PackedScene" uid="uid://c5xt53r6xiuur" path="res://assets/models/oscilloscope.glb" id="3_choun"]
 [ext_resource type="PackedScene" uid="uid://d13xnsm7t448a" path="res://assets/models/fan.glb" id="3_jyhfs"]
+[ext_resource type="PackedScene" path="res://scenes/tutorial_hint_trigger.tscn" id="5_jkv2x"]
 [ext_resource type="PackedScene" uid="uid://m3lxy2w7yit0" path="res://assets/models/stepping-stone.glb" id="5_tbgi4"]
 [ext_resource type="PackedScene" uid="uid://bv0hnms6140rh" path="res://assets/models/crowbar.glb" id="11_ya4ey"]
 [ext_resource type="PackedScene" uid="uid://c1q0y6u2681ha" path="res://scenes/rooms/room_02.tscn" id="12_room2"]
-[ext_resource type="PackedScene" path="res://scenes/rooms/room_03.tscn" id="12_room3"]
+[ext_resource type="PackedScene" uid="uid://b0fmaaidjfpdr" path="res://scenes/rooms/room_03.tscn" id="12_room3"]
 [ext_resource type="PackedScene" uid="uid://ddj3m4m8j8qaq" path="res://scenes/rooms/room_drop.tscn" id="13_room4"]
 [ext_resource type="PackedScene" uid="uid://b2clkddfgsfl4" path="res://halo-door.tscn" id="13_trceg"]
 [ext_resource type="PackedScene" uid="uid://c3hwb06r5v2st" path="res://scenes/rooms/room_large.tscn" id="14_room5"]
@@ -391,6 +392,12 @@ shape = SubResource("BoxShape3D_wall_side")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/WestWall" unique_id=27448338]
 mesh = SubResource("BoxMesh_wall_side")
+
+[node name="TutorialHintTrigger" parent="Room1/WestWall" unique_id=695893982 instance=ExtResource("5_jkv2x")]
+transform = Transform3D(-0.020097136, 0, -1.2057194e-07, 0, 1, 0, 1.7569475e-09, 0, -1.3791822, -13.6355, -2.0000002, 0.91797185)
+hint_text = "lights and doors are controlled by switches
+the proximity scope"
+one_shot = false
 
 [node name="EastWall" type="StaticBody3D" parent="Room1" unique_id=704229481 groups=["sonar_occluder"]]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.25, 2, 0)
