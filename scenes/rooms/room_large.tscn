@@ -62,9 +62,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
 shape = SubResource("BoxShape3D_floor")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RoomLarge/Floor" unique_id=616143062 groups=["sonar_reveal"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.021258831, -4.7683716e-07, 0.005358696)
 mesh = SubResource("BoxMesh_floor")
 
-[node name="NavigationRegion3D" type="NavigationRegion3D" parent="RoomLarge/Floor/MeshInstance3D" unique_id=1039625793]
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="RoomLarge/Floor/MeshInstance3D" unique_id=1039625793 groups=["sonar_reveal"]]
 navigation_mesh = SubResource("NavigationMesh_pmfj4")
 
 [node name="SouthWall" type="StaticBody3D" parent="RoomLarge" unique_id=1997734172 groups=["sonar_occluder"]]
@@ -174,7 +175,7 @@ navigation_mesh = SubResource("NavigationMesh_large")
 transform = Transform3D(-0.3270808, 0, -2.8594311e-08, 0, 0.3270808, 0, 2.8594311e-08, 0, -0.3270808, -11.209182, 2.7310605, 14.0087185)
 target_door_path = NodePath("../Door")
 
-[node name="Door" parent="RoomLarge" unique_id=1973194571 instance=ExtResource("3_oeki6")]
+[node name="Door" parent="RoomLarge" unique_id=1973194571 groups=["sonar_reveal"] instance=ExtResource("3_oeki6")]
 transform = Transform3D(2.2364278, 0, 0, 0, 2.2364278, 0, 0, 0, 2.2364278, 0.18762875, -0.015485585, -14.191398)
 
 [node name="Sink" parent="." unique_id=2038279140 groups=["sonar_occluder", "sonar_reveal"] instance=ExtResource("4_oeki6")]

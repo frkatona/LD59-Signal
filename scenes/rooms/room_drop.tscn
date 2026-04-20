@@ -159,7 +159,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.25, 2, 0)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/WestWall" unique_id=2012654249]
 shape = SubResource("BoxShape3D_5o5xp")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/WestWall" unique_id=432470692]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/WestWall" unique_id=432470692 groups=["sonar_reveal"]]
 mesh = SubResource("BoxMesh_5mrov")
 
 [node name="WestWall2" type="StaticBody3D" parent="Room1" unique_id=1000069372 groups=["sonar_occluder"]]
@@ -168,7 +168,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.75, 2, 0)
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Room1/WestWall2" unique_id=1387396156]
 shape = SubResource("BoxShape3D_5o5xp")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/WestWall2" unique_id=533117037]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Room1/WestWall2" unique_id=533117037 groups=["sonar_reveal"]]
 mesh = SubResource("BoxMesh_5mrov")
 
 [node name="EastWall" type="StaticBody3D" parent="Room1" unique_id=1240700051 groups=["sonar_occluder"]]
@@ -186,26 +186,26 @@ omni_attenuation = 1.5
 [node name="fan" parent="Room1/Props" unique_id=594698607 groups=["sonar_reveal"] instance=ExtResource("3_urbhd")]
 transform = Transform3D(0.6276457, 0, 0, 0, 0.6276457, 0, 0, 0, 0.6276457, 0.66948557, 3.4538434, 0.6211808)
 
-[node name="fan" parent="Room1/Props/fan" index="0" unique_id=1932814783]
+[node name="fan" parent="Room1/Props/fan" index="0" unique_id=749048863 groups=["sonar_reveal"]]
 cast_shadow = 0
 
-[node name="fanblades" parent="Room1/Props/fan/fan" index="1" unique_id=1602824703]
+[node name="fanblades" parent="Room1/Props/fan/fan" index="1" unique_id=95822170 groups=["sonar_reveal"]]
 cast_shadow = 0
 
-[node name="light-switch" parent="Room1/Props" unique_id=914163819 instance=ExtResource("7_light_switch")]
-transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -2.684149, 4.790676, 2.646953)
+[node name="light-switch" parent="Room1/Props" unique_id=914163819 groups=["sonar_reveal"] instance=ExtResource("7_light_switch")]
+transform = Transform3D(-7.925023e-09, 0, 0.18130338, 0, 0.18130338, 0, -0.18130338, 0, -7.925023e-09, -5.9441714, 1.3073962, 2.6469533)
 
 [node name="TutorialHintTrigger" parent="Room1" unique_id=927418305 instance=ExtResource("8_hint_trigger")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85549307, -6.025391)
 hint_text = "you are ready.  good luck!"
 
-[node name="Node3D" parent="." unique_id=969336222 instance=ExtResource("4_tret3")]
+[node name="Node3D" parent="." unique_id=969336222 groups=["sonar_reveal"] instance=ExtResource("4_tret3")]
 transform = Transform3D(0.58377534, 0, 0, 0, 0.58377534, 0, 0, 0, 0.58377534, 3.5790534, 0.00074719737, -5.62514)
 
-[node name="Node3D2" parent="." unique_id=780462912 instance=ExtResource("4_tret3")]
+[node name="Node3D2" parent="." unique_id=780462912 groups=["sonar_reveal"] instance=ExtResource("4_tret3")]
 transform = Transform3D(0.58377534, 0, 0, 0, 0.58377534, 0, 0, 0, 0.58377534, 4.7632947, 0.00074719737, -5.62514)
 
-[node name="Node3D3" parent="." unique_id=676603996 instance=ExtResource("4_tret3")]
+[node name="Node3D3" parent="." unique_id=676603996 groups=["sonar_reveal"] instance=ExtResource("4_tret3")]
 transform = Transform3D(-2.551763e-08, 0, -0.58377534, 0, 0.58377534, 0, 0.58377534, 0, -2.551763e-08, 2.3648598, 0.00074719737, 0.23092175)
 
 [editable path="Room1/Props/fan"]
